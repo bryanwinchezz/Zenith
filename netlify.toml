@@ -1,21 +1,12 @@
-Configurações de build para a Netlify.
-'publish' define o diretório raiz do site.
-'functions' informa onde as funções serverless estão.
 [build]
 publish = "."
 functions = "netlify/functions"
 
-Redirecionamento para a API do chat.
-Esta regra garante que as chamadas para '/chat' sejam
-direcionadas para a sua função serverless.
 [[redirects]]
 from = "/chat"
 to = "/.netlify/functions/server/chat"
 status = 200
 
-Redirecionamento para Single-Page Application (SPA).
-Essencial para que o app funcione corretamente ao recarregar
-ou acessar URLs diretas, servindo sempre o index.html.
 [[redirects]]
 from = "/*"
 to = "/index.html"
