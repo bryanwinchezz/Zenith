@@ -29,14 +29,14 @@ router.post('/chat', async (req, res) => {
     if (!history || !Array.isArray(history)) {
       return res.status(400).json({ error: 'O histórico da conversa é obrigatório.' });
     }
-    
+
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
     const requestBody = { contents: history };
 
     const apiResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
     });
 
     const responseText = await apiResponse.text();
@@ -49,20 +49,20 @@ router.post('/chat', async (req, res) => {
     }
 
     if (!apiResponse.ok) {
-        const errorMsg = data?.error?.message || 'Erro desconhecido da API do Google.';
-        console.error("Erro retornado pela API do Google:", errorMsg);
-        throw new Error(`A API retornou um erro: ${errorMsg}`);
+      const errorMsg = data?.error?.message || 'Erro desconhecido da API do Google.';
+      console.error("Erro retornado pela API do Google:", errorMsg);
+      throw new Error(`A API retornou um erro: ${errorMsg}`);
     }
-    
+
     if (!data.candidates || data.candidates.length === 0 || data.candidates[0].finishReason === 'SAFETY') {
       const blockReason = data?.promptFeedback?.blockReason || 'desconhecido';
       const blockMessage = `Sua pergunta foi bloqueada por motivo de segurança (${blockReason}). Por favor, reformule.`;
       console.warn(`Conteúdo bloqueado: ${blockReason}`);
       return res.status(400).json({ error: blockMessage });
     }
-    
+
     const text = data.candidates[0].content.parts[0].text;
-    
+
     res.json({ response: text });
 
   } catch (error) {
@@ -73,8 +73,7 @@ router.post('/chat', async (req, res) => {
 
 // --- Configuração do Servidor ---
 
-const basePath = process.env.NETLIFY ? '/.netlify/functions/server' : '/';
-app.use(basePath, router);
+app.use('/api', router);
 
 // Configuração apenas para desenvolvimento local
 if (!process.env.NETLIFY) {

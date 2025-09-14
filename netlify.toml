@@ -1,13 +1,19 @@
 [build]
-publish = "."
-functions = "netlify/functions"
+  publish = "."
+  functions = "netlify/functions"
 
-[[redirects]]
-from = "/chat"
-to = "/.netlify/functions/server/chat"
-status = 200
+[functions]
+  # Aumenta o timeout para garantir que a IA tenha tempo de responder
+  timeout = 25
 
+# NOVA REGRA: Qualquer chamada para /api/... será enviada para a função server
 [[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200
+  from = "/api/*"
+  to = "/.netlify/functions/server/:splat"
+  status = 200
+
+# Regra principal do site (deve vir por último)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
