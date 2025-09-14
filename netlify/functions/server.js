@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import serverless from 'serverless-http';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fetch from 'node-fetch'; // Importa o node-fetch para robustez
 
 dotenv.config();
 
@@ -15,7 +16,6 @@ const projectRoot = path.join(path.dirname(__filename), '..', '..');
 app.use(express.json());
 
 // --- Rota da API ---
-// Esta rota agora será verificada ANTES de servir os arquivos estáticos.
 router.post('/chat', async (req, res) => {
   console.log('--- Requisição /chat recebida ---');
   try {
@@ -74,15 +74,11 @@ router.post('/chat', async (req, res) => {
 // --- Configuração do Servidor ---
 
 const basePath = process.env.NETLIFY ? '/.netlify/functions/server' : '/';
-// CORREÇÃO CRÍTICA: A rota da API é registrada ANTES dos arquivos estáticos.
 app.use(basePath, router);
 
-// Configuração apenas para desenvolvimento local (será ignorada pela Netlify)
+// Configuração apenas para desenvolvimento local
 if (!process.env.NETLIFY) {
-  // Agora, o servidor de arquivos estáticos é registrado DEPOIS da API.
   app.use(express.static(projectRoot));
-  
-  // Adiciona uma rota "catch-all" para que o app funcione ao recarregar a página
   app.get('*', (req, res) => {
     res.sendFile(path.join(projectRoot, 'index.html'));
   });
@@ -93,5 +89,5 @@ if (!process.env.NETLIFY) {
   });
 }
 
-// Exporta o handler para a Netlify usar em produção
+// Exporta o handler para a Netlify
 export const handler = serverless(app);

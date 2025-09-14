@@ -1,10 +1,23 @@
-# Arquivo: netlify.toml
-
+Arquivo: netlify.toml
 [build]
-  publish = "."
-  functions = "netlify/functions"
 
+Define o diretório de publicação como a raiz do projeto.
+publish = "."
+
+Informa à Netlify onde encontrar as funções serverless.
+functions = "netlify/functions"
+
+Redirecionamento da API (DEVE VIR PRIMEIRO)
+Encaminha todas as chamadas para /chat para a nossa função serverless.
 [[redirects]]
-  from = "/chat"
-  to = "/.netlify/functions/server/chat"
-  status = 200
+from = "/chat"
+to = "/.netlify/functions/server/chat"
+status = 200
+
+Redirecionamento para Single-Page App (SPA)
+Garante que, ao recarregar a página em qualquer rota (ex: /lembretes),
+o index.html seja servido, permitindo que o roteador do lado do cliente funcione.
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
