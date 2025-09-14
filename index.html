@@ -1,0 +1,3549 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenith - Seu Assistente Pessoal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+    <!-- Dependências da IA -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Firebase v9 SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDoc, getDocs, onSnapshot, query, where, orderBy, serverTimestamp, Timestamp, increment, arrayUnion } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCq8RgAiTWxn-QdtR0BcBsCTl-4L2llVqo",
+            authDomain: "zenithzapp.firebaseapp.com",
+            projectId: "zenithzapp",
+            storageBucket: "zenithzapp.appspot.com",
+            messagingSenderId: "155992428449",
+            appId: "1:155992428449:web:3818c2b912b602f54585e0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Make Firebase available globally
+        window.auth = auth;
+        window.db = db;
+        window.firebaseAuth = { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile };
+        window.firebaseFirestore = { collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDoc, getDocs, onSnapshot, query, where, orderBy, serverTimestamp, Timestamp, increment, arrayUnion };
+        window.firebaseInitialized = true;
+
+        console.log('Firebase initialized successfully');
+    </script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand': {
+                            '50': '#f0f9ff', '100': '#e0f2fe', '200': '#bae6fd', '300': '#7dd3fc',
+                            '400': '#38bdf8', '500': '#0ea5e9', '600': '#0284c7', '700': '#0369a1',
+                            '800': '#075985', '900': '#0c4a6e', '950': '#082f49',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .toast-container {
+                bottom: 30px;
+                left: auto;
+                right: 30px;
+                transform: translateX(0);
+                align-items: flex-end;
+            }
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.21, 1.02, 0.73, 1);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background-color: #22c55e;
+        }
+
+        .toast.error {
+            background-color: #ef4444;
+        }
+
+        .toast.info {
+            background-color: #3b82f6;
+        }
+
+        .toast.achievement {
+            background: linear-gradient(135deg, #facc15, #fb923c);
+        }
+
+        .nav-item.active {
+            color: #0ea5e9;
+            background-color: #f0f9ff;
+        }
+
+        .dark .nav-item.active {
+            color: #e0f2fe;
+            background-color: #0c4a6e;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1010;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.21, 1.02, 0.73, 1);
+        }
+
+        .dark .modal-content {
+            background: #1f2937;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        #paint-canvas {
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        #calculator-display {
+            text-align: right;
+            padding: 20px;
+            font-size: 2.5rem;
+            overflow-x: auto;
+            word-wrap: break-word;
+            word-break: break-all;
+            transition: opacity 0.15s ease-in-out;
+        }
+
+        .clock-tab.active {
+            border-color: #0ea5e9;
+            background-color: #f0f9ff;
+            color: #0ea5e9;
+        }
+
+        .dark .clock-tab.active {
+            background-color: #0c4a6e;
+            color: #e0f2fe;
+        }
+
+        /* Calendar Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .calendar-day.other-month {
+            color: #9ca3af;
+            /* gray-400 */
+        }
+
+        .dark .calendar-day.other-month {
+            color: #4b5563;
+            /* gray-600 */
+        }
+
+        .calendar-day.today {
+            background-color: #0ea5e9;
+            /* brand-500 */
+            color: white;
+            font-weight: bold;
+        }
+
+        .calendar-day.selected {
+            background-color: #38bdf8;
+            /* brand-400 */
+            color: white;
+            font-weight: bold;
+        }
+
+        .dark .calendar-day.selected {
+            background-color: #0369a1;
+            /* brand-700 */
+        }
+
+        .calendar-day:hover:not(.today):not(.selected) {
+            background-color: #f0f9ff;
+            /* brand-50 */
+        }
+
+        .dark .calendar-day:hover:not(.today):not(.selected) {
+            background-color: #0c4a6e;
+            /* brand-900 */
+        }
+
+        .event-dot {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            /* red-500 */
+        }
+
+        .calendar-day.today .event-dot,
+        .calendar-day.selected .event-dot {
+            background-color: white;
+        }
+
+        /* Estilos da IA */
+        #ai-chat-history {
+            scroll-behavior: smooth;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1.0);
+            }
+        }
+
+        .dot-bounce div {
+            width: 8px;
+            height: 8px;
+            background-color: #4A90E2;
+            border-radius: 100%;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot-bounce .dot1 {
+            animation-delay: -0.32s;
+        }
+
+        .dot-bounce .dot2 {
+            animation-delay: -0.16s;
+        }
+
+        /* Oculta a barra de rolagem mas mantém a funcionalidade */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
+
+    <div id="loading-overlay" class="fixed inset-0 bg-gray-950 bg-opacity-80 flex items-center justify-center z-[1050]">
+        <div
+            class="w-16 h-16 border-4 border-t-brand-500 border-r-transparent border-b-brand-500 border-l-transparent rounded-full animate-spin">
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <div id="auth-container" class="page">
+        <div
+            class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-950">
+            <div id="login-page" class="page active w-full max-w-md fade-in">
+                <div class="text-center mb-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-sparkles mx-auto text-brand-500">
+                        <path
+                            d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                        <path d="M5 3v4" />
+                        <path d="M19 17v4" />
+                        <path d="M3 5h4" />
+                        <path d="M17 19h4" />
+                    </svg>
+                    <h1 data-t="loginTitle" class="text-4xl font-extrabold mt-4 text-gray-900 dark:text-white">Bem-vindo
+                        ao Zenith</h1>
+                    <p data-t="loginSubtitle" class="text-gray-600 dark:text-gray-400 mt-2">Seu assistente pessoal</p>
+                </div>
+                <form id="login-form"
+                    class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
+                    <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
+                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                        required>
+                    <div class="relative">
+                        <input type="password" id="login-password" data-t-placeholder="passwordPlaceholder"
+                            placeholder="Senha"
+                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                            required>
+                        <button type="button"
+                            class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
+                            <i data-lucide="eye" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <button type="submit" data-t="loginButton"
+                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105">Entrar</button>
+                </form>
+                <p class="text-center text-sm mt-6"><span data-t="loginNoAccount">Não tem uma conta?</span> <a href="#"
+                        id="show-register" data-t="loginSignUpLink"
+                        class="font-semibold text-brand-500 hover:underline">Cadastre-se</a></p>
+            </div>
+
+            <div id="register-page" class="page w-full max-w-md fade-in">
+                <div class="text-center mb-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-user-plus mx-auto text-brand-500">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <line x1="19" x2="19" y1="8" y2="14" />
+                        <line x1="22" x2="16" y1="11" y2="11" />
+                    </svg>
+                    <h1 data-t="registerTitle" class="text-4xl font-extrabold mt-4 text-gray-900 dark:text-white">Criar
+                        Conta</h1>
+                    <p data-t="registerSubtitle" class="text-gray-600 dark:text-gray-400 mt-2">Comece sua jornada de
+                        produtividade</p>
+                </div>
+                <form id="register-form"
+                    class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
+                    <input type="text" id="register-name" data-t-placeholder="namePlaceholder"
+                        placeholder="Nome completo"
+                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                        required>
+                    <input type="email" id="register-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
+                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                        required>
+                    <div class="relative">
+                        <input type="password" id="register-password" data-t-placeholder="passwordPlaceholderRegister"
+                            placeholder="Criar senha"
+                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                            required>
+                        <button type="button"
+                            class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
+                            <i data-lucide="eye" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <button type="submit" data-t="registerButton"
+                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105">Cadastrar</button>
+                </form>
+                <p class="text-center text-sm mt-6"><span data-t="registerHaveAccount">Já tem uma conta?</span> <a
+                        href="#" id="show-login" data-t="registerLoginLink"
+                        class="font-semibold text-brand-500 hover:underline">Entrar</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="page">
+        <nav
+            class="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-2 z-40 md:left-0 md:top-0 md:h-screen md:w-64 md:border-t-0 md:border-r md:p-4 md:flex md:flex-col md:justify-start">
+
+            <div class="hidden md:flex items-center gap-2 px-2 mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-sparkles text-brand-500">
+                    <path
+                        d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                    <path d="M5 3v4" />
+                    <path d="M19 17v4" />
+                    <path d="M3 5h4" />
+                    <path d="M17 19h4" />
+                </svg>
+                <span class="text-2xl font-extrabold text-gray-900 dark:text-white">Zenith</span>
+            </div>
+
+            <div
+                class="flex justify-around items-center h-full md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto no-scrollbar">
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="dashboard">
+                    <i data-lucide="layout-dashboard"></i><span data-t="navDashboard"
+                        class="text-xs md:text-base font-semibold">Dashboard</span>
+                </button>
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="reminders">
+                    <i data-lucide="bell-ring"></i><span data-t="navReminders"
+                        class="text-xs md:text-base font-semibold">Lembretes</span>
+                </button>
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="goals">
+                    <i data-lucide="target"></i><span data-t="navGoals"
+                        class="text-xs md:text-base font-semibold">Metas</span>
+                </button>
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="notes">
+                    <i data-lucide="notebook-pen"></i><span data-t="navNotes"
+                        class="text-xs md:text-base font-semibold">Notas</span>
+                </button>
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="habits">
+                    <i data-lucide="clipboard-check"></i><span data-t="navHabits"
+                        class="text-xs md:text-base font-semibold">Hábitos</span>
+                </button>
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="clock">
+                    <i data-lucide="clock"></i><span data-t="navClock"
+                        class="text-xs md:text-base font-semibold">Relógio</span>
+                </button>
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="calendar">
+                    <i data-lucide="calendar"></i><span data-t="navCalendar"
+                        class="text-xs md:text-base font-semibold">Calendário</span>
+                </button>
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="calculator">
+                    <i data-lucide="calculator"></i><span data-t="navCalculator"
+                        class="text-xs md:text-base font-semibold">Calculadora</span>
+                </button>
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="paint">
+                    <i data-lucide="palette"></i><span data-t="navPaint"
+                        class="text-xs md:text-base font-semibold">Desenho</span>
+                </button>
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="achievements">
+                    <i data-lucide="trophy"></i><span data-t="navAchievements"
+                        class="text-xs md:text-base font-semibold">Conquistas</span>
+                </button>
+                <button
+                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="ai">
+                    <i data-lucide="bot"></i><span data-t="navAi"
+                        class="text-xs md:text-base font-semibold">Zenithinha</span>
+                </button>
+            </div>
+        </nav>
+
+        <main class="md:ml-64">
+            <header class="bg-white dark:bg-gray-900 shadow-sm p-4 md:p-6 flex justify-between items-center">
+                <h1 id="page-title" class="text-2xl md:text-3xl font-bold">Dashboard</h1>
+                <div id="header-controls" class="flex items-center gap-4">
+                    <button id="language-toggle"
+                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold w-10">
+                        PT
+                    </button>
+                    <button id="dark-mode-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i data-lucide="moon" class="w-5 h-5"></i>
+                        <i data-lucide="sun" class="w-5 h-5 hidden"></i>
+                    </button>
+                    <button id="profile-button"
+                        class="nav-item w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center text-white font-bold text-lg hover:opacity-90 overflow-hidden"
+                        data-page="profile">
+                        <span id="profile-initial"></span>
+                        <img id="profile-img-header" src="" alt="Profile" class="w-full h-full object-cover hidden">
+                    </button>
+                </div>
+            </header>
+            <div id="app-content" class="p-0 md:p-0"></div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="item-modal" class="modal-overlay"></div>
+    <div id="confirm-modal" class="modal-overlay"></div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let currentUserProfile = {};
+        let currentPage = 'dashboard';
+        let currentLanguage = 'pt';
+        let unsubscribes = [];
+        let firebaseInitialized = false;
+        let clockIntervals = [];
+        let calendarDate = new Date();
+        let calendarUnsubscribe = null;
+        let calendarEventsCache = {};
+        let aiChatUnsubscribe = null; // Unsubscribe for AI chats
+        let aiMessagesUnsubscribe = null; // Unsubscribe for AI messages
+
+        // DOM elements
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const appContent = document.getElementById('app-content');
+        const pageTitle = document.getElementById('page-title');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        // Form input classes
+        const formInputClasses = 'w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors';
+
+        // Wait for Firebase to be initialized
+        async function waitForFirebase() {
+            if (window.firebaseInitialized) return Promise.resolve();
+            return new Promise(resolve => {
+                const interval = setInterval(() => {
+                    if (window.firebaseInitialized) {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
+
+        // --- ACHIEVEMENTS ---
+        const ALL_ACHIEVEMENTS = {
+            first_login: { icon: 'log-in' },
+            first_note: { icon: 'notebook-pen' },
+            first_goal: { icon: 'target' },
+            first_habit: { icon: 'clipboard-check' },
+            artist: { icon: 'palette' },
+            note_taker_pro: { icon: 'notebook-tabs' },
+            goal_setter_pro: { icon: 'flag' },
+            habit_master: { icon: 'clipboard-list' },
+            goal_achiever_1: { icon: 'award' },
+            goal_achiever_10: { icon: 'gem' },
+            habit_streak_7: { icon: 'flame' },
+            habit_streak_30: { icon: 'sparkles' },
+            productive_week: { icon: 'calendar-check' },
+            art_collector: { icon: 'images' },
+            calculator_user: { icon: 'calculator' },
+            clock_watcher: { icon: 'clock' },
+            timer_master: { icon: 'timer' },
+            world_traveler: { icon: 'globe-2' },
+            polyglot: { icon: 'languages' },
+            organizer: { icon: 'folder-kanban' },
+            zenith_master: { icon: 'crown' }
+        };
+
+        // Translations
+        const translations = {
+            pt: {
+                navAi: "Zenithinha",
+                pageTitleAi: "Zenithinha",
+                aiWelcome: "Olá, sou a Zenithinha. Posso ajudar você a criar sugestões para seus lembretes, suas metas, suas notas e mais! Diga oque você precisa.",
+                aiPrompt: "Digite sua pergunta...",
+                aiNewChat: "Novo Chat",
+                aiSavedChats: "Chats Salvos",
+                aiToAi: "Converse com a Zenithinha",
+                aiToAiSubtitle: "Sua nova assistente de IA para te ajudar a organizar suas ideias.",
+                aiToAiBtn: "Conversar agora",
+                loginTitle: "Bem-vindo ao Zenith",
+                loginSubtitle: "Seu assistente pessoal",
+                loginButton: "Entrar",
+                loginNoAccount: "Não tem uma conta?",
+                loginSignUpLink: "Cadastre-se",
+                registerTitle: "Criar Conta",
+                registerSubtitle: "Comece sua jornada de produtividade",
+                registerButton: "Cadastrar",
+                registerHaveAccount: "Já tem uma conta?",
+                registerLoginLink: "Entrar",
+                emailPlaceholder: "Email",
+                passwordPlaceholder: "Senha",
+                passwordPlaceholderRegister: "Criar senha",
+                namePlaceholder: "Nome completo",
+                navDashboard: "Dashboard",
+                navReminders: "Lembretes",
+                navGoals: "Metas",
+                navHabits: "Hábitos",
+                navNotes: "Notas",
+                navCalendar: "Calendário",
+                navPaint: "Desenho",
+                navCalculator: "Calculadora",
+                navClock: "Relógio",
+                navAchievements: "Conquistas",
+                pageTitleDashboard: "Dashboard",
+                pageTitleReminders: "Lembretes",
+                pageTitleGoals: "Metas",
+                pageTitleHabits: "Hábitos",
+                pageTitleNotes: "Notas",
+                pageTitleCalendar: "Calendário",
+                pageTitlePaint: "Desenho",
+                pageTitleCalculator: "Calculadora",
+                pageTitleClock: "Relógio",
+                pageTitleAchievements: "Conquistas",
+                pageTitleProfile: "Perfil",
+                welcomeBack: "Bem-vindo(a) de volta",
+                dashboardSubtitle: "Aqui está um resumo da sua produtividade.",
+                activeReminders: "Lembretes Ativos",
+                goalsInProgress: "Metas em Progresso",
+                totalNotes: "Total de Notas",
+                quickActions: "Ações Rápidas",
+                newReminder: "Novo Lembrete",
+                newGoal: "Nova Meta",
+                newNote: "Nova Nota",
+                newHabit: "Novo Hábito",
+                noItemsFound: "Nenhum(a) {item} encontrado(a)",
+                clickToAdd: "Clique no botão acima para adicionar",
+                statusUpdated: "Status atualizado com sucesso!",
+                errorUpdating: "Erro ao atualizar status",
+                newItem: "Novo",
+                editItem: "Editar",
+                itemReminder: "Lembrete",
+                itemGoal: "Meta",
+                itemNote: "Nota",
+                itemHabit: "Hábito",
+                goalTitlePlaceholder: "Título da meta",
+                goalCurrentValue: "Valor atual",
+                goalTargetValue: "Valor alvo",
+                noteTitlePlaceholder: "Título da nota",
+                noteContentPlaceholder: "Conteúdo da nota",
+                habitTitlePlaceholder: "Nome do hábito",
+                habitStreak: "Sequência",
+                habitDays: "dias",
+                habitDoneToday: "Feito hoje!",
+                habitMarkDone: "Marcar como feito",
+                save: "Salvar",
+                cancel: "Cancelar",
+                delete: "Excluir",
+                confirmDelete: "Tem certeza que deseja excluir este item?",
+                itemSaved: "Item salvo com sucesso!",
+                itemDeleted: "Item excluído com sucesso!",
+                errorSaving: "Erro ao salvar item",
+                errorDeleting: "Erro ao excluir item",
+                profileName: "Nome",
+                profileEmail: "Email",
+                profileSince: "Membro desde",
+                profileLogout: "Sair",
+                profileUpdateSuccess: "Perfil atualizado com sucesso!",
+                profileUpdateError: "Erro ao atualizar perfil",
+                drawingSaved: "Desenho salvo com sucesso!",
+                drawingDeleted: "Desenho excluído com sucesso!",
+                errorSavingDrawing: "Erro ao salvar desenho",
+                errorDeletingDrawing: "Erro ao excluir desenho",
+                achievementUnlocked: "Conquista Desbloqueada",
+                colorLabel: "Cor",
+                sizeLabel: "Tamanho",
+                eraser: "Borracha",
+                clear: "Limpar",
+                saveDrawing: "Salvar Desenho",
+                savedDrawings: "Desenhos Salvos",
+                noDrawings: "Nenhum desenho salvo.",
+                reminderTitlePlaceholder: "Título do lembrete",
+                photoUrlLabel: "URL da Foto de Perfil",
+                photoUrlPlaceholder: "https://exemplo.com/foto.png",
+                editDrawing: "Editar",
+                complete: "completo",
+                units: "unidades",
+                achievementsTitle: "🏆 Suas Conquistas",
+                achievementsSubtitle: "Desbloqueie conquistas usando as funcionalidades do Zenith!",
+                progressTitle: "📊 Progresso",
+                unlockedAchievementsLabel: "Conquistas Desbloqueadas",
+                unlockedOn: "Desbloqueada em",
+                clockTabWorld: "Relógios",
+                clockTabStopwatch: "Cronômetro",
+                clockTabTimer: "Temporizador",
+                stopwatchStart: "Iniciar",
+                stopwatchPause: "Pausar",
+                stopwatchContinue: "Continuar",
+                stopwatchReset: "Zerar",
+                timerSet: "Definir",
+                timerStart: "Iniciar",
+                timerPause: "Pausar",
+                timerContinue: "Continuar",
+                timerStop: "Parar",
+                timerReset: "Zerar",
+                timerHours: "Horas",
+                timerMinutes: "Minutos",
+                timerSeconds: "Segundos",
+                timerFinished: "O tempo acabou!",
+                localTime: "Horário Local",
+                addEvent: "Adicionar Evento",
+                editEvent: "Editar Evento",
+                eventTitle: "Título do Evento",
+                noEvents: "Nenhum evento para este dia.",
+                eventsFor: "Eventos para",
+                allEvents: "Todos os eventos marcados",
+                paintBucket: "Lata de Tinta",
+                downloadDrawing: "Baixar Desenho",
+                brush: "Pincel",
+                undo: "Reverter",
+                redo: "Avançar",
+
+                ach_first_login_title: "Primeiro Acesso",
+                ach_first_login_desc: "Faça seu primeiro login no Zenith.",
+                ach_first_note_title: "Anotado!",
+                ach_first_note_desc: "Crie sua primeira nota.",
+                ach_first_goal_title: "De Olho no Prêmio",
+                ach_first_goal_desc: "Defina sua primeira meta.",
+                ach_first_habit_title: "Começando Bem",
+                ach_first_habit_desc: "Crie seu primeiro hábito.",
+                ach_artist_title: "Artista Nato",
+                ach_artist_desc: "Salve seu primeiro desenho.",
+                ach_productive_week_title: "Semana Produtiva",
+                ach_productive_week_desc: "Complete 5 metas em uma semana.",
+                ach_habit_streak_7_title: "Na Mosca!",
+                ach_habit_streak_7_desc: "Mantenha um hábito por 7 dias seguidos.",
+                ach_note_taker_pro_title: "Escritor Dedicado",
+                ach_note_taker_pro_desc: "Crie 10 notas.",
+                ach_goal_setter_pro_title: "Planejador Mestre",
+                ach_goal_setter_pro_desc: "Crie 10 metas.",
+                ach_habit_master_title: "Mestre dos Hábitos",
+                ach_habit_master_desc: "Crie 5 hábitos.",
+                ach_goal_achiever_1_title: "Primeira Vitória",
+                ach_goal_achiever_1_desc: "Complete sua primeira meta.",
+                ach_goal_achiever_10_title: "Conquistador",
+                ach_goal_achiever_10_desc: "Complete 10 metas.",
+                ach_habit_streak_30_title: "Implacável",
+                ach_habit_streak_30_desc: "Mantenha um hábito por 30 dias.",
+                ach_art_collector_title: "Colecionador de Arte",
+                ach_art_collector_desc: "Salve 5 desenhos.",
+                ach_calculator_user_title: "Matemático",
+                ach_calculator_user_desc: "Use a calculadora.",
+                ach_clock_watcher_title: "Senhor do Tempo",
+                ach_clock_watcher_desc: "Use as funções do relógio.",
+                ach_timer_master_title: "Mestre do Tempo",
+                ach_timer_master_desc: "Defina um temporizador de mais de 1 hora.",
+                ach_world_traveler_title: "Viajante do Mundo",
+                ach_world_traveler_desc: "Confira os relógios mundiais.",
+                ach_polyglot_title: "Poliglota",
+                ach_polyglot_desc: "Alterne o idioma do aplicativo.",
+                ach_organizer_title: "Organizador Mestre",
+                ach_organizer_desc: "Tenha pelo menos um lembrete, uma meta e um hábito ativos ao mesmo tempo.",
+                ach_zenith_master_title: "Mestre do Zênite",
+                ach_zenith_master_desc: "Desbloqueie todas as outras conquistas."
+            },
+            en: {
+                navAi: "Zenithinha",
+                pageTitleAi: "Zenithinha",
+                aiWelcome: "Hello, I'm Zenithinha. I can help you create suggestions for your reminders, goals, notes, and more! Tell me what you need.",
+                aiPrompt: "Type your question...",
+                aiNewChat: "New Chat",
+                aiSavedChats: "Saved Chats",
+                aiToAi: "Chat with Zenithinha",
+                aiToAiSubtitle: "Your new AI assistant to help you organize your ideas.",
+                aiToAiBtn: "Chat now",
+                loginTitle: "Welcome to Zenith",
+                loginSubtitle: "Your personal assistant",
+                loginButton: "Sign In",
+                loginNoAccount: "Don't have an account?",
+                loginSignUpLink: "Sign Up",
+                registerTitle: "Create Account",
+                registerSubtitle: "Start your productivity journey",
+                registerButton: "Sign Up",
+                registerHaveAccount: "Already have an account?",
+                registerLoginLink: "Sign In",
+                emailPlaceholder: "Email",
+                passwordPlaceholder: "Password",
+                passwordPlaceholderRegister: "Create password",
+                namePlaceholder: "Full name",
+                navDashboard: "Dashboard",
+                navReminders: "Reminders",
+                navGoals: "Goals",
+                navHabits: "Habits",
+                navNotes: "Notes",
+                navCalendar: "Calendar",
+                navPaint: "Paint",
+                navCalculator: "Calculator",
+                navClock: "Clock",
+                navAchievements: "Achievements",
+                pageTitleDashboard: "Dashboard",
+                pageTitleReminders: "Reminders",
+                pageTitleGoals: "Goals",
+                pageTitleHabits: "Habits",
+                pageTitleNotes: "Notes",
+                pageTitleCalendar: "Calendar",
+                pageTitlePaint: "Paint",
+                pageTitleCalculator: "Calculator",
+                pageTitleClock: "Clock",
+                pageTitleAchievements: "Achievements",
+                pageTitleProfile: "Profile",
+                welcomeBack: "Welcome back",
+                dashboardSubtitle: "Here's a summary of your productivity.",
+                activeReminders: "Active Reminders",
+                goalsInProgress: "Goals in Progress",
+                totalNotes: "Total Notes",
+                quickActions: "Quick Actions",
+                newReminder: "New Reminder",
+                newGoal: "New Goal",
+                newNote: "New Note",
+                newHabit: "New Habit",
+                noItemsFound: "No {item} found",
+                clickToAdd: "Click the button above to add",
+                statusUpdated: "Status updated successfully!",
+                errorUpdating: "Error updating status",
+                newItem: "New",
+                editItem: "Edit",
+                itemReminder: "Reminder",
+                itemGoal: "Goal",
+                itemNote: "Note",
+                itemHabit: "Habit",
+                goalTitlePlaceholder: "Goal title",
+                goalCurrentValue: "Current value",
+                goalTargetValue: "Target value",
+                noteTitlePlaceholder: "Note title",
+                noteContentPlaceholder: "Note content",
+                habitTitlePlaceholder: "Habit name",
+                habitStreak: "Streak",
+                habitDays: "days",
+                habitDoneToday: "Done today!",
+                habitMarkDone: "Mark as done",
+                save: "Save",
+                cancel: "Cancel",
+                delete: "Delete",
+                confirmDelete: "Are you sure you want to delete this item?",
+                itemSaved: "Item saved successfully!",
+                itemDeleted: "Item deleted successfully!",
+                errorSaving: "Error saving item",
+                errorDeleting: "Error deleting item",
+                profileName: "Name",
+                profileEmail: "Email",
+                profileSince: "Member since",
+                profileLogout: "Sign Out",
+                profileUpdateSuccess: "Profile updated successfully!",
+                profileUpdateError: "Error updating profile",
+                drawingSaved: "Drawing saved successfully!",
+                drawingDeleted: "Drawing deleted successfully!",
+                errorSavingDrawing: "Error saving drawing",
+                errorDeletingDrawing: "Error deleting drawing",
+                achievementUnlocked: "Achievement Unlocked",
+                colorLabel: "Color",
+                sizeLabel: "Size",
+                eraser: "Eraser",
+                clear: "Clear",
+                saveDrawing: "Save Drawing",
+                savedDrawings: "Saved Drawings",
+                noDrawings: "No saved drawings yet.",
+                reminderTitlePlaceholder: "Reminder title",
+                photoUrlLabel: "Profile Photo URL",
+                photoUrlPlaceholder: "https://example.com/photo.png",
+                editDrawing: "Edit",
+                complete: "complete",
+                units: "units",
+                achievementsTitle: "🏆 Your Achievements",
+                achievementsSubtitle: "Unlock achievements by using Zenith's features!",
+                progressTitle: "📊 Progress",
+                unlockedAchievementsLabel: "Unlocked Achievements",
+                unlockedOn: "Unlocked on",
+                clockTabWorld: "Clocks",
+                clockTabStopwatch: "Stopwatch",
+                clockTabTimer: "Timer",
+                stopwatchStart: "Start",
+                stopwatchPause: "Pause",
+                stopwatchContinue: "Continue",
+                stopwatchReset: "Reset",
+                timerSet: "Set",
+                timerStart: "Start",
+                timerPause: "Pause",
+                timerContinue: "Continue",
+                timerStop: "Stop",
+                timerReset: "Reset",
+                timerHours: "Hours",
+                timerMinutes: "Minutes",
+                timerSeconds: "Seconds",
+                timerFinished: "Time is up!",
+                localTime: "Local Time",
+                addEvent: "Add Event",
+                editEvent: "Edit Event",
+                eventTitle: "Event Title",
+                noEvents: "No events for this day.",
+                eventsFor: "Events for",
+                allEvents: "All Scheduled Events",
+                paintBucket: "Paint Bucket",
+                downloadDrawing: "Download Drawing",
+                brush: "Brush",
+                undo: "Undo",
+                redo: "Redo",
+
+                ach_first_login_title: "First Login",
+                ach_first_login_desc: "Log in to Zenith for the first time.",
+                ach_first_note_title: "Noted!",
+                ach_first_note_desc: "Create your first note.",
+                ach_first_goal_title: "Eye on the Prize",
+                ach_first_goal_desc: "Set your first goal.",
+                ach_first_habit_title: "A Good Start",
+                ach_first_habit_desc: "Create your first habit.",
+                ach_artist_title: "Born Artist",
+                ach_artist_desc: "Save your first drawing.",
+                ach_productive_week_title: "Productive Week",
+                ach_productive_week_desc: "Complete 5 goals in one week.",
+                ach_habit_streak_7_title: "On a Roll!",
+                ach_habit_streak_7_desc: "Keep a habit streak for 7 days.",
+                ach_note_taker_pro_title: "Dedicated Writer",
+                ach_note_taker_pro_desc: "Create 10 notes.",
+                ach_goal_setter_pro_title: "Master Planner",
+                ach_goal_setter_pro_desc: "Create 10 goals.",
+                ach_habit_master_title: "Habit Master",
+                ach_habit_master_desc: "Create 5 habits.",
+                ach_goal_achiever_1_title: "First Victory",
+                ach_goal_achiever_1_desc: "Complete your first goal.",
+                ach_goal_achiever_10_title: "Conqueror",
+                ach_goal_achiever_10_desc: "Complete 10 goals.",
+                ach_habit_streak_30_title: "Unstoppable",
+                ach_habit_streak_30_desc: "Keep a habit for 30 days.",
+                ach_art_collector_title: "Art Collector",
+                ach_art_collector_desc: "Save 5 drawings.",
+                ach_calculator_user_title: "Mathematician",
+                ach_calculator_user_desc: "Use the calculator.",
+                ach_clock_watcher_title: "Time Lord",
+                ach_clock_watcher_desc: "Use the clock features.",
+                ach_timer_master_title: "Master of Time",
+                ach_timer_master_desc: "Set a timer for over 1 hour.",
+                ach_world_traveler_title: "World Traveler",
+                ach_world_traveler_desc: "Check the world clocks.",
+                ach_polyglot_title: "Polyglot",
+                ach_polyglot_desc: "Switch the application language.",
+                ach_organizer_title: "Master Organizer",
+                ach_organizer_desc: "Have at least one active reminder, goal, and habit at the same time.",
+                ach_zenith_master_title: "Zenith Master",
+                ach_zenith_master_desc: "Unlock all other achievements."
+            }
+        };
+
+        // Translation function
+        function t(key, params = {}) {
+            let text = translations[currentLanguage][key] || key;
+            Object.keys(params).forEach(param => {
+                text = text.replace(`{${param}}`, params[param]);
+            });
+            return text;
+        }
+
+        // Utility Functions
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = type === 'achievement' ? `
+                <i data-lucide="trophy" class="w-6 h-6"></i>
+                <div>
+                    <p class="font-bold">${t('achievementUnlocked')}</p>
+                    <p>${message}</p>
+                </div>
+            ` : `<span>${message}</span>`;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => toast.classList.add('show'), 100);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 5000);
+        }
+
+        function showAuthContainer() {
+            authContainer.classList.add('active');
+            appContainer.classList.remove('active');
+        }
+
+        function showAppContainer() {
+            authContainer.classList.remove('active');
+            appContainer.classList.add('active');
+        }
+
+        function navigateTo(page) {
+            if (currentUser === null && page !== 'profile') {
+                showAuthContainer();
+                return;
+            }
+
+            // Do not re-render if it's the same page, except for dashboard
+            if (currentPage === page && appContent.innerHTML.trim() !== '' && page !== 'dashboard') return;
+
+
+            // Clear previous intervals
+            clockIntervals.forEach(interval => clearInterval(interval));
+            clockIntervals = [];
+            if (calendarUnsubscribe) {
+                calendarUnsubscribe();
+                calendarUnsubscribe = null;
+            }
+
+
+            // Clear previous unsubscribes for the old page
+            unsubscribes.forEach(unsub => unsub());
+            unsubscribes = [];
+            if (aiChatUnsubscribe) {
+                aiChatUnsubscribe();
+                aiChatUnsubscribe = null;
+            }
+            if (aiMessagesUnsubscribe) {
+                aiMessagesUnsubscribe();
+                aiMessagesUnsubscribe = null;
+            }
+
+
+            currentPage = page;
+            pageTitle.textContent = t(`pageTitle${page.charAt(0).toUpperCase() + page.slice(1)}`);
+            // Adjust padding based on page
+            if (page === 'ai') {
+                appContent.classList.remove('p-4', 'md:p-6', 'pb-20', 'md:pb-6');
+            } else {
+                appContent.classList.add('p-4', 'md:p-6', 'pb-20', 'md:pb-6');
+            }
+
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.page === page);
+            });
+
+            switch (page) {
+                case 'dashboard': loadDashboard(); break;
+                case 'ai': loadAi(); break;
+                case 'reminders': loadReminders(); break;
+                case 'goals': loadGoals(); break;
+                case 'habits': loadHabits(); break;
+                case 'notes': loadNotes(); break;
+                case 'calendar': loadCalendar(); break;
+                case 'paint': loadPaint(); break;
+                case 'calculator': loadCalculator(); break;
+                case 'clock': loadClock(); break;
+                case 'achievements': loadAchievements(); break;
+                case 'profile': loadProfile(); break;
+            }
+        }
+
+        const setupNavigation = () => {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => navigateTo(item.dataset.page));
+            });
+        };
+
+        // --- PAGE LOADERS & RENDERERS ---
+        function loadDashboard() {
+            appContent.innerHTML = `
+            <div class="fade-in space-y-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <h2 class="text-3xl font-bold mb-2">${t('welcomeBack')}, <span class="text-brand-500">${currentUserProfile.name || 'Usuário'}!</span></h2>
+                    <p class="text-gray-600 dark:text-gray-400" data-t="dashboardSubtitle">${t('dashboardSubtitle')}</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md flex items-center gap-4">
+                            <div class="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg"><i data-lucide="bell-ring" class="w-7 h-7 text-blue-500"></i></div>
+                            <div><h3 class="font-semibold text-lg text-gray-500 dark:text-gray-400" data-t="activeReminders">${t('activeReminders')}</h3><p id="dashboard-reminders" class="text-3xl font-bold text-gray-900 dark:text-white">0</p></div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md flex items-center gap-4">
+                            <div class="p-3 bg-green-100 dark:bg-green-900/50 rounded-lg"><i data-lucide="target" class="w-7 h-7 text-green-500"></i></div>
+                            <div><h3 class="font-semibold text-lg text-gray-500 dark:text-gray-400" data-t="goalsInProgress">${t('goalsInProgress')}</h3><p id="dashboard-goals" class="text-3xl font-bold text-gray-900 dark:text-white">0</p></div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md flex items-center gap-4">
+                            <div class="p-3 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg"><i data-lucide="notebook-pen" class="w-7 h-7 text-yellow-500"></i></div>
+                            <div><h3 class="font-semibold text-lg text-gray-500 dark:text-gray-400" data-t="totalNotes">${t('totalNotes')}</h3><p id="dashboard-notes" class="text-3xl font-bold text-gray-900 dark:text-white">0</p></div>
+                        </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <div class="flex flex-col md:flex-row items-center gap-4">
+                        <i data-lucide="sparkles" class="w-12 h-12 text-brand-500"></i>
+                        <div class="flex-1 text-center md:text-left">
+                            <h3 class="font-bold text-lg" data-t="aiToAi">${t('aiToAi')}</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm" data-t="aiToAiSubtitle">${t('aiToAiSubtitle')}</p>
+                        </div>
+                        <button id="goto-ai-btn" class="bg-brand-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-brand-700 whitespace-nowrap transition-transform hover:scale-105">
+                            ${t('aiToAiBtn')}
+                        </button>
+                    </div>
+                </div>
+                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <h3 class="font-semibold text-lg mb-4" data-t="quickActions">${t('quickActions')}</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <button class="quick-action-btn flex items-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform" data-action="add-reminder"><i data-lucide="plus"></i><span data-t="newReminder">${t('newReminder')}</span></button>
+                        <button class="quick-action-btn flex items-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform" data-action="add-goal"><i data-lucide="plus"></i><span data-t="newGoal">${t('newGoal')}</span></button>
+                        <button class="quick-action-btn flex items-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform" data-action="add-note"><i data-lucide="plus"></i><span data-t="newNote">${t('newNote')}</span></button>
+                        <button class="quick-action-btn flex items-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform" data-action="add-habit"><i data-lucide="plus"></i><span data-t="newHabit">${t('newHabit')}</span></button>
+                    </div>
+                </div>
+            </div>`;
+            lucide.createIcons();
+            document.getElementById('goto-ai-btn').addEventListener('click', () => navigateTo('ai'));
+            document.querySelector('[data-action="add-reminder"]').addEventListener('click', () => showItemModal('reminder'));
+            document.querySelector('[data-action="add-goal"]').addEventListener('click', () => showItemModal('goal'));
+            document.querySelector('[data-action="add-note"]').addEventListener('click', () => showItemModal('note'));
+            document.querySelector('[data-action="add-habit"]').addEventListener('click', () => showItemModal('habit'));
+
+            // Real-time counters
+            if (firebaseInitialized) {
+                const { collection, query, where, onSnapshot, getDocs } = window.firebaseFirestore;
+                const remindersRef = collection(window.db, `users/${currentUser.uid}/reminders`);
+                const unsubReminders = onSnapshot(query(remindersRef, where("completed", "==", false)), s => {
+                    document.getElementById('dashboard-reminders').textContent = s.size;
+                });
+                const goalsRef = collection(window.db, `users/${currentUser.uid}/goals`);
+                const unsubGoals = onSnapshot(query(goalsRef, where("completed", "==", false)), s => {
+                    document.getElementById('dashboard-goals').textContent = s.size;
+                });
+                const notesRef = collection(window.db, `users/${currentUser.uid}/notes`);
+                const unsubNotes = onSnapshot(notesRef, s => {
+                    document.getElementById('dashboard-notes').textContent = s.size;
+                });
+                unsubscribes.push(unsubReminders, unsubGoals, unsubNotes);
+
+                // Check for organizer achievement
+                Promise.all([
+                    getDocs(query(remindersRef, where("completed", "==", false))),
+                    getDocs(query(goalsRef, where("completed", "==", false))),
+                    getDocs(collection(window.db, `users/${currentUser.uid}/habits`))
+                ]).then(([reminders, goals, habits]) => {
+                    if (reminders.size > 0 && goals.size > 0 && habits.size > 0) {
+                        checkAndUnlockAchievement('organizer');
+                    }
+                })
+
+            }
+        }
+
+        // --- AI CHAT PAGE ---
+        function loadAi() {
+            appContent.innerHTML = `
+            <div id="ai-chat-container" class="flex w-full h-[calc(100vh-112px)] md:h-[calc(100vh-88px)] fade-in">
+                <!-- Barra Lateral de Chats -->
+                <aside class="bg-gray-800 text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
+                    <h2 class="text-xl font-bold mb-4" data-t="aiSavedChats">${t('aiSavedChats')}</h2>
+                    <button id="ai-new-chat-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mb-4 transition-colors duration-300 flex items-center justify-center">
+                        <i class="fas fa-plus mr-2"></i> <span data-t="aiNewChat">${t('aiNewChat')}</span>
+                    </button>
+                    <div class="flex-grow overflow-y-auto no-scrollbar" id="ai-chat-list">
+                        <!-- A lista de chats será inserida aqui -->
+                    </div>
+                </aside>
+
+                <!-- Área Principal do Chat -->
+                <main class="flex-grow flex flex-col bg-white dark:bg-gray-900">
+                    <!-- Histórico de Mensagens -->
+                    <div id="ai-chat-history" class="flex-grow p-6 overflow-y-auto space-y-6 no-scrollbar">
+                        <!-- As mensagens serão inseridas aqui -->
+                    </div>
+                    
+                    <!-- Formulário de Envio -->
+                    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+                        <form id="ai-prompt-form" class="flex items-stretch gap-4 max-w-4xl mx-auto">
+                            <textarea id="ai-prompt-input" rows="1" data-t-placeholder="aiPrompt" placeholder="${t('aiPrompt')}" class="flex-grow p-3 bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all resize-none"></textarea>
+                            <button type="submit" id="ai-submit-button" class="bg-brand-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-brand-700 transition-colors duration-300 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                        </form>
+                    </div>
+                </main>
+            </div>`;
+
+            setupAiChat();
+        }
+
+        function setupAiChat() {
+            // --- Configuração da IA ---
+            // A chave de API foi removida daqui para segurança.
+            // A chamada agora é feita para o nosso próprio servidor.
+            const API_URL = '/chat'; // Endpoint no nosso servidor
+
+            // --- Elementos do DOM ---
+            const chatListEl = document.getElementById('ai-chat-list');
+            const newChatBtn = document.getElementById('ai-new-chat-btn');
+            const chatHistoryEl = document.getElementById('ai-chat-history');
+            const promptForm = document.getElementById('ai-prompt-form');
+            const promptInput = document.getElementById('ai-prompt-input');
+            const submitButton = document.getElementById('ai-submit-button');
+
+            // --- Estado ---
+            let activeChatId = null;
+
+            // --- Firestore Refs ---
+            const { collection, query, orderBy, onSnapshot, doc, getDoc, addDoc, updateDoc, deleteDoc, arrayUnion, serverTimestamp } = window.firebaseFirestore;
+            const chatsColRef = collection(db, `users/${currentUser.uid}/ai-chats`);
+
+            const renderChatList = (chats) => {
+                if (!chatListEl) return;
+                chatListEl.innerHTML = '';
+                if (chats.length === 0) {
+                    chatListEl.innerHTML = '<p class="text-gray-400 text-sm p-2">Nenhum chat salvo.</p>';
+                    return;
+                }
+                chats.forEach(chat => {
+                    const isActive = chat.id === activeChatId;
+                    const item = document.createElement('div');
+                    item.className = `flex items-center justify-between p-2 rounded-lg cursor-pointer my-1 ${isActive ? 'bg-blue-500' : 'hover:bg-gray-700'}`;
+                    item.innerHTML = `
+                        <span class="truncate flex-grow">${chat.title}</span>
+                        <button class="ai-delete-chat-btn text-gray-400 hover:text-red-500 ml-2 p-1">
+                            <i class="fas fa-trash-alt fa-sm"></i>
+                        </button>
+                    `;
+                    item.addEventListener('click', () => switchChat(chat.id));
+                    item.querySelector('.ai-delete-chat-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        confirmDelete(chat.id, `ai-chats`);
+                    });
+                    chatListEl.appendChild(item);
+                });
+            };
+
+            const renderChatHistory = (messages) => {
+                if (!chatHistoryEl) return;
+                chatHistoryEl.innerHTML = '';
+                if (!messages || messages.length === 0) {
+                    chatHistoryEl.innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-gray-500 dark:text-gray-400">Faça a primeira pergunta para começar!</p></div>';
+                    return;
+                }
+
+                messages.forEach(msg => {
+                    const messageEl = createMessageElement(msg.role, msg.content);
+                    chatHistoryEl.appendChild(messageEl);
+                });
+                chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
+            };
+
+            const createMessageElement = (role, content) => {
+                const div = document.createElement('div');
+                const isUser = role === 'user';
+                div.className = `flex items-start gap-3 ${isUser ? 'justify-end' : ''}`;
+
+                const iconClass = isUser ? 'fa-user bg-blue-500' : 'fa-robot bg-gray-700';
+                const contentBg = isUser ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+
+                div.innerHTML = `
+                    ${!isUser ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 ${iconClass.split(' ')[1]}"><i class="fas ${iconClass.split(' ')[0]}"></i></div>` : ''}
+                    <div class="max-w-xl p-3 rounded-lg ${contentBg}">${marked.parse(content)}</div>
+                    ${isUser ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 ${iconClass.split(' ')[1]}"><i class="fas ${iconClass.split(' ')[0]}"></i></div>` : ''}
+                `;
+                return div;
+            };
+
+            const switchChat = (chatId) => {
+                activeChatId = chatId;
+                if (aiMessagesUnsubscribe) aiMessagesUnsubscribe();
+
+                const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, chatId);
+                aiMessagesUnsubscribe = onSnapshot(chatDocRef, (doc) => {
+                    if (doc.exists()) {
+                        const chatData = doc.data();
+                        renderChatHistory(chatData.messages);
+                        // We need to re-render the list to update the active state
+                        if (aiChatUnsubscribe) aiChatUnsubscribe();
+                        listenForChats();
+                    }
+                });
+                unsubscribes.push(aiMessagesUnsubscribe);
+            };
+
+            const createNewChat = async () => {
+                const newChat = {
+                    title: 'Nova Conversa',
+                    messages: [{
+                        role: 'model',
+                        content: t('aiWelcome')
+                    }],
+                    createdAt: serverTimestamp()
+                };
+                try {
+                    const docRef = await addDoc(chatsColRef, newChat);
+                    switchChat(docRef.id);
+                } catch (e) {
+                    console.error("Error creating new chat:", e);
+                    showToast("Erro ao criar novo chat", "error");
+                }
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!activeChatId) {
+                    showToast("Nenhum chat ativo. Crie um novo chat primeiro.", "error");
+                    return;
+                }
+                const prompt = promptInput.value.trim();
+                if (!prompt) return;
+
+                const userMessage = { role: 'user', content: prompt };
+                const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, activeChatId);
+
+                promptInput.value = '';
+                submitButton.disabled = true;
+
+                try {
+                    const chatDoc = await getDoc(chatDocRef);
+                    let currentMessages = chatDoc.exists() ? chatDoc.data().messages : [];
+                    // If it's the first user message, update the chat title
+                    if (currentMessages.length === 1) {
+                        const newTitle = prompt.substring(0, 30) + (prompt.length > 30 ? '...' : '');
+                        await updateDoc(chatDocRef, {
+                            title: newTitle,
+                            messages: arrayUnion(userMessage)
+                        });
+                    } else {
+                        await updateDoc(chatDocRef, { messages: arrayUnion(userMessage) });
+                    }
+
+                    const updatedDoc = await getDoc(chatDocRef);
+                    const apiHistory = updatedDoc.data().messages.map(msg => ({
+                        role: msg.role, // 'user' ou 'model'
+                        content: msg.content
+                    }));
+
+                    const loadingEl = document.createElement('div');
+                    loadingEl.id = 'loading-indicator';
+                    loadingEl.className = "flex items-start gap-3";
+                    loadingEl.innerHTML = `
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-gray-700 shrink-0"><i class="fas fa-robot"></i></div>
+                        <div class="max-w-xl p-3 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                            <div class="dot-bounce">
+                                <div class="dot1"></div><div class="dot2"></div><div class="dot3"></div>
+                            </div>
+                        </div>
+                    `;
+                    chatHistoryEl.appendChild(loadingEl);
+                    chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
+
+                    const now = new Date();
+                    const formattedDateTime = now.toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'long' });
+
+                    const historyWithContext = apiHistory;
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ history: historyWithContext }) // Envia o histórico para o nosso servidor
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `API Error: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    const text = data.response || "Não foi possível obter uma resposta.";
+                    const modelMessage = { role: 'model', content: text };
+
+                    await updateDoc(chatDocRef, { messages: arrayUnion(modelMessage) });
+                } catch (error) {
+                    console.error("Error in handleSubmit:", error);
+                    showToast("Erro ao contatar a IA.", "error");
+                    const errorMessage = { role: 'model', content: `**Erro:** ${error.message}` };
+                    await updateDoc(chatDocRef, { messages: arrayUnion(errorMessage) });
+
+                } finally {
+                    submitButton.disabled = false;
+                }
+            };
+
+            const listenForChats = () => {
+                const q = query(chatsColRef, orderBy('createdAt', 'desc'));
+                aiChatUnsubscribe = onSnapshot(q, (snapshot) => {
+                    const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderChatList(chats);
+                    if (!activeChatId && chats.length > 0) {
+                        switchChat(chats[0].id);
+                    } else if (chats.length === 0) {
+                        createNewChat();
+                    }
+                });
+                unsubscribes.push(aiChatUnsubscribe);
+            };
+
+            // --- Event Listeners ---
+            newChatBtn.addEventListener('click', createNewChat);
+            promptForm.addEventListener('submit', handleSubmit);
+            promptInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    promptForm.requestSubmit();
+                }
+            });
+
+            // --- Initial Load ---
+            listenForChats();
+        }
+
+        function commonListPage(type, plural, icon) {
+            appContent.innerHTML = `
+            <div class="fade-in">
+                <button id="add-${type}-btn" class="w-full md:w-auto bg-brand-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-brand-700 transition-colors mb-6 flex items-center justify-center gap-2 transform hover:scale-105">
+                    <i data-lucide="${icon}" class="w-5 h-5"></i> ${t(`new${type.charAt(0).toUpperCase() + type.slice(1)}`)}
+                </button>
+                <div id="${type}s-list"></div>
+            </div>`;
+            lucide.createIcons();
+            document.getElementById(`add-${type}-btn`).addEventListener('click', () => showItemModal(type));
+            const listEl = document.getElementById(`${type}s-list`);
+            const itemLayoutClass = (type === 'note') ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+                : (type === 'habit') ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'
+                    : (type === 'goal') ? 'grid grid-cols-1 lg:grid-cols-2 gap-6'
+                        : 'space-y-4';
+            listEl.className = itemLayoutClass;
+
+            if (firebaseInitialized) {
+                const { collection, query, orderBy, onSnapshot } = window.firebaseFirestore;
+                const q = query(collection(window.db, `users/${currentUser.uid}/${type}s`), orderBy('createdAt', 'desc'));
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    if (snapshot.empty) {
+                        listEl.innerHTML = `<div class="text-center py-12 col-span-full"><p class="text-gray-500">${t('noItemsFound', { item: plural.toLowerCase() })}</p><p class="text-gray-400 text-sm">${t('clickToAdd')}</p></div>`;
+                        return;
+                    }
+
+                    listEl.innerHTML = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return renderItem(type, doc.id, data);
+                    }).join('');
+                    lucide.createIcons();
+
+                    // Add event listeners
+                    listEl.querySelectorAll('.edit-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const itemId = btn.dataset.id;
+                            const itemData = snapshot.docs.find(doc => doc.id === itemId).data();
+                            showItemModal(type, itemId, itemData);
+                        });
+                    });
+
+                    if (type === 'reminder' || type === 'goal') {
+                        listEl.querySelectorAll('.toggle-btn').forEach(btn => {
+                            btn.addEventListener('click', () => toggleItemStatus(btn.dataset.id, type + 's'));
+                        });
+                    }
+
+                    if (type === 'goal') {
+                        listEl.querySelectorAll('.goal-update-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const amount = parseInt(btn.dataset.amount);
+                                updateGoalValue(btn.dataset.id, amount);
+                            });
+                        });
+                    }
+
+                    if (type === 'habit') {
+                        listEl.querySelectorAll('.habit-toggle').forEach(btn => {
+                            btn.addEventListener('click', () => toggleHabitToday(btn.dataset.id));
+                        });
+                    }
+                });
+                unsubscribes.push(unsubscribe);
+            }
+        }
+
+        function renderItem(type, id, data) {
+            const today = new Date().toDateString();
+
+            switch (type) {
+                case 'reminder':
+                    const isOverdue = data.remindAt && new Date(data.remindAt.toDate()) < new Date() && !data.completed;
+                    return `
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''} ${isOverdue ? 'border-l-4 border-red-500' : ''}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
+                                ${data.remindAt ? `<p class="text-sm text-gray-500">${new Date(data.remindAt.toDate()).toLocaleString()}</p>` : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform" data-id="${id}">
+                                    <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
+                                </button>
+                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform" data-id="${id}">
+                                    <i data-lucide="edit" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                case 'goal':
+                    const progress = data.targetValue > 0 ? Math.min((data.currentValue / data.targetValue) * 100, 100) : 0;
+                    return `
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''}">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
+                                <p class="text-sm text-gray-500">${progress.toFixed(0)}% ${t('complete')}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform" data-id="${id}">
+                                    <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
+                                </button>
+                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform" data-id="${id}">
+                                    <i data-lucide="edit" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                            <div class="bg-brand-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                             <div>
+                                <p class="font-semibold text-lg">${data.currentValue} / ${data.targetValue}</p>
+                             </div>
+                             <div class="flex gap-2">
+                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center" data-id="${id}" data-amount="-1"><i data-lucide="minus"></i></button>
+                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center" data-id="${id}" data-amount="1"><i data-lucide="plus"></i></button>
+                             </div>
+                        </div>
+                    </div>`;
+                case 'note':
+                    const noteColorClasses = {
+                        yellow: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200',
+                        blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
+                        green: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+                        red: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+                        purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200'
+                    };
+                    return `
+                    <div class="p-4 rounded-lg shadow-md ${noteColorClasses[data.color] || noteColorClasses.yellow}">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-bold">${data.title}</h3>
+                            <button class="edit-btn p-1 opacity-70 hover:opacity-100 hover:scale-105 transition-transform" data-id="${id}">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm opacity-90 whitespace-pre-wrap">${data.content}</p>
+                    </div>`;
+                case 'habit':
+                    const completedToday = data.completedDates && data.completedDates.includes(today);
+                    const streak = calculateStreak(data.completedDates || []);
+                    return `
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-lg">${data.title}</h3>
+                            <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform" data-id="${id}">
+                                <i data-lucide="edit" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl">${streak}</span> ${t('habitDays')}</p>
+                            <button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all ${completedToday ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white'}" data-id="${id}">
+                                ${completedToday ? t('habitDoneToday') : t('habitMarkDone')}
+                            </button>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        async function updateGoalValue(id, amount) {
+            if (!firebaseInitialized || !currentUser) return;
+            const { doc, getDoc, updateDoc, increment } = window.firebaseFirestore;
+            const docRef = doc(window.db, `users/${currentUser.uid}/goals`, id);
+
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) return;
+
+            const goal = docSnap.data();
+            const newValue = goal.currentValue + amount;
+
+            if (newValue > goal.targetValue || newValue < 0) {
+                return; // Prevents updating beyond limits
+            }
+
+            await updateDoc(docRef, {
+                currentValue: increment(amount)
+            });
+        }
+
+
+        function calculateStreak(completedDates) {
+            if (!completedDates || completedDates.length === 0) return 0;
+
+            const uniqueDates = [...new Set(completedDates)].map(d => new Date(d));
+            uniqueDates.sort((a, b) => b - a);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+
+            let lastDate = uniqueDates[0];
+            lastDate.setHours(0, 0, 0, 0);
+
+            if (lastDate.getTime() !== today.getTime() && lastDate.getTime() !== yesterday.getTime()) {
+                return 0;
+            }
+
+            let streak = 0;
+            let expectedDate = new Date(today);
+            if (lastDate.getTime() !== today.getTime()) {
+                expectedDate = new Date(yesterday);
+            }
+
+
+            for (const date of uniqueDates) {
+                date.setHours(0, 0, 0, 0);
+                if (date.getTime() === expectedDate.getTime()) {
+                    streak++;
+                    expectedDate.setDate(expectedDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+
+            return streak;
+        }
+
+        async function toggleItemStatus(id, collectionName) {
+            if (!firebaseInitialized || !currentUser) {
+                showToast("Firebase não configurado ou usuário não logado.", 'error');
+                return;
+            }
+
+            showLoading();
+            try {
+                const { doc, updateDoc, getDoc, serverTimestamp } = window.firebaseFirestore;
+                const docRef = doc(window.db, `users/${currentUser.uid}/${collectionName}`, id);
+                const docSnap = await getDoc(docRef);
+                const currentStatus = docSnap.data().completed;
+
+                await updateDoc(docRef, {
+                    completed: !currentStatus,
+                    completedAt: !currentStatus ? serverTimestamp() : null
+                });
+
+                if (!currentStatus && collectionName === 'goals') {
+                    await checkAndUnlockAchievement('productive_week');
+                    await checkAndUnlockAchievement('goal_achiever_1');
+                    await checkAndUnlockAchievement('goal_achiever_10');
+                }
+
+                showToast(t('statusUpdated'), 'success');
+            } catch (error) {
+                console.error('Error updating status:', error);
+                showToast(t('errorUpdating'), 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function toggleHabitToday(id) {
+            if (!firebaseInitialized || !currentUser) {
+                showToast("Firebase não configurado ou usuário não logado.", 'error');
+                return;
+            }
+
+            showLoading();
+            try {
+                const { doc, updateDoc, getDoc } = window.firebaseFirestore;
+                const docRef = doc(window.db, `users/${currentUser.uid}/habits`, id);
+                const docSnap = await getDoc(docRef);
+                const data = docSnap.data();
+                const today = new Date().toDateString();
+                const completedDates = data.completedDates || [];
+
+                if (completedDates.includes(today)) {
+                    const updatedDates = completedDates.filter(date => date !== today);
+                    await updateDoc(docRef, { completedDates: updatedDates });
+                } else {
+                    const updatedDates = [...completedDates, today];
+                    await updateDoc(docRef, { completedDates: updatedDates });
+                    const newStreak = calculateStreak(updatedDates);
+                    if (newStreak >= 7) await checkAndUnlockAchievement('habit_streak_7');
+                    if (newStreak >= 30) await checkAndUnlockAchievement('habit_streak_30');
+                }
+
+                showToast(t('statusUpdated'), 'success');
+            } catch (error) {
+                console.error('Error updating habit:', error);
+                showToast(t('errorUpdating'), 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function loadReminders() { commonListPage('reminder', 'Lembretes', 'bell-ring'); }
+        function loadGoals() { commonListPage('goal', 'Metas', 'target'); }
+        function loadHabits() { commonListPage('habit', 'Hábitos', 'clipboard-check'); }
+        function loadNotes() { commonListPage('note', 'Notas', 'notebook-pen'); }
+
+        function showItemModal(type, id = null, data = {}) {
+            const isEdit = !!id;
+            const title = isEdit ? t('editItem') + ' ' + t(`item${type.charAt(0).toUpperCase() + type.slice(1)}`) : t('newItem') + ' ' + t(`item${type.charAt(0).toUpperCase() + type.slice(1)}`);
+
+            let fieldsHtml = '';
+
+            switch (type) {
+                case 'reminder':
+                    const remindAtValue = data.remindAt ? new Date(data.remindAt.toDate()).toISOString().slice(0, 16) : '';
+                    fieldsHtml = `
+                        <input type="text" id="item-title" placeholder="${t('reminderTitlePlaceholder')}" class="${formInputClasses}" value="${data.title || ''}" required>
+                        <input type="datetime-local" id="item-remindAt" class="${formInputClasses}" value="${remindAtValue}">`;
+                    break;
+                case 'goal':
+                    fieldsHtml = `
+                        <input type="text" id="item-title" placeholder="${t('goalTitlePlaceholder')}" class="${formInputClasses}" value="${data.title || ''}" required>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">${t('goalCurrentValue')}</label>
+                                <input type="number" id="item-currentValue" class="${formInputClasses}" value="${data.currentValue || 0}" min="0">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">${t('goalTargetValue')}</label>
+                                <input type="number" id="item-targetValue" class="${formInputClasses}" value="${data.targetValue || 100}" min="1" required>
+                            </div>
+                        </div>`;
+                    break;
+                case 'note':
+                    fieldsHtml = `
+                        <input type="text" id="item-title" placeholder="${t('noteTitlePlaceholder')}" class="${formInputClasses}" value="${data.title || ''}" required>
+                        <textarea id="item-content" placeholder="${t('noteContentPlaceholder')}" class="${formInputClasses}" rows="6">${data.content || ''}</textarea>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">${t('colorLabel')}</label>
+                            <div class="flex gap-2">
+                                ${['yellow', 'blue', 'green', 'red', 'purple'].map(color =>
+                        `<button type="button" class="color-btn w-8 h-8 rounded-full bg-${color}-200 border-2 ${data.color === color || (!data.color && color === 'yellow') ? 'ring-2 ring-brand-500' : 'border-transparent'}" data-color="${color}"></button>`
+                    ).join('')}
+                            </div>
+                        </div>`;
+                    break;
+                case 'habit':
+                    fieldsHtml = `<input type="text" id="item-title" placeholder="${t('habitTitlePlaceholder')}" class="${formInputClasses}" value="${data.title || ''}" required>`;
+                    break;
+            }
+
+            const modal = document.getElementById('item-modal');
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3 class="text-xl font-bold mb-4">${title}</h3>
+                    <form id="item-form" class="space-y-4">
+                        ${fieldsHtml}
+                        <div class="flex gap-3 pt-4">
+                            <button type="submit" class="flex-1 bg-brand-600 text-white py-2 px-4 rounded-lg hover:bg-brand-700">${t('save')}</button>
+                            <button type="button" id="cancel-btn" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500">${t('cancel')}</button>
+                            ${id ? `<button type="button" id="delete-btn" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">${t('delete')}</button>` : ''}
+                        </div>
+                    </form>
+                </div>`;
+
+            modal.classList.add('show');
+
+            // Color selection for notes
+            let selectedColor = data.color || 'yellow';
+            if (type === 'note') {
+                document.querySelectorAll('.color-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('ring-2', 'ring-brand-500'));
+                        btn.classList.add('ring-2', 'ring-brand-500');
+                        selectedColor = btn.dataset.color;
+                    });
+                });
+            }
+
+            // Form submission
+            document.getElementById('item-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                showLoading();
+
+                try {
+                    let payload = { title: document.getElementById('item-title').value };
+
+                    if (type === 'reminder') {
+                        const remindAtInput = document.getElementById('item-remindAt').value;
+                        payload.remindAt = remindAtInput ? new Date(remindAtInput) : null;
+                        payload.completed = data.completed || false;
+                    } else if (type === 'goal') {
+                        payload.currentValue = parseInt(document.getElementById('item-currentValue').value) || 0;
+                        payload.targetValue = parseInt(document.getElementById('item-targetValue').value) || 100;
+                        payload.completed = data.completed || false;
+                    } else if (type === 'note') {
+                        payload.content = document.getElementById('item-content').value;
+                        payload.color = selectedColor;
+                    } else if (type === 'habit') {
+                        payload.completedDates = data.completedDates || [];
+                    }
+
+                    const { doc, updateDoc, addDoc, collection, serverTimestamp } = window.firebaseFirestore;
+
+                    if (id) {
+                        await updateDoc(doc(window.db, `users/${currentUser.uid}/${type}s`, id), payload);
+                    } else {
+                        payload.createdAt = serverTimestamp();
+                        await addDoc(collection(window.db, `users/${currentUser.uid}/${type}s`), payload);
+                        await checkAndUnlockAchievement(`first_${type}`);
+
+                        if (type === 'note') await checkAndUnlockAchievement('note_taker_pro');
+                        if (type === 'goal') await checkAndUnlockAchievement('goal_setter_pro');
+                        if (type === 'habit') await checkAndUnlockAchievement('habit_master');
+                    }
+
+                    modal.classList.remove('show');
+                    showToast(t('itemSaved'), 'success');
+                } catch (error) {
+                    console.error('Error saving item:', error);
+                    showToast(t('errorSaving'), 'error');
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            // Cancel button
+            document.getElementById('cancel-btn').addEventListener('click', () => {
+                modal.classList.remove('show');
+            });
+
+            // Delete button
+            if (id) {
+                document.getElementById('delete-btn').addEventListener('click', () => {
+                    modal.classList.remove('show');
+                    confirmDelete(id, `${type}s`);
+                });
+            }
+
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('show');
+            });
+        }
+
+        function confirmDelete(id, collection, callback) {
+            const modal = document.getElementById('confirm-modal');
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3 class="text-xl font-bold mb-4">${t('confirmDelete')}</h3>
+                    <div class="flex gap-3">
+                        <button id="confirm-delete" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">${t('delete')}</button>
+                        <button id="cancel-delete" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500">${t('cancel')}</button>
+                    </div>
+                </div>`;
+
+            modal.classList.add('show');
+
+            document.getElementById('confirm-delete').addEventListener('click', async () => {
+                showLoading();
+                if (!firebaseInitialized || !currentUser) {
+                    showToast("Firebase não configurado ou usuário não logado.", 'error');
+                    hideLoading();
+                    return;
+                }
+                try {
+                    const { doc, deleteDoc } = window.firebaseFirestore;
+                    await deleteDoc(doc(window.db, `users/${currentUser.uid}/${collection}`, id));
+                    modal.classList.remove('show');
+                    showToast(t('itemDeleted'), 'success');
+                    if (callback) callback();
+                } catch (error) {
+                    console.error('Error deleting item:', error);
+                    showToast(t('errorDeleting'), 'error');
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            document.getElementById('cancel-delete').addEventListener('click', () => {
+                modal.classList.remove('show');
+                if (collection === 'calendarEvents') {
+                    document.getElementById('item-modal').classList.add('show');
+                }
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                    if (collection === 'calendarEvents') {
+                        document.getElementById('item-modal').classList.add('show');
+                    }
+                }
+            });
+        }
+
+        // --- CALENDAR PAGE ---
+        function loadCalendar() {
+            if (calendarUnsubscribe) {
+                calendarUnsubscribe();
+                calendarUnsubscribe = null;
+            }
+
+            appContent.innerHTML = `
+            <div class="fade-in max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div class="lg:col-span-3 bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-md">
+                    <div id="calendar-header" class="flex justify-between items-center mb-4">
+                        <button id="prev-month-btn" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="chevron-left"></i></button>
+                        <h2 id="month-year-header" class="text-xl font-bold text-center"></h2>
+                        <button id="next-month-btn" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><i data-lucide="chevron-right"></i></button>
+                    </div>
+                    <div id="calendar-body"></div>
+                </div>
+                <div id="calendar-events-display" class="lg:col-span-2 space-y-6"></div>
+            </div>`;
+
+            document.getElementById('prev-month-btn').addEventListener('click', () => {
+                calendarDate.setMonth(calendarDate.getMonth() - 1);
+                renderCalendarUI();
+            });
+
+            document.getElementById('next-month-btn').addEventListener('click', () => {
+                calendarDate.setMonth(calendarDate.getMonth() + 1);
+                renderCalendarUI();
+            });
+
+            lucide.createIcons();
+            renderCalendarUI();
+            loadAllEventsList();
+        }
+
+        function renderCalendarUI() {
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+
+            renderCalendarGrid(year, month);
+            setupCalendarSubscription(year, month);
+            // Display today's events by default on first load of the page
+            const todayDateString = new Date().toISOString().slice(0, 10);
+            displayDayEvents(todayDateString);
+        }
+
+        function renderCalendarGrid(year, month) {
+            const calendarBody = document.getElementById('calendar-body');
+            if (!calendarBody) return;
+
+            const lang = currentLanguage === 'pt' ? 'pt-BR' : 'en-US';
+            const monthYearHeader = document.getElementById('month-year-header');
+            if (monthYearHeader) monthYearHeader.textContent = new Date(year, month).toLocaleDateString(lang, { month: 'long', year: 'numeric' });
+
+            const daysOfWeek = currentLanguage === 'pt' ? ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            let html = '<div class="calendar-grid mb-4">';
+            daysOfWeek.forEach(day => {
+                html += `<div class="font-bold text-center text-gray-500 dark:text-gray-400 text-xs">${day}</div>`;
+            });
+            html += '</div><div class="calendar-grid">';
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const prevMonthLastDate = new Date(year, month, 0);
+            const prevMonth = prevMonthLastDate.getMonth();
+            const prevYear = prevMonthLastDate.getFullYear();
+            for (let i = firstDayOfMonth; i > 0; i--) {
+                const day = prevMonthLastDate.getDate() - i + 1;
+                const dateString = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                html += `<div class="calendar-day other-month" data-date="${dateString}"><span>${day}</span></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const currentDate = new Date(year, month, day);
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                let classes = 'calendar-day';
+                if (currentDate.getTime() === today.getTime()) {
+                    classes += ' today';
+                }
+                html += `<div class="${classes}" data-date="${dateString}"><span>${day}</span></div>`;
+            }
+
+            const nextMonthFirstDate = new Date(year, month + 1, 1);
+            const nextMonth = nextMonthFirstDate.getMonth();
+            const nextYear = nextMonthFirstDate.getFullYear();
+            const lastDayOfMonth = new Date(year, month, daysInMonth).getDay();
+            for (let i = 1; i < 7 - lastDayOfMonth; i++) {
+                const dateString = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                html += `<div class="calendar-day other-month" data-date="${dateString}"><span>${i}</span></div>`;
+            }
+
+            html += '</div>';
+            calendarBody.innerHTML = html;
+
+            document.querySelectorAll('.calendar-day[data-date]').forEach(dayEl => {
+                dayEl.addEventListener('click', () => {
+                    displayDayEvents(dayEl.dataset.date);
+                });
+            });
+        }
+
+        function setupCalendarSubscription(year, month) {
+            if (calendarUnsubscribe) calendarUnsubscribe();
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const gridStartDate = new Date(year, month, 1 - firstDayOfMonth);
+            const lastDayOfMonth = new Date(year, month, daysInMonth).getDay();
+            const gridEndDate = new Date(year, month, daysInMonth + (6 - lastDayOfMonth));
+
+            const { collection, query, where, onSnapshot, Timestamp } = window.firebaseFirestore;
+            const eventsRef = collection(db, `users/${currentUser.uid}/calendarEvents`);
+            const q = query(eventsRef,
+                where('date', '>=', Timestamp.fromDate(gridStartDate)),
+                where('date', '<=', Timestamp.fromDate(gridEndDate))
+            );
+
+            calendarUnsubscribe = onSnapshot(q, (snapshot) => {
+                calendarEventsCache = {};
+                snapshot.forEach(doc => {
+                    const eventData = doc.data();
+                    const eventDate = eventData.date.toDate();
+                    const dateString = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`;
+                    if (!calendarEventsCache[dateString]) calendarEventsCache[dateString] = [];
+                    calendarEventsCache[dateString].push({ id: doc.id, ...eventData });
+                });
+                updateEventDotsOnGrid();
+                // Refresh currently displayed events
+                const selectedDay = document.querySelector('.calendar-day.selected');
+                if (selectedDay) {
+                    displayDayEvents(selectedDay.dataset.date);
+                }
+            });
+
+            unsubscribes.push(calendarUnsubscribe);
+        }
+
+        function updateEventDotsOnGrid() {
+            document.querySelectorAll('.event-dot').forEach(dot => dot.remove());
+            document.querySelectorAll('.calendar-day[data-date]').forEach(dayEl => {
+                const dateString = dayEl.dataset.date;
+                if (calendarEventsCache[dateString] && calendarEventsCache[dateString].length > 0) {
+                    const dot = document.createElement('div');
+                    dot.className = 'event-dot';
+                    dayEl.appendChild(dot);
+                }
+            });
+        }
+
+        function displayDayEvents(dateString) {
+            document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+            const selectedDayEl = document.querySelector(`.calendar-day[data-date="${dateString}"]`);
+            if (selectedDayEl) {
+                selectedDayEl.classList.add('selected');
+            }
+
+            const eventsDisplay = document.getElementById('calendar-events-display');
+            if (!eventsDisplay) return;
+
+            let dayEventsContainer = document.getElementById('day-events-container');
+            if (!dayEventsContainer) {
+                dayEventsContainer = document.createElement('div');
+                dayEventsContainer.id = 'day-events-container';
+                eventsDisplay.prepend(dayEventsContainer);
+            }
+
+
+            const date = new Date(dateString + 'T00:00:00');
+            const lang = currentLanguage === 'pt' ? 'pt-BR' : 'en-US';
+            const formattedDate = date.toLocaleDateString(lang, { day: 'numeric', month: 'long', year: 'numeric' });
+
+            const eventsForDay = calendarEventsCache[dateString] || [];
+            let eventsHtml = `<div class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-md"><h3 class="text-lg font-bold mb-4">${t('eventsFor')} ${formattedDate}</h3>`;
+
+            if (eventsForDay.length > 0) {
+                eventsHtml += '<div class="space-y-2">';
+                eventsForDay.forEach(event => {
+                    const safeTitle = event.title.replace(/"/g, "&quot;");
+                    eventsHtml += `
+                        <div class="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-md">
+                            <span class="break-all">${event.title}</span>
+                            <div>
+                                <button class="edit-event-btn p-1 text-blue-500 hover:text-blue-700 flex-shrink-0 ml-2" data-date="${dateString}" data-id="${event.id}" data-title="${safeTitle}"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                                <button class="delete-event-btn p-1 text-red-500 hover:text-red-700 flex-shrink-0 ml-2" data-id="${event.id}" data-date="${dateString}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>`;
+                });
+                eventsHtml += '</div>';
+            } else {
+                eventsHtml += `<p class="text-gray-500 text-sm text-center py-4">${t('noEvents')}</p>`;
+            }
+
+            eventsHtml += `<button id="add-event-for-day-btn" class="w-full mt-4 bg-brand-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-700 flex items-center justify-center gap-2">
+                <i data-lucide="plus"></i> ${t('addEvent')}
+            </button></div>`;
+
+            dayEventsContainer.innerHTML = eventsHtml;
+            lucide.createIcons();
+
+            dayEventsContainer.querySelector('#add-event-for-day-btn').addEventListener('click', () => {
+                showCalendarEventModal(dateString);
+            });
+
+            dayEventsContainer.querySelectorAll('.delete-event-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    confirmDelete(btn.dataset.id, 'calendarEvents', () => {
+                        displayDayEvents(btn.dataset.date);
+                    });
+                });
+            });
+
+            dayEventsContainer.querySelectorAll('.edit-event-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const { date, id, title } = btn.dataset;
+                    showCalendarEventModal(date, id, { title });
+                });
+            });
+        }
+
+        function loadAllEventsList() {
+            const eventsDisplay = document.getElementById('calendar-events-display');
+            if (!eventsDisplay) return;
+
+            let allEventsContainer = document.getElementById('all-events-container');
+            if (!allEventsContainer) {
+                allEventsContainer = document.createElement('div');
+                allEventsContainer.id = 'all-events-container';
+                eventsDisplay.append(allEventsContainer);
+            }
+
+            const { collection, query, where, orderBy, onSnapshot, Timestamp } = window.firebaseFirestore;
+            const eventsRef = collection(db, `users/${currentUser.uid}/calendarEvents`);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const q = query(eventsRef, where('date', '>=', Timestamp.fromDate(today)), orderBy('date'));
+            const unsub = onSnapshot(q, (snapshot) => {
+                let eventsHtml = `<div class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-md"><h3 class="text-lg font-bold mb-4">${t('allEvents')}</h3>`;
+                if (snapshot.empty) {
+                    eventsHtml += `<p class="text-gray-500 text-sm text-center py-4">${t('noEvents')}</p>`;
+                } else {
+                    eventsHtml += '<div class="space-y-2 max-h-60 overflow-y-auto">';
+                    const lang = currentLanguage === 'pt' ? 'pt-BR' : 'en-US';
+                    snapshot.docs.forEach(doc => {
+                        const event = doc.data();
+                        const eventDate = event.date.toDate();
+                        const dateString = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`;
+                        const formattedDate = eventDate.toLocaleDateString(lang, { day: 'numeric', month: 'short' });
+                        eventsHtml += `
+                        <div class="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-md">
+                            <div>
+                                <div class="font-semibold">${event.title}</div>
+                                <div class="text-sm text-gray-500">${formattedDate}</div>
+                            </div>
+                            <button class="view-day-btn p-2 text-brand-500 hover:text-brand-700 flex-shrink-0 ml-2" data-date="${dateString}"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                        </div>
+                        `
+                    });
+                    eventsHtml += '</div>';
+                }
+                eventsHtml += '</div>';
+                allEventsContainer.innerHTML = eventsHtml;
+                lucide.createIcons();
+
+                allEventsContainer.querySelectorAll('.view-day-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const date = new Date(btn.dataset.date + 'T00:00:00');
+                        calendarDate = date;
+                        renderCalendarUI();
+                    });
+                });
+            });
+            unsubscribes.push(unsub);
+        }
+
+        function showCalendarEventModal(dateString, eventId = null, eventData = {}) {
+            const isEdit = !!eventId;
+            const date = new Date(dateString + 'T00:00:00');
+            const lang = currentLanguage === 'pt' ? 'pt-BR' : 'en-US';
+            const formattedDate = date.toLocaleDateString(lang, { day: 'numeric', month: 'long', year: 'numeric' });
+
+            const modal = document.getElementById('item-modal');
+            const title = isEdit ? t('editEvent') : t('addEvent');
+
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3 class="text-xl font-bold mb-1">${title}</h3>
+                    <p class="text-sm text-gray-500 mb-4">${formattedDate}</p>
+                    <form id="event-form" class="flex gap-2">
+                        <input type="text" id="event-title-input" placeholder="${t('eventTitle')}" class="${formInputClasses} flex-1" value="${eventData.title || ''}" required>
+                        <button type="submit" class="bg-brand-600 text-white p-3 rounded-lg hover:bg-brand-700 flex-shrink-0"><i data-lucide="${isEdit ? 'save' : 'plus'}"></i></button>
+                    </form>
+                    <button id="close-calendar-modal" class="w-full mt-4 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500">${t('cancel')}</button>
+                </div>
+            `;
+
+            modal.classList.add('show');
+            lucide.createIcons();
+            modal.querySelector('#event-title-input').focus();
+
+            modal.querySelector('#event-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const titleInput = modal.querySelector('#event-title-input');
+                const title = titleInput.value.trim();
+                if (title) {
+                    if (isEdit) {
+                        await updateCalendarEvent(eventId, title);
+                    } else {
+                        await addCalendarEvent(dateString, title);
+                    }
+                    modal.classList.remove('show');
+                }
+            });
+
+            modal.querySelector('#close-calendar-modal').addEventListener('click', () => modal.classList.remove('show'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('show');
+            });
+        }
+
+        async function addCalendarEvent(dateString, title) {
+            if (!currentUser) return;
+            showLoading();
+            try {
+                const { collection, addDoc, serverTimestamp, Timestamp } = window.firebaseFirestore;
+                await addDoc(collection(db, `users/${currentUser.uid}/calendarEvents`), {
+                    title: title,
+                    date: Timestamp.fromDate(new Date(dateString + 'T00:00:00')),
+                    createdAt: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Error adding event:", error);
+                showToast(t('errorSaving'), 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function updateCalendarEvent(eventId, newTitle) {
+            if (!currentUser) return;
+            showLoading();
+            try {
+                const { doc, updateDoc } = window.firebaseFirestore;
+                const eventRef = doc(db, `users/${currentUser.uid}/calendarEvents`, eventId);
+                await updateDoc(eventRef, { title: newTitle });
+            } catch (error) {
+                console.error("Error updating event:", error);
+                showToast(t('errorUpdating'), 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // --- PAINT PAGE ---
+        function loadPaint() {
+            appContent.innerHTML = `
+            <div class="fade-in space-y-6">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                    <div class="flex flex-wrap items-center gap-2 mb-4">
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm font-medium" data-t="colorLabel">${t('colorLabel')}</label>
+                            <input type="color" id="color-picker" value="#000000" class="w-10 h-10 rounded border-2 border-gray-300 cursor-pointer">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm font-medium" data-t="sizeLabel">${t('sizeLabel')}</label>
+                            <input type="range" id="brush-size" min="1" max="50" value="5" class="w-24">
+                            <span id="brush-size-display" class="text-sm">5px</span>
+                        </div>
+                        <div class="flex items-center gap-2 border-l-2 border-gray-200 dark:border-gray-700 pl-2 ml-2">
+                            <button id="brush-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="brush" title="${t('brush')}"><i data-lucide="pen-tool"></i></button>
+                            <button id="fill-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="paintBucket" title="${t('paintBucket')}"><i data-lucide="paint-bucket"></i></button>
+                            <button id="eraser-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="eraser" title="${t('eraser')}"><i data-lucide="eraser"></i></button>
+                        </div>
+                        <div class="flex items-center gap-2 border-l-2 border-gray-200 dark:border-gray-700 pl-2 ml-2">
+                             <button id="undo-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="undo" title="${t('undo')}" disabled><i data-lucide="undo-2"></i></button>
+                             <button id="redo-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="redo" title="${t('redo')}" disabled><i data-lucide="redo-2"></i></button>
+                        </div>
+                        <div class="flex items-center gap-2 border-l-2 border-gray-200 dark:border-gray-700 pl-2 ml-2">
+                            <button id="clear-btn" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200" data-t-title="clear" title="${t('clear')}"><i data-lucide="trash-2"></i></button>
+                            <button id="save-drawing-btn" class="p-2 bg-brand-100 text-brand-600 rounded-lg hover:bg-brand-200" data-t-title="saveDrawing" title="${t('saveDrawing')}"><i data-lucide="save"></i></button>
+                        </div>
+                    </div>
+                    <canvas id="paint-canvas" class="border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white w-full"></canvas>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                    <h3 class="font-semibold text-lg mb-4" data-t="savedDrawings">${t('savedDrawings')}</h3>
+                    <div id="saved-drawings-gallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+                </div>
+            </div>`;
+            lucide.createIcons();
+            setupPaintCanvas();
+            if (firebaseInitialized) {
+                loadSavedDrawings();
+            }
+        }
+
+        function setupPaintCanvas() {
+            const canvas = document.getElementById('paint-canvas');
+            const ctx = canvas.getContext('2d');
+            const colorPicker = document.getElementById('color-picker');
+            const brushSize = document.getElementById('brush-size');
+            const brushSizeDisplay = document.getElementById('brush-size-display');
+            const eraserBtn = document.getElementById('eraser-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const saveBtn = document.getElementById('save-drawing-btn');
+            const fillBtn = document.getElementById('fill-btn');
+            const brushBtn = document.getElementById('brush-btn');
+            const undoBtn = document.getElementById('undo-btn');
+            const redoBtn = document.getElementById('redo-btn');
+
+            let currentTool = 'brush';
+            let history = [];
+            let historyIndex = -1;
+
+            function resizeCanvas() {
+                const parent = canvas.parentElement;
+                canvas.width = parent.clientWidth;
+                canvas.height = parent.clientWidth * 0.6; // Maintain aspect ratio
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                saveState();
+            }
+            window.addEventListener('resize', resizeCanvas);
+
+            let isDrawing = false;
+
+            function updateUndoRedoButtons() {
+                undoBtn.disabled = historyIndex <= 0;
+                redoBtn.disabled = historyIndex >= history.length - 1;
+            }
+
+            function saveState() {
+                if (historyIndex < history.length - 1) {
+                    history.splice(historyIndex + 1);
+                }
+                history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+                historyIndex++;
+                updateUndoRedoButtons();
+            }
+
+            function undo() {
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    ctx.putImageData(history[historyIndex], 0, 0);
+                    updateUndoRedoButtons();
+                }
+            }
+
+            function redo() {
+                if (historyIndex < history.length - 1) {
+                    historyIndex++;
+                    ctx.putImageData(history[historyIndex], 0, 0);
+                    updateUndoRedoButtons();
+                }
+            }
+
+            resizeCanvas(); // initial setup and first saveState
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            function getCoords(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                return {
+                    x: Math.round((clientX - rect.left) * scaleX),
+                    y: Math.round((clientY - rect.top) * scaleY)
+                };
+            }
+
+            function startDrawing(e) {
+                if (currentTool === 'fill') {
+                    const { x, y } = getCoords(e);
+                    floodFill(x, y, colorPicker.value);
+                    saveState();
+                    return;
+                }
+                isDrawing = true;
+                ctx.lineWidth = brushSize.value;
+                ctx.strokeStyle = colorPicker.value;
+                ctx.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
+                const { x, y } = getCoords(e);
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                const { x, y } = getCoords(e);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+
+            function stopDrawing() {
+                if (isDrawing) {
+                    ctx.closePath();
+                    isDrawing = false;
+                    saveState();
+                }
+            }
+
+            function hexToRgba(hex) {
+                let r = 0, g = 0, b = 0;
+                if (hex.length == 4) {
+                    r = "0x" + hex[1] + hex[1];
+                    g = "0x" + hex[2] + hex[2];
+                    b = "0x" + hex[3] + hex[3];
+                } else if (hex.length == 7) {
+                    r = "0x" + hex[1] + hex[2];
+                    g = "0x" + hex[3] + hex[4];
+                    b = "0x" + hex[5] + hex[6];
+                }
+                return [parseInt(r), parseInt(g), parseInt(b), 255];
+            }
+
+
+            function floodFill(startX, startY, fillColor) {
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                const stack = [[startX, startY]];
+                const startPos = (startY * canvas.width + startX) * 4;
+                const startR = data[startPos];
+                const startG = data[startPos + 1];
+                const startB = data[startPos + 2];
+                const startA = data[startPos + 3];
+
+                const [fillR, fillG, fillB, fillA] = hexToRgba(fillColor);
+
+                if (startR === fillR && startG === fillG && startB === fillB && startA === fillA) {
+                    return;
+                }
+
+                while (stack.length) {
+                    const [x, y] = stack.pop();
+                    const currentPos = (y * canvas.width + x) * 4;
+
+                    if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) continue;
+
+                    if (data[currentPos] === startR && data[currentPos + 1] === startG && data[currentPos + 2] === startB && data[currentPos + 3] === startA) {
+                        data[currentPos] = fillR;
+                        data[currentPos + 1] = fillG;
+                        data[currentPos + 2] = fillB;
+                        data[currentPos + 3] = fillA;
+
+                        stack.push([x + 1, y]);
+                        stack.push([x - 1, y]);
+                        stack.push([x, y + 1]);
+                        stack.push([x, y - 1]);
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+            }
+
+            // Mouse events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // Touch events
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+            canvas.addEventListener('touchend', (e) => { e.preventDefault(); stopDrawing(); });
+
+            colorPicker.addEventListener('change', (e) => {
+                currentTool = 'brush';
+                canvas.style.cursor = 'crosshair';
+            });
+
+            brushSize.addEventListener('input', (e) => {
+                brushSizeDisplay.textContent = e.target.value + 'px';
+            });
+
+            brushBtn.addEventListener('click', () => {
+                currentTool = 'brush';
+                canvas.style.cursor = 'crosshair';
+            });
+
+            fillBtn.addEventListener('click', () => {
+                currentTool = 'fill';
+                canvas.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paint-bucket"><path d="M12 5h-1a2 2 0 0 0 -2 2v2h3z"/><path d="M12 5a2 2 0 0 1 2 2v2h3"/><path d="M19 12h-1a2 2 0 0 1 -2-2V8a2 2 0 0 0 -2-2h-1"/><path d="m19 12 2 2"/><path d="M2.21 14.21a2.12 2.12 0 0 0 0 3l3.58 3.58a2.12 2.12 0 0 0 3 0l7.21-7.21a2.12 2.12 0 0 0 0-3l-3.58-3.58a2.12 2.12 0 0 0-3 0Z"/></svg>'), auto`;
+            });
+
+            eraserBtn.addEventListener('click', () => {
+                currentTool = 'eraser';
+                canvas.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eraser"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21H7Z"/><path d="M22 11.5 12.5 2"/><path d="m16.5 6.5 3 3"/></svg>'), auto`;
+            });
+
+            clearBtn.addEventListener('click', () => {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                saveState();
+            });
+
+            undoBtn.addEventListener('click', undo);
+            redoBtn.addEventListener('click', redo);
+
+            saveBtn.addEventListener('click', async () => {
+                if (!firebaseInitialized || !currentUser) {
+                    showToast("Firebase não configurado ou usuário não logado. Não é possível salvar desenhos.", 'error');
+                    return;
+                }
+                const dataUrl = canvas.toDataURL('image/png');
+                showLoading();
+                try {
+                    const { addDoc, collection, serverTimestamp } = window.firebaseFirestore;
+                    await addDoc(collection(window.db, `users/${currentUser.uid}/drawings`), {
+                        imageData: dataUrl,
+                        createdAt: serverTimestamp()
+                    });
+                    showToast(t('drawingSaved'), 'success');
+                    await checkAndUnlockAchievement('artist');
+                    await checkAndUnlockAchievement('art_collector');
+                } catch (error) {
+                    console.error('Error saving drawing:', error);
+                    showToast(t('errorSavingDrawing'), 'error');
+                } finally {
+                    hideLoading();
+                }
+            });
+        }
+
+        function loadSavedDrawings() {
+            const gallery = document.getElementById('saved-drawings-gallery');
+            const { collection, query, orderBy, onSnapshot } = window.firebaseFirestore;
+            const q = query(collection(window.db, `users/${currentUser.uid}/drawings`), orderBy('createdAt', 'desc'));
+
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    gallery.innerHTML = `<p id="no-drawings-msg" class="text-gray-500 col-span-full" data-t="noDrawings">${t('noDrawings')}</p>`;
+                    return;
+                }
+
+                gallery.innerHTML = snapshot.docs.map(doc => {
+                    const drawing = doc.data();
+                    const drawingData = JSON.stringify(drawing.imageData).replace(/'/g, "\\'");
+                    return `
+                    <div class="relative group">
+                        <img src="${drawing.imageData}" alt="Saved Drawing" class="w-full h-32 object-cover rounded-lg shadow-md bg-white">
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                             <button class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600" onclick='window.editDrawing(${drawingData})' title="${t('editDrawing')}">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                             <button class="bg-green-500 text-white p-2 rounded-full hover:bg-green-600" onclick="window.downloadDrawing('${drawing.imageData}', '${doc.id}')" title="${t('downloadDrawing')}">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                            </button>
+                            <button class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600" onclick="deleteDrawing('${doc.id}')" title="${t('delete')}">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                }).join('');
+                lucide.createIcons();
+            });
+            unsubscribes.push(unsubscribe);
+        }
+
+        window.downloadDrawing = (imageDataUrl, docId) => {
+            const img = new Image();
+            img.onload = () => {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = img.width;
+                tempCanvas.height = img.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.fillStyle = 'white';
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                tempCtx.drawImage(img, 0, 0);
+
+                const link = document.createElement('a');
+                link.href = tempCanvas.toDataURL('image/png');
+                link.download = `zenith-drawing-${docId}.png`;
+                link.click();
+            };
+            img.src = imageDataUrl;
+        };
+
+        window.editDrawing = (imageDataUrl) => {
+            const canvas = document.getElementById('paint-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.src = imageDataUrl;
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                window.scrollTo(0, 0);
+                saveState(); // Save the loaded image as the first state
+            }
+        }
+
+        window.deleteDrawing = async (id) => {
+            if (!firebaseInitialized || !currentUser) {
+                showToast("Firebase não configurado ou usuário não logado.", 'error');
+                return;
+            }
+            confirmDelete(id, 'drawings');
+        };
+
+        // --- ACHIEVEMENTS PAGE ---
+        async function loadAchievements() {
+            appContent.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto mt-10"></div>`;
+
+            const { collection, getDocs } = window.firebaseFirestore;
+            const achievementsSnapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/achievements`));
+            const unlockedAchievements = {};
+            achievementsSnapshot.forEach(doc => {
+                unlockedAchievements[doc.id] = doc.data();
+            });
+
+            const achievementsProgress = Object.keys(unlockedAchievements).length;
+            const totalAchievements = Object.keys(ALL_ACHIEVEMENTS).length;
+            const progressPercentage = (achievementsProgress / totalAchievements) * 100;
+
+            appContent.innerHTML = `
+            <div class="fade-in space-y-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4" data-t="achievementsTitle">${t('achievementsTitle')}</h2>
+                    <p class="text-gray-600 dark:text-gray-400" data-t="achievementsSubtitle">${t('achievementsSubtitle')}</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${Object.entries(ALL_ACHIEVEMENTS).map(([id, data]) => {
+                const unlockedData = unlockedAchievements[id];
+                const isUnlocked = !!unlockedData;
+                const unlockedAt = isUnlocked ? new Date(unlockedData.unlockedAt.toDate()).toLocaleDateString() : '';
+                return `
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 ${isUnlocked ? 'border-yellow-400' : 'border-gray-200 dark:border-gray-700'}">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="p-3 rounded-full ${isUnlocked ? 'bg-yellow-100 dark:bg-yellow-900/50' : 'bg-gray-100 dark:bg-gray-700'}">
+                                    <i data-lucide="${data.icon}" class="w-6 h-6 ${isUnlocked ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-400'}"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-lg ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-600 dark:text-gray-400'}">${t(`ach_${id}_title`)}</h3>
+                                    ${isUnlocked ? `<p class="text-sm text-yellow-600 dark:text-yellow-400">${t('unlockedOn')} ${unlockedAt}</p>` : ''}
+                                </div>
+                                ${isUnlocked ? '<div class="text-2xl text-yellow-500">🏆</div>' : '<div class="text-2xl text-gray-400">🔒</div>'}
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">${t(`ach_${id}_desc`)}</p>
+                        </div>
+                        `}).join('')}
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <h3 class="font-bold text-lg mb-4" data-t="progressTitle">${t('progressTitle')}</h3>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <div class="flex justify-between text-sm mb-2">
+                                <span data-t="unlockedAchievementsLabel">${t('unlockedAchievementsLabel')}</span>
+                                <span>${achievementsProgress}/${totalAchievements}</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                <div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-500" style="width: ${progressPercentage}%"></div>
+                            </div>
+                        </div>
+                        <div class="text-2xl">${Math.round(progressPercentage)}%</div>
+                    </div>
+                </div>
+            </div>`;
+
+            lucide.createIcons();
+        }
+
+        async function checkAndUnlockAchievement(achievementId) {
+            if (!currentUser || !ALL_ACHIEVEMENTS[achievementId]) return;
+
+            const { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where, Timestamp } = window.firebaseFirestore;
+            const achievementRef = doc(window.db, `users/${currentUser.uid}/achievements`, achievementId);
+            const docSnap = await getDoc(achievementRef);
+
+            if (docSnap.exists()) return; // Already unlocked
+
+            // Logic to check if achievement is truly earned
+            let conditionMet = false;
+            switch (achievementId) {
+                case 'first_login': conditionMet = true; break;
+                case 'first_note':
+                case 'first_goal':
+                case 'first_habit':
+                case 'artist': {
+                    const type = achievementId.split('_')[1] + 's';
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/${type}`));
+                    if (snapshot.size >= 1) conditionMet = true;
+                    break;
+                }
+                case 'note_taker_pro': {
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/notes`));
+                    if (snapshot.size >= 10) conditionMet = true;
+                    break;
+                }
+                case 'goal_setter_pro': {
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/goals`));
+                    if (snapshot.size >= 10) conditionMet = true;
+                    break;
+                }
+                case 'habit_master': {
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/habits`));
+                    if (snapshot.size >= 5) conditionMet = true;
+                    break;
+                }
+                case 'goal_achiever_1':
+                case 'goal_achiever_10': {
+                    const requiredCount = achievementId === 'goal_achiever_1' ? 1 : 10;
+                    const q = query(collection(window.db, `users/${currentUser.uid}/goals`), where('completed', '==', true));
+                    const snapshot = await getDocs(q);
+                    if (snapshot.size >= requiredCount) conditionMet = true;
+                    break;
+                }
+                case 'art_collector': {
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/drawings`));
+                    if (snapshot.size >= 5) conditionMet = true;
+                    break;
+                }
+                case 'productive_week': {
+                    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                    const q = query(collection(window.db, `users/${currentUser.uid}/goals`),
+                        where('completed', '==', true),
+                        where('completedAt', '>=', Timestamp.fromDate(oneWeekAgo)));
+                    const snapshot = await getDocs(q);
+                    if (snapshot.size >= 5) conditionMet = true;
+                    break;
+                }
+                case 'habit_streak_7':
+                case 'habit_streak_30':
+                case 'calculator_user':
+                case 'clock_watcher':
+                case 'timer_master':
+                case 'world_traveler':
+                case 'polyglot':
+                case 'organizer':
+                    // These are triggered manually from their respective functions
+                    conditionMet = true;
+                    break;
+            }
+
+            if (conditionMet) {
+                await setDoc(achievementRef, { unlockedAt: serverTimestamp() });
+                showToast(t(`ach_${achievementId}_title`), 'achievement');
+
+                // Check for Zenith Master
+                const allAchievementsSnapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/achievements`));
+                if (allAchievementsSnapshot.size >= Object.keys(ALL_ACHIEVEMENTS).length - 1) {
+                    const masterRef = doc(window.db, `users/${currentUser.uid}/achievements`, 'zenith_master');
+                    const masterSnap = await getDoc(masterRef);
+                    if (!masterSnap.exists()) {
+                        await setDoc(masterRef, { unlockedAt: serverTimestamp() });
+                        showToast(t(`ach_zenith_master_title`), 'achievement');
+                    }
+                }
+            }
+        }
+
+
+        // --- PROFILE PAGE ---
+        function loadProfile() {
+            appContent.innerHTML = `
+                <div class="fade-in max-w-2xl mx-auto">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <div class="flex items-center gap-6 mb-6">
+                            <img id="profile-pic" src="${currentUser.photoURL || `https://placehold.co/100x100/0ea5e9/ffffff?text=${currentUserProfile.name?.charAt(0).toUpperCase() || 'U'}`}" alt="Foto de Perfil" class="w-24 h-24 rounded-full object-cover">
+                            <div>
+                                <h2 class="text-2xl font-bold">${currentUserProfile.name || 'Usuário'}</h2>
+                                <p class="text-gray-600 dark:text-gray-400">${currentUser?.email || ''}</p>
+                            </div>
+                        </div>
+                        
+                        <form id="profile-form" class="space-y-4">
+                            <div>
+                                <label for="profile-name" class="block text-sm font-medium mb-2">${t('profileName')}</label>
+                                <input type="text" id="profile-name" value="${currentUserProfile.name || ''}" class="${formInputClasses}">
+                            </div>
+                             <div>
+                                <label for="profile-photo-url" class="block text-sm font-medium mb-2">${t('photoUrlLabel')}</label>
+                                <input type="url" id="profile-photo-url" value="${currentUser.photoURL || ''}" placeholder="${t('photoUrlPlaceholder')}" class="${formInputClasses}">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">${t('profileEmail')}</label>
+                                <input type="email" value="${currentUser?.email || ''}" class="${formInputClasses}" disabled>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">${t('profileSince')}</label>
+                                <input type="text" value="${currentUser?.metadata?.creationTime ? new Date(currentUser.metadata.creationTime).toLocaleDateString() : ''}" class="${formInputClasses}" disabled>
+                            </div>
+                            
+                            <div class="flex gap-3 pt-4">
+                                <button type="submit" class="flex-1 bg-brand-600 text-white py-2 px-4 rounded-lg hover:bg-brand-700">${t('save')}</button>
+                                <button type="button" id="logout-btn" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">${t('profileLogout')}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>`;
+
+            const profilePic = document.getElementById('profile-pic');
+            profilePic.onerror = () => {
+                profilePic.src = `https://placehold.co/100x100/7dd3fc/0c4a6e?text=${currentUserProfile.name?.charAt(0).toUpperCase() || 'U'}`;
+            }
+
+            document.getElementById('profile-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                showLoading();
+                if (!firebaseInitialized || !currentUser) {
+                    showToast("Firebase não configurado ou usuário não logado.", 'error');
+                    hideLoading();
+                    return;
+                }
+                try {
+                    const newName = document.getElementById('profile-name').value;
+                    const newPhotoURL = document.getElementById('profile-photo-url').value;
+                    const { updateProfile } = window.firebaseAuth;
+                    await updateProfile(currentUser, {
+                        displayName: newName,
+                        photoURL: newPhotoURL
+                    });
+
+                    const { doc, setDoc } = window.firebaseFirestore;
+                    const userDocRef = doc(window.db, 'users', currentUser.uid);
+                    await setDoc(userDocRef, {
+                        name: newName,
+                        photoURL: newPhotoURL
+                    }, { merge: true });
+
+                    currentUserProfile.name = newName;
+                    currentUserProfile.photoURL = newPhotoURL;
+
+                    updateHeaderProfileIcon();
+                    showToast(t('profileUpdateSuccess'), 'success');
+                    loadProfile(); // Reload to show updated name and pic
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    showToast(t('profileUpdateError'), 'error');
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            document.getElementById('logout-btn').addEventListener('click', async () => {
+                showLoading();
+                if (!firebaseInitialized) {
+                    showToast("Firebase não configurado. Logout não disponível.", 'error');
+                    hideLoading();
+                    return;
+                }
+                try {
+                    const { signOut } = window.firebaseAuth;
+                    await signOut(window.auth);
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                    showToast('Erro ao fazer logout', 'error');
+                } finally {
+                    hideLoading();
+                }
+            });
+        }
+
+        // --- CALCULATOR PAGE ---
+        function loadCalculator() {
+            appContent.innerHTML = `
+            <div class="fade-in max-w-md mx-auto">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden">
+                    <div id="calculator-display" class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white h-24 flex items-end justify-end">0</div>
+                    <div class="grid grid-cols-4 gap-px bg-gray-300 dark:bg-gray-700">
+                        <button class="calc-btn bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-2xl p-6" data-value="C">C</button>
+                        <button class="calc-btn flex justify-center items-center bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-2xl p-6" data-value="<"><i data-lucide="delete"></i></button>
+                        <button class="calc-btn bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-2xl p-6" data-value="%">%</button>
+                        <button class="calc-btn operator bg-orange-400 hover:bg-orange-500 text-white text-2xl p-6" data-value="/">÷</button>
+
+                        <button class="calc-btn bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value="7">7</button>
+                        <button class="calc-btn bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value="8">8</button>
+                        <button class="calc-btn bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value="9">9</button>
+                        <button class="calc-btn operator bg-orange-400 hover:bg-orange-500 text-white text-2xl p-6" data-value="*">×</button>
+
+                        <button class="calc-btn bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value="4">4</button>
+                        <button class="calc-btn bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value="5">5</button>
+                        <button class="calc-btn bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value="6">6</button>
+                        <button class="calc-btn operator bg-orange-400 hover:bg-orange-500 text-white text-2xl p-6" data-value="-">−</button>
+
+                        <button class="calc-btn bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value="1">1</button>
+                        <button class="calc-btn bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value="2">2</button>
+                        <button class="calc-btn bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value="3">3</button>
+                        <button class="calc-btn operator bg-orange-400 hover:bg-orange-500 text-white text-2xl p-6" data-value="+">+</button>
+
+                        <button class="calc-btn col-span-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value="0">0</button>
+                        <button class="calc-btn bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl p-6" data-value=".">.</button>
+                        <button class="calc-btn operator bg-orange-400 hover:bg-orange-500 text-white text-2xl p-6" data-value="=">=</button>
+                    </div>
+                </div>
+            </div>`;
+            lucide.createIcons();
+            setupCalculator();
+        }
+
+        function setupCalculator() {
+            const display = document.getElementById('calculator-display');
+            const buttons = document.querySelectorAll('.calc-btn');
+
+            let expressionParts = [];
+            let currentInput = '0';
+
+            const updateDisplay = () => {
+                const expressionString = expressionParts.join(' ');
+                display.textContent = `${expressionString} ${currentInput === '0' && expressionParts.length > 0 ? '' : currentInput}`;
+            };
+
+            const calculate = (parts) => {
+                if (parts.length < 3) return parseFloat(parts[0]) || 0;
+
+                let currentResult = parseFloat(parts[0]);
+                for (let i = 1; i < parts.length; i += 2) {
+                    const operator = parts[i];
+                    const nextNumber = parseFloat(parts[i + 1]);
+
+                    if (isNaN(nextNumber)) break;
+
+                    switch (operator) {
+                        case '+': currentResult += nextNumber; break;
+                        case '-': currentResult -= nextNumber; break;
+                        case '*': currentResult *= nextNumber; break;
+                        case '/': currentResult /= nextNumber; break;
+                    }
+                }
+                return parseFloat(currentResult.toPrecision(12));
+            };
+
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const value = button.dataset.value;
+                    const isOperator = ['+', '-', '*', '/'].includes(value);
+
+                    // Prevent overflow
+                    if (display.scrollWidth > display.clientWidth && !isNaN(value)) {
+                        return;
+                    }
+
+                    if (!isNaN(value) || value === '.') { // Number or decimal
+                        if (currentInput === '0' && value !== '.') {
+                            currentInput = value;
+                        } else if (value === '.' && currentInput.includes('.')) {
+                            return;
+                        }
+                        else {
+                            currentInput += value;
+                        }
+                    } else if (isOperator) {
+                        if (currentInput !== '') {
+                            expressionParts.push(currentInput);
+                        }
+                        // Handle chained operations
+                        if (expressionParts.length >= 3) {
+                            const result = calculate(expressionParts);
+                            expressionParts = [result];
+                        }
+                        expressionParts.push(value);
+                        currentInput = '0';
+
+                    } else if (value === '%') {
+                        currentInput = (parseFloat(currentInput) / 100).toString();
+                    } else if (value === '=') {
+                        if (currentInput !== '') {
+                            expressionParts.push(currentInput);
+                        }
+                        if (expressionParts.length > 0) {
+                            const finalResult = calculate(expressionParts);
+                            currentInput = finalResult.toString();
+                            expressionParts = [];
+                        }
+                    } else if (value === 'C') {
+                        currentInput = '0';
+                        expressionParts = [];
+                    } else if (value === '<') {
+                        if (currentInput.length > 1) {
+                            currentInput = currentInput.slice(0, -1);
+                        } else {
+                            currentInput = '0';
+                        }
+                    }
+
+                    updateDisplay();
+                });
+            });
+            updateDisplay();
+        }
+
+        // --- CLOCK PAGE ---
+        function loadClock() {
+            appContent.innerHTML = `
+            <div class="fade-in max-w-4xl mx-auto space-y-6">
+                <div class="flex flex-wrap justify-center gap-2 p-2 bg-gray-200 dark:bg-gray-800 rounded-lg">
+                    <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="world">${t('clockTabWorld')}</button>
+                    <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="stopwatch">${t('clockTabStopwatch')}</button>
+                    <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="timer">${t('clockTabTimer')}</button>
+                </div>
+                <div id="clock-content" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"></div>
+            </div>`;
+            setupClockTabs();
+        }
+
+        function setupClockTabs() {
+            const tabs = document.querySelectorAll('.clock-tab');
+            const contentContainer = document.getElementById('clock-content');
+
+            const loadTabContent = (tabId) => {
+                clockIntervals.forEach(interval => clearInterval(interval));
+                clockIntervals = [];
+
+                tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
+
+                switch (tabId) {
+                    case 'world': renderWorldClocks(); break;
+                    case 'stopwatch': renderStopwatch(); break;
+                    case 'timer': renderTimer(); break;
+                }
+                checkAndUnlockAchievement('clock_watcher');
+            };
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => loadTabContent(tab.dataset.tab));
+            });
+
+            loadTabContent('world'); // Load default tab
+        }
+
+        function renderWorldClocks() {
+            const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' ');
+            document.getElementById('clock-content').innerHTML = `
+                <div id="local-clock" class="text-center mb-8">
+                    <h3 class="text-lg font-semibold text-brand-500">${t('localTime')} (${userTimeZone})</h3>
+                    <h2 id="local-time" class="text-5xl md:text-7xl font-bold tracking-tighter"></h2>
+                    <p id="local-date" class="text-lg text-gray-500 dark:text-gray-400"></p>
+                </div>
+                <div id="world-clocks-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            `;
+            checkAndUnlockAchievement('world_traveler');
+
+            const cities = [
+                { name: 'São Paulo', timeZone: 'America/Sao_Paulo' },
+                { name: 'New York', timeZone: 'America/New_York' },
+                { name: 'Los Angeles', timeZone: 'America/Los_Angeles' },
+                { name: 'London', timeZone: 'Europe/London' },
+                { name: 'Paris', timeZone: 'Europe/Paris' },
+                { name: 'Moscow', timeZone: 'Europe/Moscow' },
+                { name: 'Tokyo', timeZone: 'Asia/Tokyo' },
+                { name: 'Dubai', timeZone: 'Asia/Dubai' },
+                { name: 'Sydney', timeZone: 'Australia/Sydney' },
+            ];
+
+            const localTimeEl = document.getElementById('local-time');
+            const localDateEl = document.getElementById('local-date');
+            const worldClocksListEl = document.getElementById('world-clocks-list');
+
+            const updateClocks = () => {
+                const now = new Date();
+                const lang = currentLanguage === 'pt' ? 'pt-BR' : 'en-US';
+
+                localTimeEl.textContent = now.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                localDateEl.textContent = now.toLocaleDateString(lang, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+                worldClocksListEl.innerHTML = cities.map(city => {
+                    const time = now.toLocaleTimeString(lang, { timeZone: city.timeZone, hour: '2-digit', minute: '2-digit' });
+                    const date = now.toLocaleDateString(lang, { timeZone: city.timeZone, month: 'short', day: 'numeric' });
+                    return `
+                    <div class="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg flex justify-between items-center">
+                        <div>
+                            <h3 class="font-semibold text-lg">${city.name}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${date}</p>
+                        </div>
+                        <p class="text-3xl font-semibold">${time}</p>
+                    </div>`;
+                }).join('');
+            };
+
+            updateClocks();
+            const interval = setInterval(updateClocks, 1000);
+            clockIntervals.push(interval);
+        }
+
+        function renderStopwatch() {
+            let startTime, savedTime = 0, tInterval;
+            let running = false;
+
+            document.getElementById('clock-content').innerHTML = `
+                <div class="text-center">
+                    <div id="stopwatch-display" class="text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
+                    <div class="flex justify-center gap-4">
+                        <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700">${t('stopwatchStart')}</button>
+                        <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600">${t('stopwatchReset')}</button>
+                    </div>
+                </div>
+            `;
+
+            const display = document.getElementById('stopwatch-display');
+            const startStopBtn = document.getElementById('stopwatch-start-stop');
+            const resetBtn = document.getElementById('stopwatch-reset');
+
+            const formatTime = (ms) => {
+                let totalSeconds = Math.floor(ms / 1000);
+                let hours = Math.floor(totalSeconds / 3600);
+                let minutes = Math.floor((totalSeconds % 3600) / 60);
+                let seconds = totalSeconds % 60;
+                let hundredths = Math.floor((ms % 1000) / 10);
+                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
+            };
+
+
+            const update = () => {
+                const difference = (new Date().getTime() - startTime) + savedTime;
+                display.textContent = formatTime(difference);
+            };
+
+            startStopBtn.addEventListener('click', () => {
+                if (!running) { // Start or Continue
+                    startTime = new Date().getTime();
+                    tInterval = setInterval(update, 10);
+                    clockIntervals.push(tInterval);
+                    startStopBtn.textContent = t('stopwatchPause');
+                    startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
+                    startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
+                    running = true;
+                } else { // Pause
+                    clearInterval(tInterval);
+                    savedTime += new Date().getTime() - startTime;
+                    startStopBtn.textContent = t('stopwatchContinue');
+                    startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
+                    startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
+                    running = false;
+                }
+            });
+
+            resetBtn.addEventListener('click', () => {
+                clearInterval(tInterval);
+                display.textContent = "00:00:00.00";
+                running = false;
+                savedTime = 0;
+                startStopBtn.textContent = t('stopwatchStart');
+                startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                startStopBtn.classList.add('bg-brand-600', 'hover:bg-brand-700');
+            });
+        }
+
+        function renderTimer() {
+            let timerInterval;
+            let totalSeconds = 0;
+            let running = false;
+            let paused = false;
+
+            document.getElementById('clock-content').innerHTML = `
+                <div class="text-center">
+                    <div id="timer-display" class="text-6xl md:text-8xl font-mono mb-8">00:00:00</div>
+                    <div id="timer-inputs" class="flex justify-center items-center gap-4 mb-8">
+                        <input type="number" id="timer-hours" placeholder="${t('timerHours')}" min="0" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
+                        <input type="number" id="timer-minutes" placeholder="${t('timerMinutes')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
+                        <input type="number" id="timer-seconds" placeholder="${t('timerSeconds')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
+                    </div>
+                     <div class="flex justify-center gap-4">
+                        <button id="timer-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700">${t('timerStart')}</button>
+                        <button id="timer-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600">${t('timerReset')}</button>
+                    </div>
+                </div>`;
+
+            const display = document.getElementById('timer-display');
+            const startStopBtn = document.getElementById('timer-start-stop');
+            const resetBtn = document.getElementById('timer-reset');
+            const inputsContainer = document.getElementById('timer-inputs');
+
+            const formatTime = (seconds) => {
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = seconds % 60;
+                return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
+            };
+
+            const updateTimer = () => {
+                if (totalSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    display.textContent = t('timerFinished');
+                    startStopBtn.textContent = t('timerStart');
+                    startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    startStopBtn.classList.add('bg-brand-600', 'hover:bg-brand-700');
+                    inputsContainer.style.display = 'flex';
+                    running = false;
+                    paused = false;
+                    return;
+                }
+                totalSeconds--;
+                display.textContent = formatTime(totalSeconds);
+            };
+
+
+            startStopBtn.addEventListener('click', () => {
+                if (!running) { // Is initial state or paused
+                    if (!paused) { // Initial Start
+                        const hours = parseInt(document.getElementById('timer-hours').value) || 0;
+                        const minutes = parseInt(document.getElementById('timer-minutes').value) || 0;
+                        const seconds = parseInt(document.getElementById('timer-seconds').value) || 0;
+                        totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+
+                        if (totalSeconds <= 0) return;
+
+                        if (hours >= 1) {
+                            checkAndUnlockAchievement('timer_master');
+                        }
+                    }
+
+                    paused = false;
+                    running = true;
+                    inputsContainer.style.display = 'none';
+                    display.textContent = formatTime(totalSeconds);
+                    timerInterval = setInterval(updateTimer, 1000);
+                    clockIntervals.push(timerInterval);
+                    startStopBtn.textContent = t('timerPause');
+                    startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
+                    startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
+
+                } else { // Is running, so pause it
+                    clearInterval(timerInterval);
+                    running = false;
+                    paused = true;
+                    startStopBtn.textContent = t('timerContinue');
+                    startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
+                    startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
+                }
+            });
+
+            resetBtn.addEventListener('click', () => {
+                clearInterval(timerInterval);
+                running = false;
+                paused = false;
+                display.textContent = "00:00:00";
+                startStopBtn.textContent = t('timerStart');
+                startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                startStopBtn.classList.add('bg-brand-600', 'hover:bg-brand-700');
+                inputsContainer.style.display = 'flex';
+                document.getElementById('timer-hours').value = '';
+                document.getElementById('timer-minutes').value = '';
+                document.getElementById('timer-seconds').value = '';
+            });
+        }
+
+        // --- AUTH FUNCTIONS ---
+        async function handleLogin(email, password) {
+            showLoading();
+            if (!firebaseInitialized) {
+                showToast("Firebase não configurado. Login não disponível.", 'error');
+                hideLoading();
+                return;
+            }
+            try {
+                const { signInWithEmailAndPassword } = window.firebaseAuth;
+                await signInWithEmailAndPassword(window.auth, email, password);
+                showToast('Login realizado com sucesso!', 'success');
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('Erro no login: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function handleRegister(name, email, password) {
+            showLoading();
+            if (!firebaseInitialized) {
+                showToast("Firebase não configurado. Cadastro não disponível.", 'error');
+                hideLoading();
+                return;
+            }
+            try {
+                const { createUserWithEmailAndPassword, updateProfile } = window.firebaseAuth;
+                const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
+                const user = userCredential.user;
+
+                await updateProfile(user, { displayName: name });
+
+                const { doc, setDoc, serverTimestamp } = window.firebaseFirestore;
+                await setDoc(doc(window.db, 'users', user.uid), {
+                    uid: user.uid,
+                    name: name,
+                    email: email,
+                    createdAt: serverTimestamp()
+                });
+
+                showToast('Conta criada com sucesso!', 'success');
+            } catch (error) {
+                console.error('Register error:', error);
+                showToast('Erro no cadastro: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // --- INITIALIZATION ---
+        function setupAuthListeners() {
+            // Password toggle
+            document.querySelectorAll('.password-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    const input = this.parentElement.querySelector('input');
+                    const icon = this.querySelector('i');
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.setAttribute('data-lucide', 'eye-off');
+                    } else {
+                        input.type = 'password';
+                        icon.setAttribute('data-lucide', 'eye');
+                    }
+                    lucide.createIcons();
+                });
+            });
+
+            // Show register
+            document.getElementById('show-register').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('login-page').classList.remove('active');
+                document.getElementById('register-page').classList.add('active');
+            });
+
+            // Show login
+            document.getElementById('show-login').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('register-page').classList.remove('active');
+                document.getElementById('login-page').classList.add('active');
+            });
+
+            // Login form
+            document.getElementById('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                handleLogin(email, password);
+            });
+
+            // Register form
+            document.getElementById('register-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('register-name').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                handleRegister(name, email, password);
+            });
+        }
+
+        function setupAppListeners() {
+            // Dark mode toggle
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            const sunIcon = darkModeToggle.querySelector('[data-lucide="sun"]');
+            const moonIcon = darkModeToggle.querySelector('[data-lucide="moon"]');
+
+            darkModeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                const isDark = document.documentElement.classList.contains('dark');
+                localStorage.setItem('darkMode', isDark);
+                sunIcon.classList.toggle('hidden', !isDark);
+                moonIcon.classList.toggle('hidden', isDark);
+            });
+
+            // Language toggle
+            document.getElementById('language-toggle').addEventListener('click', () => {
+                currentLanguage = currentLanguage === 'pt' ? 'en' : 'pt';
+                document.getElementById('language-toggle').textContent = currentLanguage.toUpperCase();
+                localStorage.setItem('language', currentLanguage);
+                updateTranslations();
+                checkAndUnlockAchievement('polyglot');
+            });
+        }
+
+        function updateTranslations() {
+            document.querySelectorAll('[data-t]').forEach(el => {
+                el.textContent = t(el.dataset.t);
+            });
+            document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+                el.placeholder = t(el.dataset.tPlaceholder);
+            });
+            document.querySelectorAll('[data-t-title]').forEach(el => {
+                el.title = t(el.dataset.tTitle);
+            });
+            if (document.body.contains(pageTitle)) {
+                pageTitle.textContent = t(`pageTitle${currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}`);
+            }
+            if (appContainer.classList.contains('active')) {
+                // appContent.innerHTML = ''; //This causes a flicker, let's re-render specific parts
+                navigateTo(currentPage); // Re-render current page with new language
+            }
+        }
+
+        function updateHeaderProfileIcon() {
+            const profileInitial = document.getElementById('profile-initial');
+            const profileImg = document.getElementById('profile-img-header');
+            const photoURL = currentUser?.photoURL || currentUserProfile?.photoURL;
+
+            if (photoURL) {
+                profileImg.src = photoURL;
+                profileImg.classList.remove('hidden');
+                profileInitial.classList.add('hidden');
+                profileImg.onerror = () => {
+                    profileImg.classList.add('hidden');
+                    profileInitial.classList.remove('hidden');
+                    profileInitial.textContent = currentUserProfile.name?.charAt(0).toUpperCase() || 'U';
+                };
+            } else {
+                profileImg.classList.add('hidden');
+                profileInitial.classList.remove('hidden');
+                profileInitial.textContent = currentUserProfile.name?.charAt(0).toUpperCase() || 'U';
+            }
+        }
+
+
+        // Initialize app
+        async function initApp() {
+            // Load saved preferences
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            }
+
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            darkModeToggle.querySelector('[data-lucide="sun"]').classList.toggle('hidden', !isDark);
+            darkModeToggle.querySelector('[data-lucide="moon"]').classList.toggle('hidden', isDark);
+
+
+            currentLanguage = localStorage.getItem('language') || 'pt';
+            document.getElementById('language-toggle').textContent = currentLanguage.toUpperCase();
+
+            setupAuthListeners();
+            setupAppListeners();
+            setupNavigation();
+
+            // Wait for Firebase to be initialized
+            await waitForFirebase();
+            firebaseInitialized = true;
+
+            // Auth state listener
+            const { onAuthStateChanged } = window.firebaseAuth;
+            onAuthStateChanged(window.auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+
+                    // Load user profile
+                    const { getDoc, doc } = window.firebaseFirestore;
+                    const userDocRef = doc(window.db, 'users', user.uid);
+                    const userDoc = await getDoc(userDocRef);
+
+                    if (userDoc.exists()) {
+                        currentUserProfile = userDoc.data();
+                    } else {
+                        currentUserProfile = { name: user.displayName || 'Usuário', email: user.email, uid: user.uid, photoURL: user.photoURL };
+                    }
+
+                    updateHeaderProfileIcon();
+
+                    await checkAndUnlockAchievement('first_login');
+
+                    showAppContainer();
+                    if (!currentPage || currentPage === 'profile') {
+                        navigateTo('dashboard');
+                    } else {
+                        navigateTo(currentPage);
+                    }
+                } else {
+                    currentUser = null;
+                    currentUserProfile = {};
+                    showAuthContainer();
+                }
+                updateTranslations();
+                hideLoading();
+            });
+
+            lucide.createIcons();
+        }
+
+        // Start the app
+        initApp();
+    </script>
+</body>
+
+</html>
