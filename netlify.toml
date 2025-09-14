@@ -1,9 +1,10 @@
 # Arquivo: netlify.toml
 
 [build]
+  publish = "."
   functions = "netlify/functions"
 
 [[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server/:splat"
+  from = "/chat"
+  to = "/.netlify/functions/server/chat"
   status = 200

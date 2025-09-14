@@ -1,104 +1,97 @@
-// ADICIONADO: Importa o 'tradutor' para o formato do Netlify
-import serverless from 'serverless-http';
-
-// SUAS IMPORTAÇÕES ORIGINAIS (mantidas)
 import express from 'express';
 import dotenv from 'dotenv';
+import serverless from 'serverless-http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 const app = express();
-// REMOVIDO: A porta é gerenciada pelo Netlify, não precisamos mais dela aqui.
-// const port = process.env.PORT || 3000;
+const router = express.Router();
 
-// MODIFICADO: Lógica de caminhos para funcionar dentro da Function
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-// Este é o caminho para a raiz do seu projeto a partir da function
-const projectRoot = path.join(__dirname, '..', '..');
+const projectRoot = path.join(path.dirname(__filename), '..', '..');
 
 app.use(express.json());
 
-// ADICIONADO: Um router para organizar as rotas da API
-const router = express.Router();
-
-// ADICIONADO: Servir TODOS os arquivos estáticos da raiz do projeto (para o client.js, css, etc.)
-app.use(express.static(projectRoot));
-
-// MODIFICADO: Sua rota de chat agora usa o 'router'
+// --- Rota da API ---
+// Esta rota agora será verificada ANTES de servir os arquivos estáticos.
 router.post('/chat', async (req, res) => {
-  console.log('--- Requisição /chat recebida ---');
-  try {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      console.error("ERRO: GEMINI_API_KEY não foi encontrada no arquivo .env.");
-      return res.status(500).json({ error: 'Chave de API não configurada no servidor.' });
-    }
+  console.log('--- Requisição /chat recebida ---');
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error("ERRO: GEMINI_API_KEY não foi encontrada.");
+      return res.status(500).json({ error: 'Chave de API não configurada no servidor.' });
+    }
 
-    const { history } = req.body;
-    if (!history || !Array.isArray(history) || history.length === 0) {
-      console.warn("AVISO: Requisição recebida sem um histórico de conversa válido.");
-      return res.status(400).json({ error: 'O histórico da conversa é obrigatório.' });
-    }
-    
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    const { history } = req.body;
+    if (!history || !Array.isArray(history)) {
+      return res.status(400).json({ error: 'O histórico da conversa é obrigatório.' });
+    }
+    
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    const requestBody = { contents: history };
 
-    const requestBody = {
-      contents: history.map(msg => ({
-        role: msg.role === 'model' ? 'model' : 'user',
-        parts: [{ text: msg.content }],
-      }))
-    };
+    const apiResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+    });
 
-    const apiResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-    });
+    const responseText = await apiResponse.text();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Erro ao analisar JSON da API do Google:", responseText);
+      throw new Error("A API do Google retornou uma resposta inválida ou vazia.");
+    }
 
-    if (!apiResponse.ok) {
-        const errorData = await apiResponse.json();
-        console.error("Erro retornado pela API do Google:", errorData?.error?.message || errorData);
-        throw new Error(`A API retornou um erro. Verifique a validade da sua chave de API.`);
-    }
+    if (!apiResponse.ok) {
+        const errorMsg = data?.error?.message || 'Erro desconhecido da API do Google.';
+        console.error("Erro retornado pela API do Google:", errorMsg);
+        throw new Error(`A API retornou um erro: ${errorMsg}`);
+    }
+    
+    if (!data.candidates || data.candidates.length === 0 || data.candidates[0].finishReason === 'SAFETY') {
+      const blockReason = data?.promptFeedback?.blockReason || 'desconhecido';
+      const blockMessage = `Sua pergunta foi bloqueada por motivo de segurança (${blockReason}). Por favor, reformule.`;
+      console.warn(`Conteúdo bloqueado: ${blockReason}`);
+      return res.status(400).json({ error: blockMessage });
+    }
+    
+    const text = data.candidates[0].content.parts[0].text;
+    
+    res.json({ response: text });
 
-    const data = await apiResponse.json();
-    
-    if (!data.candidates || data.candidates.length === 0 || data.candidates[0].finishReason === 'SAFETY') {
-        const blockReason = data?.promptFeedback?.blockReason || 'desconhecido';
-        const blockMessage = `Sua pergunta foi bloqueada por motivo de segurança (${blockReason}). Por favor, reformule.`;
-        console.warn(`Conteúdo bloqueado: ${blockReason}`);
-        return res.status(400).json({ error: blockMessage });
-    }
-    
-    const text = data.candidates[0].content.parts[0].text;
-    
-    console.log('Resposta da IA enviada ao cliente.');
-    res.json({ response: text });
-
-  } catch (error) {
-    console.error('!!! ERRO GERAL NA ROTA /CHAT !!!');
-    console.error('Mensagem de Erro:', error.message || error);
-    res.status(500).json({ error: 'Falha ao comunicar com a API do Gemini. Verifique sua chave de API e consulte o log do servidor.' });
-  }
+  } catch (error) {
+    console.error('ERRO GERAL NA ROTA /CHAT:', error.message);
+    res.status(500).json({ error: 'Falha ao comunicar com a API do Gemini. Verifique os logs do servidor.' });
+  }
 });
 
-// ADICIONADO: Monta o router no caminho que o Netlify usa para as functions
-app.use('/.netlify/functions/server', router);
+// --- Configuração do Servidor ---
 
-// ADICIONADO: Uma rota "catch-all" para servir o index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(projectRoot, 'index.html'));
-});
+const basePath = process.env.NETLIFY ? '/.netlify/functions/server' : '/';
+// CORREÇÃO CRÍTICA: A rota da API é registrada ANTES dos arquivos estáticos.
+app.use(basePath, router);
 
-// REMOVIDO: O app.listen() não é usado no ambiente serverless
-/*
-app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
-});
-*/
+// Configuração apenas para desenvolvimento local (será ignorada pela Netlify)
+if (!process.env.NETLIFY) {
+  // Agora, o servidor de arquivos estáticos é registrado DEPOIS da API.
+  app.use(express.static(projectRoot));
+  
+  // Adiciona uma rota "catch-all" para que o app funcione ao recarregar a página
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(projectRoot, 'index.html'));
+  });
 
-// ADICIONADO: Exporta o handler para o Netlify usar
+  const port = 3000;
+  app.listen(port, () => {
+    console.log(`Servidor de desenvolvimento iniciado! Acesse o site em http://localhost:${port}`);
+  });
+}
+
+// Exporta o handler para a Netlify usar em produção
 export const handler = serverless(app);

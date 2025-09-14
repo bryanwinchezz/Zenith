@@ -13,7 +13,11 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Firebase v9 SDK -->
+    <!-- 
+        ATENÇÃO: CONFIGURAÇÃO DO FIREBASE
+        Substitua os valores abaixo ("YOUR_API_KEY", etc.) com as suas próprias
+        credenciais do projeto Firebase para que a autenticação e o banco de dados funcionem.
+    -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
@@ -24,7 +28,7 @@
             apiKey: "AIzaSyCq8RgAiTWxn-QdtR0BcBsCTl-4L2llVqo",
             authDomain: "zenithzapp.firebaseapp.com",
             projectId: "zenithzapp",
-            storageBucket: "zenithzapp.appspot.com",
+            storageBucket: "zenithzapp.firebasestorage.app",
             messagingSenderId: "155992428449",
             appId: "1:155992428449:web:3818c2b912b602f54585e0"
         };
@@ -1261,8 +1265,6 @@
 
         function setupAiChat() {
             // --- Configuração da IA ---
-            // A chave de API foi removida daqui para segurança.
-            // A chamada agora é feita para o nosso próprio servidor.
             const API_URL = '/chat'; // Endpoint no nosso servidor
 
             // --- Elementos do DOM ---
@@ -1403,8 +1405,8 @@
 
                     const updatedDoc = await getDoc(chatDocRef);
                     const apiHistory = updatedDoc.data().messages.map(msg => ({
-                        role: msg.role, // 'user' ou 'model'
-                        content: msg.content
+                        role: msg.role === 'model' ? 'model' : 'user',
+                        parts: [{ text: msg.content }]
                     }));
 
                     const loadingEl = document.createElement('div');
@@ -1421,20 +1423,22 @@
                     chatHistoryEl.appendChild(loadingEl);
                     chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
 
-                    const now = new Date();
-                    const formattedDateTime = now.toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'long' });
-
-                    const historyWithContext = apiHistory;
-
                     const response = await fetch(API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ history: historyWithContext }) // Envia o histórico para o nosso servidor
+                        body: JSON.stringify({ history: apiHistory })
                     });
 
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `API Error: ${response.status}`);
+                        const errorText = await response.text();
+                        let errorJson;
+                        try {
+                            errorJson = JSON.parse(errorText);
+                        } catch (e) {
+                            // If parsing fails, the response was not JSON. Show the raw text.
+                            throw new Error(errorText || `Erro do servidor: ${response.status}`);
+                        }
+                        throw new Error(errorJson.error || `Erro da API: ${response.status}`);
                     }
 
                     const data = await response.json();
@@ -1444,12 +1448,16 @@
                     await updateDoc(chatDocRef, { messages: arrayUnion(modelMessage) });
                 } catch (error) {
                     console.error("Error in handleSubmit:", error);
-                    showToast("Erro ao contatar a IA.", "error");
+                    showToast(error.message, "error");
                     const errorMessage = { role: 'model', content: `**Erro:** ${error.message}` };
                     await updateDoc(chatDocRef, { messages: arrayUnion(errorMessage) });
 
                 } finally {
                     submitButton.disabled = false;
+                    const loadingIndicator = document.getElementById('loading-indicator');
+                    if (loadingIndicator) {
+                        loadingIndicator.remove();
+                    }
                 }
             };
 

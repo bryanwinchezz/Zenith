@@ -2,10 +2,10 @@
   "name": "zenith-ia-server",
   "version": "1.0.0",
   "description": "Servidor seguro para a IA Zenithinha.",
-  "main": "server.js",
+  "main": "netlify/functions/server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node netlify/functions/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
