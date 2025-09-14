@@ -2,11 +2,11 @@
   publish = "."
   functions = "netlify/functions"
 
-[functions]
-  # Aumenta o timeout para garantir que a IA tenha tempo de responder
+# --- SINTAXE CORRETA PARA O TIMEOUT ---
+[functions."*"]
   timeout = 25
 
-# NOVA REGRA: Qualquer chamada para /api/... será enviada para a função server
+# --- REGRAS DE REDIRECIONAMENTO ---
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/server/:splat"
