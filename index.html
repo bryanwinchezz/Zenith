@@ -1194,7 +1194,7 @@
         // --- AI CHAT PAGE ---
         function loadAi() {
             appContent.innerHTML = `
-            <div id="ai-chat-container" class="flex w-full h-[calc(100dvh-112px)] md:h-[calc(100dvh-88px)] fade-in">
+            <div id="ai-chat-container" class="flex w-full h-[calc(100dvh-120px)] md:h-[calc(100vh-88px)] fade-in">
                 <!-- Barra Lateral de Chats (Desktop) -->
                 <aside id="ai-sidebar-desktop" class="bg-gray-800 text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
                     <!-- Conteúdo da sidebar será preenchido por JS -->
@@ -1249,7 +1249,7 @@
             let activeChatId = null;
 
             // --- Firestore Refs ---
-            const { collection, query, orderBy, onSnapshot, doc, getDoc, addDoc, updateDoc, setDoc, serverTimestamp, Timestamp, arrayUnion } = window.firebaseFirestore;
+            const { collection, query, orderBy, onSnapshot, doc, getDoc, getDocs, addDoc, updateDoc, setDoc, serverTimestamp, Timestamp, arrayUnion } = window.firebaseFirestore;
             const chatsColRef = collection(db, `users/${currentUser.uid}/ai-chats`);
             const userDocRef = doc(db, 'users', currentUser.uid);
 
@@ -1524,6 +1524,12 @@
 
             // --- Mobile Menu Setup ---
             sidebarDesktopEl.innerHTML = getSidebarHtml();
+            
+            // Attach the close listener ONCE.
+            chatsModal.addEventListener('click', (e) => {
+               if (e.target === chatsModal) chatsModal.classList.remove('show');
+            });
+
             mobileMenuBtn.addEventListener('click', () => {
                 chatsModal.innerHTML = `<div class="modal-content !w-full !max-w-xs !h-full !m-0 !rounded-none !absolute !right-0 bg-gray-800 text-white p-4 flex flex-col">${getSidebarHtml()}</div>`;
                 const chatListContainer = chatsModal.querySelector('#ai-chat-list');
@@ -1541,9 +1547,6 @@
                 });
                 
                 chatsModal.classList.add('show');
-                chatsModal.addEventListener('click', (e) => {
-                   if (e.target === chatsModal) chatsModal.classList.remove('show');
-                });
             });
 
             // --- Event Listeners ---
