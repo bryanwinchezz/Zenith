@@ -1342,7 +1342,8 @@
                     title: 'Nova Conversa',
                     messages: [{
                         role: 'model',
-                        content: t('aiWelcomeWithLimit')
+                        content: t('aiWelcomeWithLimit'),
+                        createdAt: new Date()
                     }],
                     createdAt: serverTimestamp()
                 };
@@ -1416,7 +1417,7 @@
                 const prompt = promptInput.value.trim();
                 if (!prompt) return;
 
-                const userMessage = { role: 'user', content: prompt, createdAt: serverTimestamp() };
+                const userMessage = { role: 'user', content: prompt, createdAt: new Date() };
                 const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, activeChatId);
                 
                 promptInput.value = '';
@@ -1475,13 +1476,13 @@
 
                     const data = await response.json();
                     const text = data.response || "Não foi possível obter uma resposta.";
-                    const modelMessage = { role: 'model', content: text, createdAt: serverTimestamp() };
+                    const modelMessage = { role: 'model', content: text, createdAt: new Date() };
                     await updateDoc(chatDocRef, { messages: arrayUnion(modelMessage) });
 
                 } catch (error) {
                     console.error("Error in handleSubmit:", error);
                     showToast(error.message, "error");
-                    const errorMessage = { role: 'model', content: `**Erro:** ${error.message}` };
+                    const errorMessage = { role: 'model', content: `**Erro:** ${error.message}`, createdAt: new Date() };
                     await updateDoc(chatDocRef, { messages: arrayUnion(errorMessage) });
                 } finally {
                     if ((await getAiUsage()).count < MESSAGE_LIMIT) {
