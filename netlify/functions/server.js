@@ -22,7 +22,7 @@ router.post('/chat', async (req, res) => {
       return res.status(400).json({ error: 'O histórico da conversa é obrigatório.' });
     }
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
     const apiResponse = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -67,4 +67,5 @@ if (!process.env.NETLIFY) {
 }
 
 // --- Exporta handler para Netlify ---
+
 export const handler = serverless(app);
