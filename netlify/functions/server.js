@@ -77,7 +77,7 @@ app.use('/api', router);
 
 // Configuração apenas para desenvolvimento local
 if (!process.env.NETLIFY) {
-  // Essas duas linhas foram movidas para cá
+  // Mova as declarações para cá
   const __filename = fileURLToPath(import.meta.url);
   const projectRoot = path.join(path.dirname(__filename), '..', '..');
 
