@@ -1245,7 +1245,7 @@
         // --- AI CHAT PAGE ---
         function loadAi() {
             appContent.innerHTML = `
-            <div id="ai-chat-container" class="flex w-full h-[calc(100vh-112px)] md:h-[calc(100vh-88px)] fade-in">
+            <div id="ai-chat-container" class="flex w-full h-[calc(100dvh-112px)] md:h-[calc(100dvh-88px)] fade-in">
                 <!-- Barra Lateral de Chats -->
                 <aside class="bg-gray-800 text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
                     <h2 class="text-xl font-bold mb-4" data-t="aiSavedChats">${t('aiSavedChats')}</h2>
@@ -1389,6 +1389,33 @@
                     showToast("Erro ao criar novo chat", "error");
                 }
             };
+            
+            const fetchWithExponentialBackoff = async (url, options, maxRetries = 5) => {
+                let delay = 1000; // start with 1 second
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        const response = await fetch(url, options);
+                        // If response is not 429 (rate limit), we're good, return it
+                        if (response.status !== 429) {
+                            return response;
+                        }
+                        // If we've reached max retries, throw an error
+                        if (i === maxRetries - 1) {
+                            throw new Error("API rate limit exceeded after multiple retries.");
+                        }
+                        // Wait and increase delay for next retry
+                        console.warn(`Rate limit exceeded. Retrying in ${delay}ms... (Attempt ${i + 1}/${maxRetries})`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2; // Double the delay
+                    } catch (error) {
+                         // Handle network errors, etc.
+                         console.error(`Fetch attempt ${i + 1} failed:`, error);
+                         if (i === maxRetries - 1) throw error; // Re-throw last error
+                         await new Promise(resolve => setTimeout(resolve, delay));
+                         delay *= 2;
+                    }
+                }
+            };
 
             const handleSubmit = async (e) => {
                 e.preventDefault();
@@ -1439,7 +1466,7 @@
                     chatHistoryEl.appendChild(loadingEl);
                     chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
 
-                    const response = await fetch(API_URL, {
+                    const response = await fetchWithExponentialBackoff(API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ history: apiHistory })
@@ -3200,7 +3227,7 @@
 
             document.getElementById('clock-content').innerHTML = `
                 <div class="text-center">
-                    <div id="stopwatch-display" class="text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
+                    <div id="stopwatch-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
                     <div class="flex justify-center gap-4">
                         <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('stopwatchStart')}</button>
                         <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('stopwatchReset')}</button>
@@ -3265,7 +3292,7 @@
 
             document.getElementById('clock-content').innerHTML = `
                 <div class="text-center">
-                    <div id="timer-display" class="text-6xl md:text-8xl font-mono mb-8">00:00:00</div>
+                    <div id="timer-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00</div>
                     <div id="timer-inputs" class="flex justify-center items-center gap-4 mb-8">
                         <input type="number" id="timer-hours" placeholder="${t('timerHours')}" min="0" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
                         <input type="number" id="timer-minutes" placeholder="${t('timerMinutes')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
