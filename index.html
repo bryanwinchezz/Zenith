@@ -202,6 +202,7 @@
 
         ::-webkit-scrollbar {
             width: 8px;
+            height: 8px;
         }
 
         ::-webkit-scrollbar-track {
@@ -359,6 +360,17 @@
         .dot-bounce .dot2 {
             animation-delay: -0.16s;
         }
+        
+        /* Estilos para Notas */
+        .note-content-wrapper {
+            max-height: 120px; /* Altura máxima para o conteúdo da nota antes de expandir */
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
+        }
+        .note-content-wrapper.expanded {
+            max-height: 1000px; /* Um valor alto para garantir que todo o conteúdo seja visível */
+        }
+
 
         /* Oculta a barra de rolagem mas mantém a funcionalidade */
         .no-scrollbar::-webkit-scrollbar {
@@ -419,7 +431,7 @@
                         </button>
                     </div>
                     <button type="submit" data-t="loginButton"
-                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105">Entrar</button>
+                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Entrar</button>
                 </form>
                 <p class="text-center text-sm mt-6"><span data-t="loginNoAccount">Não tem uma conta?</span> <a href="#"
                         id="show-register" data-t="loginSignUpLink"
@@ -461,7 +473,7 @@
                         </button>
                     </div>
                     <button type="submit" data-t="registerButton"
-                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105">Cadastrar</button>
+                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Cadastrar</button>
                 </form>
                 <p class="text-center text-sm mt-6"><span data-t="registerHaveAccount">Já tem uma conta?</span> <a
                         href="#" id="show-login" data-t="registerLoginLink"
@@ -489,69 +501,69 @@
             </div>
 
             <div
-                class="flex justify-around items-center h-full md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto no-scrollbar">
+                class="flex justify-start items-center h-full overflow-x-auto no-scrollbar md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto">
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="dashboard">
                     <i data-lucide="layout-dashboard"></i><span data-t="navDashboard"
                         class="text-xs md:text-base font-semibold">Dashboard</span>
                 </button>
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="reminders">
                     <i data-lucide="bell-ring"></i><span data-t="navReminders"
                         class="text-xs md:text-base font-semibold">Lembretes</span>
                 </button>
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="goals">
                     <i data-lucide="target"></i><span data-t="navGoals"
                         class="text-xs md:text-base font-semibold">Metas</span>
                 </button>
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="notes">
                     <i data-lucide="notebook-pen"></i><span data-t="navNotes"
                         class="text-xs md:text-base font-semibold">Notas</span>
                 </button>
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="habits">
                     <i data-lucide="clipboard-check"></i><span data-t="navHabits"
                         class="text-xs md:text-base font-semibold">Hábitos</span>
                 </button>
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="clock">
                     <i data-lucide="clock"></i><span data-t="navClock"
                         class="text-xs md:text-base font-semibold">Relógio</span>
                 </button>
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="calendar">
                     <i data-lucide="calendar"></i><span data-t="navCalendar"
                         class="text-xs md:text-base font-semibold">Calendário</span>
                 </button>
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="calculator">
                     <i data-lucide="calculator"></i><span data-t="navCalculator"
                         class="text-xs md:text-base font-semibold">Calculadora</span>
                 </button>
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="paint">
                     <i data-lucide="palette"></i><span data-t="navPaint"
                         class="text-xs md:text-base font-semibold">Desenho</span>
                 </button>
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="achievements">
                     <i data-lucide="trophy"></i><span data-t="navAchievements"
                         class="text-xs md:text-base font-semibold">Conquistas</span>
                 </button>
                 <button
-                    class="nav-item flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 md:flex-row md:justify-start md:gap-3 md:p-3"
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
                     data-page="ai">
                     <i data-lucide="bot"></i><span data-t="navAi"
                         class="text-xs md:text-base font-semibold">Zenithinha</span>
@@ -654,6 +666,8 @@
         // Translations
         const translations = {
             pt: {
+                showMore: "Ver nota completa",
+                showLess: "Mostrar menos",
                 navAi: "Zenithinha",
                 pageTitleAi: "Zenithinha",
                 aiWelcome: "Olá, sou a Zenithinha. Posso ajudar você a criar sugestões para seus lembretes, suas metas, suas notas e mais! Diga oque você precisa.",
@@ -839,6 +853,8 @@
                 ach_zenith_master_desc: "Desbloqueie todas as outras conquistas."
             },
             en: {
+                showMore: "View full note",
+                showLess: "Show less",
                 navAi: "Zenithinha",
                 pageTitleAi: "Zenithinha",
                 aiWelcome: "Hello, I'm Zenithinha. I can help you create suggestions for your reminders, goals, notes, and more! Tell me what you need.",
@@ -1173,18 +1189,18 @@
                             <h3 class="font-bold text-lg" data-t="aiToAi">${t('aiToAi')}</h3>
                             <p class="text-gray-500 dark:text-gray-400 text-sm" data-t="aiToAiSubtitle">${t('aiToAiSubtitle')}</p>
                         </div>
-                        <button id="goto-ai-btn" class="bg-brand-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-brand-700 whitespace-nowrap transition-transform hover:scale-105">
+                        <button id="goto-ai-btn" class="bg-brand-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-brand-700 whitespace-nowrap transition-transform hover:scale-105 active:scale-95 active:brightness-95">
                             ${t('aiToAiBtn')}
                         </button>
                     </div>
                 </div>
                  <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                     <h3 class="font-semibold text-lg mb-4" data-t="quickActions">${t('quickActions')}</h3>
-                    <div class="flex flex-wrap gap-3">
-                        <button class="quick-action-btn flex items-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform" data-action="add-reminder"><i data-lucide="plus"></i><span data-t="newReminder">${t('newReminder')}</span></button>
-                        <button class="quick-action-btn flex items-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform" data-action="add-goal"><i data-lucide="plus"></i><span data-t="newGoal">${t('newGoal')}</span></button>
-                        <button class="quick-action-btn flex items-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform" data-action="add-note"><i data-lucide="plus"></i><span data-t="newNote">${t('newNote')}</span></button>
-                        <button class="quick-action-btn flex items-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform" data-action="add-habit"><i data-lucide="plus"></i><span data-t="newHabit">${t('newHabit')}</span></button>
+                    <div class="flex flex-col gap-3">
+                        <button class="quick-action-btn w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform active:scale-95 active:brightness-95" data-action="add-reminder"><i data-lucide="plus"></i><span data-t="newReminder">${t('newReminder')}</span></button>
+                        <button class="quick-action-btn w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform active:scale-95 active:brightness-95" data-action="add-goal"><i data-lucide="plus"></i><span data-t="newGoal">${t('newGoal')}</span></button>
+                        <button class="quick-action-btn w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform active:scale-95 active:brightness-95" data-action="add-note"><i data-lucide="plus"></i><span data-t="newNote">${t('newNote')}</span></button>
+                        <button class="quick-action-btn w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform active:scale-95 active:brightness-95" data-action="add-habit"><i data-lucide="plus"></i><span data-t="newHabit">${t('newHabit')}</span></button>
                     </div>
                 </div>
             </div>`;
@@ -1233,7 +1249,7 @@
                 <!-- Barra Lateral de Chats -->
                 <aside class="bg-gray-800 text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
                     <h2 class="text-xl font-bold mb-4" data-t="aiSavedChats">${t('aiSavedChats')}</h2>
-                    <button id="ai-new-chat-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mb-4 transition-colors duration-300 flex items-center justify-center">
+                    <button id="ai-new-chat-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mb-4 transition-colors duration-300 flex items-center justify-center active:scale-95 active:brightness-95">
                         <i class="fas fa-plus mr-2"></i> <span data-t="aiNewChat">${t('aiNewChat')}</span>
                     </button>
                     <div class="flex-grow overflow-y-auto no-scrollbar" id="ai-chat-list">
@@ -1252,7 +1268,7 @@
                     <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
                         <form id="ai-prompt-form" class="flex items-stretch gap-4 max-w-4xl mx-auto">
                             <textarea id="ai-prompt-input" rows="1" data-t-placeholder="aiPrompt" placeholder="${t('aiPrompt')}" class="flex-grow p-3 bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all resize-none"></textarea>
-                            <button type="submit" id="ai-submit-button" class="bg-brand-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-brand-700 transition-colors duration-300 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button type="submit" id="ai-submit-button" class="bg-brand-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-brand-700 transition-colors duration-300 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 active:brightness-95">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                         </form>
@@ -1492,7 +1508,7 @@
         function commonListPage(type, plural, icon) {
             appContent.innerHTML = `
             <div class="fade-in">
-                <button id="add-${type}-btn" class="w-full md:w-auto bg-brand-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-brand-700 transition-colors mb-6 flex items-center justify-center gap-2 transform hover:scale-105">
+                <button id="add-${type}-btn" class="w-full md:w-auto bg-brand-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-brand-700 transition-colors mb-6 flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 active:brightness-95">
                     <i data-lucide="${icon}" class="w-5 h-5"></i> ${t(`new${type.charAt(0).toUpperCase() + type.slice(1)}`)}
                 </button>
                 <div id="${type}s-list"></div>
@@ -1551,6 +1567,21 @@
                             btn.addEventListener('click', () => toggleHabitToday(btn.dataset.id));
                         });
                     }
+
+                    // Add event listeners for note expansion
+                    if (type === 'note') {
+                        listEl.querySelectorAll('.view-note-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                const wrapper = e.target.previousElementSibling; // .note-content-wrapper
+                                wrapper.classList.toggle('expanded');
+                                if (wrapper.classList.contains('expanded')) {
+                                    e.target.textContent = t('showLess');
+                                } else {
+                                    e.target.textContent = t('showMore');
+                                }
+                            });
+                        });
+                    }
                 });
                 unsubscribes.push(unsubscribe);
             }
@@ -1570,10 +1601,10 @@
                                 ${data.remindAt ? `<p class="text-sm text-gray-500">${new Date(data.remindAt.toDate()).toLocaleString()}</p>` : ''}
                             </div>
                             <div class="flex gap-2">
-                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform" data-id="${id}">
+                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95" data-id="${id}">
                                     <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
                                 </button>
-                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform" data-id="${id}">
+                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
                                     <i data-lucide="edit" class="w-5 h-5"></i>
                                 </button>
                             </div>
@@ -1589,10 +1620,10 @@
                                 <p class="text-sm text-gray-500">${progress.toFixed(0)}% ${t('complete')}</p>
                             </div>
                             <div class="flex gap-2">
-                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform" data-id="${id}">
+                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95" data-id="${id}">
                                     <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
                                 </button>
-                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform" data-id="${id}">
+                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
                                     <i data-lucide="edit" class="w-5 h-5"></i>
                                 </button>
                             </div>
@@ -1605,8 +1636,8 @@
                                 <p class="font-semibold text-lg">${data.currentValue} / ${data.targetValue}</p>
                              </div>
                              <div class="flex gap-2">
-                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center" data-id="${id}" data-amount="-1"><i data-lucide="minus"></i></button>
-                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center" data-id="${id}" data-amount="1"><i data-lucide="plus"></i></button>
+                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="-1"><i data-lucide="minus"></i></button>
+                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="1"><i data-lucide="plus"></i></button>
                              </div>
                         </div>
                     </div>`;
@@ -1618,15 +1649,20 @@
                         red: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
                         purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200'
                     };
+                    const noteHasOverflow = data.content && (data.content.split('\n').length > 5 || data.content.length > 250);
+
                     return `
-                    <div class="p-4 rounded-lg shadow-md ${noteColorClasses[data.color] || noteColorClasses.yellow}">
+                    <div class="p-4 rounded-lg shadow-md ${noteColorClasses[data.color] || noteColorClasses.yellow} flex flex-col">
                         <div class="flex items-start justify-between mb-2">
                             <h3 class="font-bold">${data.title}</h3>
                             <button class="edit-btn p-1 opacity-70 hover:opacity-100 hover:scale-105 transition-transform" data-id="${id}">
                                 <i data-lucide="edit" class="w-4 h-4"></i>
                             </button>
                         </div>
-                        <p class="text-sm opacity-90 whitespace-pre-wrap">${data.content}</p>
+                        <div class="note-content-wrapper">
+                            <p class="text-sm opacity-90 whitespace-pre-wrap">${data.content}</p>
+                        </div>
+                        ${noteHasOverflow ? `<button class="view-note-btn text-xs font-semibold mt-2 text-brand-600 dark:text-brand-400 self-start hover:underline">${t('showMore')}</button>` : ''}
                     </div>`;
                 case 'habit':
                     const completedToday = data.completedDates && data.completedDates.includes(today);
@@ -1635,13 +1671,13 @@
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="font-semibold text-lg">${data.title}</h3>
-                            <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform" data-id="${id}">
+                            <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
                                 <i data-lucide="edit" class="w-5 h-5"></i>
                             </button>
                         </div>
                         <div class="flex items-center justify-between">
                             <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl">${streak}</span> ${t('habitDays')}</p>
-                            <button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all ${completedToday ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white'}" data-id="${id}">
+                            <button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 ${completedToday ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white'}" data-id="${id}">
                                 ${completedToday ? t('habitDoneToday') : t('habitMarkDone')}
                             </button>
                         </div>
@@ -1834,9 +1870,9 @@
                     <form id="item-form" class="space-y-4">
                         ${fieldsHtml}
                         <div class="flex gap-3 pt-4">
-                            <button type="submit" class="flex-1 bg-brand-600 text-white py-2 px-4 rounded-lg hover:bg-brand-700">${t('save')}</button>
-                            <button type="button" id="cancel-btn" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500">${t('cancel')}</button>
-                            ${id ? `<button type="button" id="delete-btn" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">${t('delete')}</button>` : ''}
+                            <button type="submit" class="flex-1 bg-brand-600 text-white py-2 px-4 rounded-lg hover:bg-brand-700 transition-all active:brightness-90">${t('save')}</button>
+                            <button type="button" id="cancel-btn" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-all active:brightness-90">${t('cancel')}</button>
+                            ${id ? `<button type="button" id="delete-btn" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-all active:brightness-90">${t('delete')}</button>` : ''}
                         </div>
                     </form>
                 </div>`;
@@ -1927,8 +1963,8 @@
                 <div class="modal-content">
                     <h3 class="text-xl font-bold mb-4">${t('confirmDelete')}</h3>
                     <div class="flex gap-3">
-                        <button id="confirm-delete" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">${t('delete')}</button>
-                        <button id="cancel-delete" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500">${t('cancel')}</button>
+                        <button id="confirm-delete" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-all active:brightness-90">${t('delete')}</button>
+                        <button id="cancel-delete" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-all active:brightness-90">${t('cancel')}</button>
                     </div>
                 </div>`;
 
@@ -2169,7 +2205,7 @@
                 eventsHtml += `<p class="text-gray-500 text-sm text-center py-4">${t('noEvents')}</p>`;
             }
 
-            eventsHtml += `<button id="add-event-for-day-btn" class="w-full mt-4 bg-brand-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-700 flex items-center justify-center gap-2">
+            eventsHtml += `<button id="add-event-for-day-btn" class="w-full mt-4 bg-brand-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-700 flex items-center justify-center gap-2 active:scale-95 active:brightness-95">
                 <i data-lucide="plus"></i> ${t('addEvent')}
             </button></div>`;
 
@@ -2268,7 +2304,7 @@
                     <p class="text-sm text-gray-500 mb-4">${formattedDate}</p>
                     <form id="event-form" class="flex gap-2">
                         <input type="text" id="event-title-input" placeholder="${t('eventTitle')}" class="${formInputClasses} flex-1" value="${eventData.title || ''}" required>
-                        <button type="submit" class="bg-brand-600 text-white p-3 rounded-lg hover:bg-brand-700 flex-shrink-0"><i data-lucide="${isEdit ? 'save' : 'plus'}"></i></button>
+                        <button type="submit" class="bg-brand-600 text-white p-3 rounded-lg hover:bg-brand-700 flex-shrink-0 active:scale-95 active:brightness-95"><i data-lucide="${isEdit ? 'save' : 'plus'}"></i></button>
                     </form>
                     <button id="close-calendar-modal" class="w-full mt-4 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500">${t('cancel')}</button>
                 </div>
@@ -2868,8 +2904,8 @@
                             </div>
                             
                             <div class="flex gap-3 pt-4">
-                                <button type="submit" class="flex-1 bg-brand-600 text-white py-2 px-4 rounded-lg hover:bg-brand-700">${t('save')}</button>
-                                <button type="button" id="logout-btn" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">${t('profileLogout')}</button>
+                                <button type="submit" class="flex-1 bg-brand-600 text-white py-2 px-4 rounded-lg hover:bg-brand-700 transition-all active:brightness-90">${t('save')}</button>
+                                <button type="button" id="logout-btn" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-all active:brightness-90">${t('profileLogout')}</button>
                             </div>
                         </form>
                     </div>
@@ -3166,8 +3202,8 @@
                 <div class="text-center">
                     <div id="stopwatch-display" class="text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
                     <div class="flex justify-center gap-4">
-                        <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700">${t('stopwatchStart')}</button>
-                        <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600">${t('stopwatchReset')}</button>
+                        <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('stopwatchStart')}</button>
+                        <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('stopwatchReset')}</button>
                     </div>
                 </div>
             `;
@@ -3236,8 +3272,8 @@
                         <input type="number" id="timer-seconds" placeholder="${t('timerSeconds')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
                     </div>
                      <div class="flex justify-center gap-4">
-                        <button id="timer-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700">${t('timerStart')}</button>
-                        <button id="timer-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600">${t('timerReset')}</button>
+                        <button id="timer-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('timerStart')}</button>
+                        <button id="timer-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('timerReset')}</button>
                     </div>
                 </div>`;
 
@@ -3321,6 +3357,26 @@
         }
 
         // --- AUTH FUNCTIONS ---
+        function getAuthErrorMessage(errorCode) {
+            switch (errorCode) {
+                case 'auth/invalid-email':
+                    return 'O formato do email é inválido.';
+                case 'auth/user-disabled':
+                    return 'Este usuário foi desativado.';
+                case 'auth/user-not-found':
+                case 'auth/invalid-credential':
+                    return 'Credenciais inválidas. Verifique seu email e senha.';
+                case 'auth/wrong-password':
+                    return 'Senha incorreta. Tente novamente.';
+                case 'auth/email-already-in-use':
+                    return 'Este email já está em uso por outra conta.';
+                case 'auth/weak-password':
+                    return 'A senha é muito fraca. Tente uma mais forte (mínimo 6 caracteres).';
+                default:
+                    return 'Ocorreu um erro de autenticação. Tente novamente mais tarde.';
+            }
+        }
+
         async function handleLogin(email, password) {
             showLoading();
             if (!firebaseInitialized) {
@@ -3334,7 +3390,7 @@
                 showToast('Login realizado com sucesso!', 'success');
             } catch (error) {
                 console.error('Login error:', error);
-                showToast('Erro no login: ' + error.message, 'error');
+                showToast(getAuthErrorMessage(error.code), 'error');
             } finally {
                 hideLoading();
             }
@@ -3365,7 +3421,7 @@
                 showToast('Conta criada com sucesso!', 'success');
             } catch (error) {
                 console.error('Register error:', error);
-                showToast('Erro no cadastro: ' + error.message, 'error');
+                showToast(getAuthErrorMessage(error.code), 'error');
             } finally {
                 hideLoading();
             }
