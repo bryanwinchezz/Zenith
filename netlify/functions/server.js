@@ -29,6 +29,7 @@ router.post('/chat', async (req, res) => {
       body: JSON.stringify({ contents: history })
     });
 
+
     const responseText = await apiResponse.text();
     let data;
     try {
