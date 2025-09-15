@@ -77,6 +77,10 @@ app.use('/api', router);
 
 // Configuração apenas para desenvolvimento local
 if (!process.env.NETLIFY) {
+  // Essas duas linhas foram movidas para cá
+  const __filename = fileURLToPath(import.meta.url);
+  const projectRoot = path.join(path.dirname(__filename), '..', '..');
+
   app.use(express.static(projectRoot));
   app.get('*', (req, res) => {
     res.sendFile(path.join(projectRoot, 'index.html'));
