@@ -360,15 +360,18 @@
         .dot-bounce .dot2 {
             animation-delay: -0.16s;
         }
-        
+
         /* Estilos para Notas */
         .note-content-wrapper {
-            max-height: 120px; /* Altura máxima para o conteúdo da nota antes de expandir */
+            max-height: 120px;
+            /* Altura máxima para o conteúdo da nota antes de expandir */
             overflow: hidden;
             transition: max-height 0.4s ease-in-out;
         }
+
         .note-content-wrapper.expanded {
-            max-height: 1000px; /* Um valor alto para garantir que todo o conteúdo seja visível */
+            max-height: 1000px;
+            /* Um valor alto para garantir que todo o conteúdo seja visível */
         }
 
 
@@ -389,23 +392,18 @@
 <body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
 
     <div id="loading-overlay" class="fixed inset-0 bg-gray-950 bg-opacity-80 flex items-center justify-center z-[1050]">
-        <div
-            class="w-16 h-16 border-4 border-t-brand-500 border-r-transparent border-b-brand-500 border-l-transparent rounded-full animate-spin">
+        <div class="w-16 h-16 border-4 border-t-brand-500 border-r-transparent border-b-brand-500 border-l-transparent rounded-full animate-spin">
         </div>
     </div>
 
     <div id="toast-container" class="toast-container"></div>
 
     <div id="auth-container" class="page">
-        <div
-            class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-950">
+        <div class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-950">
             <div id="login-page" class="page active w-full max-w-md fade-in">
                 <div class="text-center mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-sparkles mx-auto text-brand-500">
-                        <path
-                            d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles mx-auto text-brand-500">
+                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                         <path d="M5 3v4" />
                         <path d="M19 17v4" />
                         <path d="M3 5h4" />
@@ -415,34 +413,22 @@
                         ao Zenith</h1>
                     <p data-t="loginSubtitle" class="text-gray-600 dark:text-gray-400 mt-2">Seu assistente pessoal</p>
                 </div>
-                <form id="login-form"
-                    class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
-                    <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
-                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                        required>
+                <form id="login-form" class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
+                    <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
                     <div class="relative">
-                        <input type="password" id="login-password" data-t-placeholder="passwordPlaceholder"
-                            placeholder="Senha"
-                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                            required>
-                        <button type="button"
-                            class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
+                        <input type="password" id="login-password" data-t-placeholder="passwordPlaceholder" placeholder="Senha" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                        <button type="button" class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
                             <i data-lucide="eye" class="w-5 h-5"></i>
                         </button>
                     </div>
-                    <button type="submit" data-t="loginButton"
-                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Entrar</button>
+                    <button type="submit" data-t="loginButton" class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Entrar</button>
                 </form>
-                <p class="text-center text-sm mt-6"><span data-t="loginNoAccount">Não tem uma conta?</span> <a href="#"
-                        id="show-register" data-t="loginSignUpLink"
-                        class="font-semibold text-brand-500 hover:underline">Cadastre-se</a></p>
+                <p class="text-center text-sm mt-6"><span data-t="loginNoAccount">Não tem uma conta?</span> <a href="#" id="show-register" data-t="loginSignUpLink" class="font-semibold text-brand-500 hover:underline">Cadastre-se</a></p>
             </div>
 
             <div id="register-page" class="page w-full max-w-md fade-in">
                 <div class="text-center mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-user-plus mx-auto text-brand-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus mx-auto text-brand-500">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
                         <line x1="19" x2="19" y1="8" y2="14" />
@@ -453,45 +439,28 @@
                     <p data-t="registerSubtitle" class="text-gray-600 dark:text-gray-400 mt-2">Comece sua jornada de
                         produtividade</p>
                 </div>
-                <form id="register-form"
-                    class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
-                    <input type="text" id="register-name" data-t-placeholder="namePlaceholder"
-                        placeholder="Nome completo"
-                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                        required>
-                    <input type="email" id="register-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
-                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                        required>
+                <form id="register-form" class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
+                    <input type="text" id="register-name" data-t-placeholder="namePlaceholder" placeholder="Nome completo" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                    <input type="email" id="register-email" data-t-placeholder="emailPlaceholder" placeholder="Email" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
                     <div class="relative">
-                        <input type="password" id="register-password" data-t-placeholder="passwordPlaceholderRegister"
-                            placeholder="Criar senha"
-                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                            required>
-                        <button type="button"
-                            class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
+                        <input type="password" id="register-password" data-t-placeholder="passwordPlaceholderRegister" placeholder="Criar senha" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                        <button type="button" class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
                             <i data-lucide="eye" class="w-5 h-5"></i>
                         </button>
                     </div>
-                    <button type="submit" data-t="registerButton"
-                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Cadastrar</button>
+                    <button type="submit" data-t="registerButton" class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Cadastrar</button>
                 </form>
-                <p class="text-center text-sm mt-6"><span data-t="registerHaveAccount">Já tem uma conta?</span> <a
-                        href="#" id="show-login" data-t="registerLoginLink"
-                        class="font-semibold text-brand-500 hover:underline">Entrar</a></p>
+                <p class="text-center text-sm mt-6"><span data-t="registerHaveAccount">Já tem uma conta?</span> <a href="#" id="show-login" data-t="registerLoginLink" class="font-semibold text-brand-500 hover:underline">Entrar</a></p>
             </div>
         </div>
     </div>
 
     <div id="app-container" class="page">
-        <nav
-            class="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-2 z-40 md:left-0 md:top-0 md:h-screen md:w-64 md:border-t-0 md:border-r md:p-4 md:flex md:flex-col md:justify-start">
+        <nav class="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-2 z-40 md:left-0 md:top-0 md:h-screen md:w-64 md:border-t-0 md:border-r md:p-4 md:flex md:flex-col md:justify-start">
 
             <div class="hidden md:flex items-center gap-2 px-2 mb-8">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-sparkles text-brand-500">
-                    <path
-                        d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles text-brand-500">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                     <path d="M5 3v4" />
                     <path d="M19 17v4" />
                     <path d="M3 5h4" />
@@ -500,73 +469,39 @@
                 <span class="text-2xl font-extrabold text-gray-900 dark:text-white">Zenith</span>
             </div>
 
-            <div
-                class="flex justify-start items-center h-full overflow-x-auto no-scrollbar md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto">
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="dashboard">
-                    <i data-lucide="layout-dashboard"></i><span data-t="navDashboard"
-                        class="text-xs md:text-base font-semibold">Dashboard</span>
+            <div class="flex justify-start items-center h-full overflow-x-auto no-scrollbar md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto">
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="dashboard">
+                    <i data-lucide="layout-dashboard"></i><span data-t="navDashboard" class="text-xs md:text-base font-semibold">Dashboard</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="reminders">
-                    <i data-lucide="bell-ring"></i><span data-t="navReminders"
-                        class="text-xs md:text-base font-semibold">Lembretes</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="reminders">
+                    <i data-lucide="bell-ring"></i><span data-t="navReminders" class="text-xs md:text-base font-semibold">Lembretes</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="goals">
-                    <i data-lucide="target"></i><span data-t="navGoals"
-                        class="text-xs md:text-base font-semibold">Metas</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="goals">
+                    <i data-lucide="target"></i><span data-t="navGoals" class="text-xs md:text-base font-semibold">Metas</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="notes">
-                    <i data-lucide="notebook-pen"></i><span data-t="navNotes"
-                        class="text-xs md:text-base font-semibold">Notas</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="notes">
+                    <i data-lucide="notebook-pen"></i><span data-t="navNotes" class="text-xs md:text-base font-semibold">Notas</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="habits">
-                    <i data-lucide="clipboard-check"></i><span data-t="navHabits"
-                        class="text-xs md:text-base font-semibold">Hábitos</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="habits">
+                    <i data-lucide="clipboard-check"></i><span data-t="navHabits" class="text-xs md:text-base font-semibold">Hábitos</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="clock">
-                    <i data-lucide="clock"></i><span data-t="navClock"
-                        class="text-xs md:text-base font-semibold">Relógio</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="clock">
+                    <i data-lucide="clock"></i><span data-t="navClock" class="text-xs md:text-base font-semibold">Relógio</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="calendar">
-                    <i data-lucide="calendar"></i><span data-t="navCalendar"
-                        class="text-xs md:text-base font-semibold">Calendário</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="calendar">
+                    <i data-lucide="calendar"></i><span data-t="navCalendar" class="text-xs md:text-base font-semibold">Calendário</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="calculator">
-                    <i data-lucide="calculator"></i><span data-t="navCalculator"
-                        class="text-xs md:text-base font-semibold">Calculadora</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="calculator">
+                    <i data-lucide="calculator"></i><span data-t="navCalculator" class="text-xs md:text-base font-semibold">Calculadora</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="paint">
-                    <i data-lucide="palette"></i><span data-t="navPaint"
-                        class="text-xs md:text-base font-semibold">Desenho</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="paint">
+                    <i data-lucide="palette"></i><span data-t="navPaint" class="text-xs md:text-base font-semibold">Desenho</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="achievements">
-                    <i data-lucide="trophy"></i><span data-t="navAchievements"
-                        class="text-xs md:text-base font-semibold">Conquistas</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="achievements">
+                    <i data-lucide="trophy"></i><span data-t="navAchievements" class="text-xs md:text-base font-semibold">Conquistas</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="ai">
-                    <i data-lucide="bot"></i><span data-t="navAi"
-                        class="text-xs md:text-base font-semibold">Zenithinha</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="ai">
+                    <i data-lucide="bot"></i><span data-t="navAi" class="text-xs md:text-base font-semibold">Zenithinha</span>
                 </button>
             </div>
         </nav>
@@ -575,17 +510,14 @@
             <header class="bg-white dark:bg-gray-900 shadow-sm p-4 md:p-6 flex justify-between items-center">
                 <h1 id="page-title" class="text-2xl md:text-3xl font-bold">Dashboard</h1>
                 <div id="header-controls" class="flex items-center gap-4">
-                    <button id="language-toggle"
-                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold w-10">
+                    <button id="language-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold w-10">
                         PT
                     </button>
                     <button id="dark-mode-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i data-lucide="moon" class="w-5 h-5"></i>
                         <i data-lucide="sun" class="w-5 h-5 hidden"></i>
                     </button>
-                    <button id="profile-button"
-                        class="nav-item w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center text-white font-bold text-lg hover:opacity-90 overflow-hidden"
-                        data-page="profile">
+                    <button id="profile-button" class="nav-item w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center text-white font-bold text-lg hover:opacity-90 overflow-hidden" data-page="profile">
                         <span id="profile-initial"></span>
                         <img id="profile-img-header" src="" alt="Profile" class="w-full h-full object-cover hidden">
                     </button>
@@ -598,6 +530,7 @@
     <!-- Modals -->
     <div id="item-modal" class="modal-overlay"></div>
     <div id="confirm-modal" class="modal-overlay"></div>
+    <div id="ai-chats-modal" class="modal-overlay"></div>
 
     <script>
         // Global variables
@@ -666,11 +599,13 @@
         // Translations
         const translations = {
             pt: {
+                limitExceeded: "Limite de mensagens diárias atingido.",
+                limitResetsAt: "Você poderá conversar novamente às {time}.",
+                aiWelcomeWithLimit: "Olá, sou a Zenithinha. Posso ajudar com suas tarefas. Lembre-se, você tem um limite de 50 mensagens por dia.",
                 showMore: "Ver nota completa",
                 showLess: "Mostrar menos",
                 navAi: "Zenithinha",
                 pageTitleAi: "Zenithinha",
-                aiWelcome: "Olá, sou a Zenithinha. Posso ajudar você a criar sugestões para seus lembretes, suas metas, suas notas e mais! Diga oque você precisa.",
                 aiPrompt: "Digite sua pergunta...",
                 aiNewChat: "Novo Chat",
                 aiSavedChats: "Chats Salvos",
@@ -853,6 +788,9 @@
                 ach_zenith_master_desc: "Desbloqueie todas as outras conquistas."
             },
             en: {
+                limitExceeded: "Daily message limit reached.",
+                limitResetsAt: "You can chat again at {time}.",
+                aiWelcomeWithLimit: "Hello, I'm Zenithinha. I can help with your tasks. Remember, you have a 50 message limit per day.",
                 showMore: "View full note",
                 showLess: "Show less",
                 navAi: "Zenithinha",
@@ -1246,19 +1184,21 @@
         function loadAi() {
             appContent.innerHTML = `
             <div id="ai-chat-container" class="flex w-full h-[calc(100dvh-112px)] md:h-[calc(100dvh-88px)] fade-in">
-                <!-- Barra Lateral de Chats -->
-                <aside class="bg-gray-800 text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
-                    <h2 class="text-xl font-bold mb-4" data-t="aiSavedChats">${t('aiSavedChats')}</h2>
-                    <button id="ai-new-chat-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mb-4 transition-colors duration-300 flex items-center justify-center active:scale-95 active:brightness-95">
-                        <i class="fas fa-plus mr-2"></i> <span data-t="aiNewChat">${t('aiNewChat')}</span>
-                    </button>
-                    <div class="flex-grow overflow-y-auto no-scrollbar" id="ai-chat-list">
-                        <!-- A lista de chats será inserida aqui -->
-                    </div>
+                <!-- Barra Lateral de Chats (Desktop) -->
+                <aside id="ai-sidebar-desktop" class="bg-gray-800 text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
+                    <!-- Conteúdo da sidebar será preenchido por JS -->
                 </aside>
 
                 <!-- Área Principal do Chat -->
                 <main class="flex-grow flex flex-col bg-white dark:bg-gray-900">
+                    <!-- Cabeçalho Mobile -->
+                    <header class="md:hidden flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                        <h2 id="ai-chat-title-mobile" class="text-lg font-bold truncate">Carregando...</h2>
+                        <button id="ai-mobile-menu-btn" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i data-lucide="message-square-text"></i>
+                        </button>
+                    </header>
+
                     <!-- Histórico de Mensagens -->
                     <div id="ai-chat-history" class="flex-grow p-6 overflow-y-auto space-y-6 no-scrollbar">
                         <!-- As mensagens serão inseridas aqui -->
@@ -1269,40 +1209,54 @@
                         <form id="ai-prompt-form" class="flex items-stretch gap-4 max-w-4xl mx-auto">
                             <textarea id="ai-prompt-input" rows="1" data-t-placeholder="aiPrompt" placeholder="${t('aiPrompt')}" class="flex-grow p-3 bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all resize-none"></textarea>
                             <button type="submit" id="ai-submit-button" class="bg-brand-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-brand-700 transition-colors duration-300 flex items-center justify-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 active:brightness-95">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
                         </form>
                     </div>
                 </main>
             </div>`;
-
+            lucide.createIcons();
             setupAiChat();
         }
 
         function setupAiChat() {
             // --- Configuração da IA ---
             const API_URL = '/api/chat';
+            const MESSAGE_LIMIT = 50;
 
             // --- Elementos do DOM ---
-            const chatListEl = document.getElementById('ai-chat-list');
-            const newChatBtn = document.getElementById('ai-new-chat-btn');
+            const sidebarDesktopEl = document.getElementById('ai-sidebar-desktop');
             const chatHistoryEl = document.getElementById('ai-chat-history');
             const promptForm = document.getElementById('ai-prompt-form');
             const promptInput = document.getElementById('ai-prompt-input');
             const submitButton = document.getElementById('ai-submit-button');
+            const mobileMenuBtn = document.getElementById('ai-mobile-menu-btn');
+            const mobileChatTitle = document.getElementById('ai-chat-title-mobile');
+            const chatsModal = document.getElementById('ai-chats-modal');
 
             // --- Estado ---
             let activeChatId = null;
 
             // --- Firestore Refs ---
-            const { collection, query, orderBy, onSnapshot, doc, getDoc, addDoc, updateDoc, deleteDoc, arrayUnion, serverTimestamp } = window.firebaseFirestore;
+            const { collection, query, orderBy, onSnapshot, doc, getDoc, addDoc, updateDoc, setDoc, serverTimestamp, Timestamp, arrayUnion } = window.firebaseFirestore;
             const chatsColRef = collection(db, `users/${currentUser.uid}/ai-chats`);
+            const userDocRef = doc(db, 'users', currentUser.uid);
 
-            const renderChatList = (chats) => {
-                if (!chatListEl) return;
-                chatListEl.innerHTML = '';
+            const getSidebarHtml = () => `
+                <h2 class="text-xl font-bold mb-4" data-t="aiSavedChats">${t('aiSavedChats')}</h2>
+                <button id="ai-new-chat-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mb-4 transition-colors duration-300 flex items-center justify-center active:scale-95 active:brightness-95">
+                    <i class="fas fa-plus mr-2"></i> <span data-t="aiNewChat">${t('aiNewChat')}</span>
+                </button>
+                <div class="flex-grow overflow-y-auto no-scrollbar" id="ai-chat-list">
+                    <!-- A lista de chats será inserida aqui -->
+                </div>
+            `;
+
+            const renderChatList = (chats, container) => {
+                if (!container) return;
+                container.innerHTML = '';
                 if (chats.length === 0) {
-                    chatListEl.innerHTML = '<p class="text-gray-400 text-sm p-2">Nenhum chat salvo.</p>';
+                    container.innerHTML = '<p class="text-gray-400 text-sm p-2">Nenhum chat salvo.</p>';
                     return;
                 }
                 chats.forEach(chat => {
@@ -1315,12 +1269,15 @@
                             <i class="fas fa-trash-alt fa-sm"></i>
                         </button>
                     `;
-                    item.addEventListener('click', () => switchChat(chat.id));
+                    item.addEventListener('click', () => {
+                        switchChat(chat.id);
+                        chatsModal.classList.remove('show');
+                    });
                     item.querySelector('.ai-delete-chat-btn').addEventListener('click', (e) => {
                         e.stopPropagation();
                         confirmDelete(chat.id, `ai-chats`);
                     });
-                    chatListEl.appendChild(item);
+                    container.appendChild(item);
                 });
             };
 
@@ -1343,28 +1300,36 @@
                 const div = document.createElement('div');
                 const isUser = role === 'user';
                 div.className = `flex items-start gap-3 ${isUser ? 'justify-end' : ''}`;
+                
+                const zenithIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`;
+                const userIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
 
-                const iconClass = isUser ? 'fa-user bg-blue-500' : 'fa-robot bg-gray-700';
+                const iconContainer = isUser
+                    ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 bg-blue-500">${userIconSVG}</div>`
+                    : `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 bg-gray-700">${zenithIconSVG}</div>`;
+
                 const contentBg = isUser ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
 
                 div.innerHTML = `
-                    ${!isUser ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 ${iconClass.split(' ')[1]}"><i class="fas ${iconClass.split(' ')[0]}"></i></div>` : ''}
+                    ${!isUser ? iconContainer : ''}
                     <div class="max-w-xl p-3 rounded-lg ${contentBg}">${marked.parse(content)}</div>
-                    ${isUser ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 ${iconClass.split(' ')[1]}"><i class="fas ${iconClass.split(' ')[0]}"></i></div>` : ''}
+                    ${isUser ? iconContainer : ''}
                 `;
                 return div;
             };
 
-            const switchChat = (chatId) => {
+            const switchChat = async (chatId) => {
                 activeChatId = chatId;
                 if (aiMessagesUnsubscribe) aiMessagesUnsubscribe();
 
                 const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, chatId);
-                aiMessagesUnsubscribe = onSnapshot(chatDocRef, (doc) => {
-                    if (doc.exists()) {
-                        const chatData = doc.data();
+                aiMessagesUnsubscribe = onSnapshot(chatDocRef, async (docSnap) => {
+                    if (docSnap.exists()) {
+                        const chatData = docSnap.data();
                         renderChatHistory(chatData.messages);
-                        // We need to re-render the list to update the active state
+                        if (mobileChatTitle) mobileChatTitle.textContent = chatData.title;
+                        await checkAndUpdateFormState();
+                        // Re-render list to update active state
                         if (aiChatUnsubscribe) aiChatUnsubscribe();
                         listenForChats();
                     }
@@ -1377,7 +1342,7 @@
                     title: 'Nova Conversa',
                     messages: [{
                         role: 'model',
-                        content: t('aiWelcome')
+                        content: t('aiWelcomeWithLimit')
                     }],
                     createdAt: serverTimestamp()
                 };
@@ -1391,34 +1356,59 @@
             };
             
             const fetchWithExponentialBackoff = async (url, options, maxRetries = 5) => {
-                let delay = 1000; // start with 1 second
+                let delay = 1000;
                 for (let i = 0; i < maxRetries; i++) {
                     try {
                         const response = await fetch(url, options);
-                        // If response is not 429 (rate limit), we're good, return it
                         if (response.status !== 429) {
                             return response;
                         }
-                        // If we've reached max retries, throw an error
-                        if (i === maxRetries - 1) {
-                            throw new Error("API rate limit exceeded after multiple retries.");
-                        }
-                        // Wait and increase delay for next retry
-                        console.warn(`Rate limit exceeded. Retrying in ${delay}ms... (Attempt ${i + 1}/${maxRetries})`);
+                        if (i === maxRetries - 1) throw new Error("API rate limit exceeded after multiple retries.");
+                        console.warn(`Rate limit exceeded. Retrying in ${delay}ms...`);
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2; // Double the delay
+                        delay *= 2;
                     } catch (error) {
-                         // Handle network errors, etc.
                          console.error(`Fetch attempt ${i + 1} failed:`, error);
-                         if (i === maxRetries - 1) throw error; // Re-throw last error
+                         if (i === maxRetries - 1) throw error;
                          await new Promise(resolve => setTimeout(resolve, delay));
                          delay *= 2;
                     }
                 }
             };
+            
+            const getAiUsage = async () => {
+                const userDocSnap = await getDoc(userDocRef);
+                let usage = userDocSnap.data()?.aiUsage || { count: 0, resetAt: null };
+                const now = new Date();
+                if (usage.resetAt && usage.resetAt.toDate() < now) {
+                    usage = { count: 0, resetAt: null };
+                }
+                return usage;
+            };
+            
+            const checkAndUpdateFormState = async () => {
+                const usage = await getAiUsage();
+                if (usage.count >= MESSAGE_LIMIT) {
+                    promptInput.disabled = true;
+                    submitButton.disabled = true;
+                    const resetTime = usage.resetAt.toDate().toLocaleTimeString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US');
+                    promptInput.placeholder = t('limitResetsAt', { time: resetTime });
+                } else {
+                    promptInput.disabled = false;
+                    submitButton.disabled = false;
+                    promptInput.placeholder = t('aiPrompt');
+                }
+            };
 
             const handleSubmit = async (e) => {
                 e.preventDefault();
+                const usage = await getAiUsage();
+                if (usage.count >= MESSAGE_LIMIT) {
+                    const resetTime = usage.resetAt.toDate().toLocaleTimeString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US');
+                    showToast(`${t('limitExceeded')} ${t('limitResetsAt', { time: resetTime })}`, 'error');
+                    return;
+                }
+
                 if (!activeChatId) {
                     showToast("Nenhum chat ativo. Crie um novo chat primeiro.", "error");
                     return;
@@ -1426,25 +1416,32 @@
                 const prompt = promptInput.value.trim();
                 if (!prompt) return;
 
-                const userMessage = { role: 'user', content: prompt };
+                const userMessage = { role: 'user', content: prompt, createdAt: serverTimestamp() };
                 const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, activeChatId);
-
+                
                 promptInput.value = '';
                 submitButton.disabled = true;
 
                 try {
                     const chatDoc = await getDoc(chatDocRef);
                     let currentMessages = chatDoc.exists() ? chatDoc.data().messages : [];
-                    // If it's the first user message, update the chat title
-                    if (currentMessages.length === 1) {
+                    if (currentMessages.length <= 1) { // Is first user message
                         const newTitle = prompt.substring(0, 30) + (prompt.length > 30 ? '...' : '');
-                        await updateDoc(chatDocRef, {
-                            title: newTitle,
-                            messages: arrayUnion(userMessage)
-                        });
+                        await updateDoc(chatDocRef, { title: newTitle, messages: arrayUnion(userMessage) });
                     } else {
                         await updateDoc(chatDocRef, { messages: arrayUnion(userMessage) });
                     }
+                    
+                    const newCount = usage.count + 1;
+                    let newResetAt = usage.resetAt;
+                    if (!newResetAt) {
+                        const resetDate = new Date();
+                        resetDate.setDate(resetDate.getDate() + 1);
+                        newResetAt = Timestamp.fromDate(resetDate);
+                    }
+                    await setDoc(userDocRef, { aiUsage: { count: newCount, resetAt: newResetAt } }, { merge: true });
+
+                    if(newCount >= MESSAGE_LIMIT) checkAndUpdateFormState();
 
                     const updatedDoc = await getDoc(chatDocRef);
                     const apiHistory = updatedDoc.data().messages.map(msg => ({
@@ -1456,13 +1453,10 @@
                     loadingEl.id = 'loading-indicator';
                     loadingEl.className = "flex items-start gap-3";
                     loadingEl.innerHTML = `
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-gray-700 shrink-0"><i class="fas fa-robot"></i></div>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 bg-gray-700">${zenithIconSVG}</div>
                         <div class="max-w-xl p-3 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                            <div class="dot-bounce">
-                                <div class="dot1"></div><div class="dot2"></div><div class="dot3"></div>
-                            </div>
-                        </div>
-                    `;
+                            <div class="dot-bounce"><div class="dot1"></div><div class="dot2"></div><div class="dot3"></div></div>
+                        </div>`;
                     chatHistoryEl.appendChild(loadingEl);
                     chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
 
@@ -1475,32 +1469,26 @@
                     if (!response.ok) {
                         const errorText = await response.text();
                         let errorJson;
-                        try {
-                            errorJson = JSON.parse(errorText);
-                        } catch (e) {
-                            // If parsing fails, the response was not JSON. Show the raw text.
-                            throw new Error(errorText || `Erro do servidor: ${response.status}`);
-                        }
+                        try { errorJson = JSON.parse(errorText); } catch (e) { throw new Error(errorText || `Erro do servidor: ${response.status}`); }
                         throw new Error(errorJson.error || `Erro da API: ${response.status}`);
                     }
 
                     const data = await response.json();
                     const text = data.response || "Não foi possível obter uma resposta.";
-                    const modelMessage = { role: 'model', content: text };
-
+                    const modelMessage = { role: 'model', content: text, createdAt: serverTimestamp() };
                     await updateDoc(chatDocRef, { messages: arrayUnion(modelMessage) });
+
                 } catch (error) {
                     console.error("Error in handleSubmit:", error);
                     showToast(error.message, "error");
                     const errorMessage = { role: 'model', content: `**Erro:** ${error.message}` };
                     await updateDoc(chatDocRef, { messages: arrayUnion(errorMessage) });
-
                 } finally {
-                    submitButton.disabled = false;
-                    const loadingIndicator = document.getElementById('loading-indicator');
-                    if (loadingIndicator) {
-                        loadingIndicator.remove();
+                    if ((await getAiUsage()).count < MESSAGE_LIMIT) {
+                       submitButton.disabled = false;
                     }
+                    const loadingIndicator = document.getElementById('loading-indicator');
+                    if (loadingIndicator) loadingIndicator.remove();
                 }
             };
 
@@ -1508,7 +1496,9 @@
                 const q = query(chatsColRef, orderBy('createdAt', 'desc'));
                 aiChatUnsubscribe = onSnapshot(q, (snapshot) => {
                     const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderChatList(chats);
+                    renderChatList(chats, document.querySelector('#ai-sidebar-desktop #ai-chat-list'));
+                    renderChatList(chats, document.querySelector('#ai-chats-modal #ai-chat-list'));
+
                     if (!activeChatId && chats.length > 0) {
                         switchChat(chats[0].id);
                     } else if (chats.length === 0) {
@@ -1518,8 +1508,32 @@
                 unsubscribes.push(aiChatUnsubscribe);
             };
 
+            // --- Mobile Menu Setup ---
+            sidebarDesktopEl.innerHTML = getSidebarHtml();
+            mobileMenuBtn.addEventListener('click', () => {
+                chatsModal.innerHTML = `<div class="modal-content !w-full !max-w-xs !h-full !m-0 !rounded-none !absolute !right-0 bg-gray-800 text-white p-4 flex flex-col">${getSidebarHtml()}</div>`;
+                const chatListContainer = chatsModal.querySelector('#ai-chat-list');
+                const newChatBtnModal = chatsModal.querySelector('#ai-new-chat-btn');
+                
+                const q = query(chatsColRef, orderBy('createdAt', 'desc'));
+                getDocs(q).then(snapshot => {
+                     const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                     renderChatList(chats, chatListContainer);
+                });
+
+                newChatBtnModal.addEventListener('click', () => {
+                    createNewChat();
+                    chatsModal.classList.remove('show');
+                });
+                
+                chatsModal.classList.add('show');
+                chatsModal.addEventListener('click', (e) => {
+                   if (e.target === chatsModal) chatsModal.classList.remove('show');
+                });
+            });
+
             // --- Event Listeners ---
-            newChatBtn.addEventListener('click', createNewChat);
+            sidebarDesktopEl.querySelector('#ai-new-chat-btn').addEventListener('click', createNewChat);
             promptForm.addEventListener('submit', handleSubmit);
             promptInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -1543,10 +1557,10 @@
             lucide.createIcons();
             document.getElementById(`add-${type}-btn`).addEventListener('click', () => showItemModal(type));
             const listEl = document.getElementById(`${type}s-list`);
-            const itemLayoutClass = (type === 'note') ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
-                : (type === 'habit') ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'
-                    : (type === 'goal') ? 'grid grid-cols-1 lg:grid-cols-2 gap-6'
-                        : 'space-y-4';
+            const itemLayoutClass = (type === 'note') ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' :
+                (type === 'habit') ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6' :
+                (type === 'goal') ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' :
+                'space-y-4';
             listEl.className = itemLayoutClass;
 
             if (firebaseInitialized) {
