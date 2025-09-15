@@ -2,14 +2,14 @@
   "name": "zenith-ia-server",
   "version": "1.0.0",
   "description": "Servidor seguro para a IA Zenithinha.",
-  "main": "netlify/functions/server.js",
   "type": "module",
   "scripts": {
     "start": "node netlify/functions/server.js",
+    "dev": "netlify dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["IA", "Zenith", "Netlify", "Express"],
+  "author": "Kauan Bryan",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.5",

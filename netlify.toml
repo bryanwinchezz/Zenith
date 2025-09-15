@@ -2,17 +2,14 @@
   publish = "."
   functions = "netlify/functions"
 
-# --- SINTAXE CORRETA PARA O TIMEOUT ---
 [functions."*"]
   timeout = 25
 
-# --- REGRAS DE REDIRECIONAMENTO ---
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/server/:splat"
   status = 200
 
-# Regra principal do site (deve vir por último)
 [[redirects]]
   from = "/*"
   to = "/index.html"

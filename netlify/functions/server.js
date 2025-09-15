@@ -1,23 +1,25 @@
+// --- server.js corrigido para Netlify / ESM ---
+
 import express from 'express';
-import dotenv from 'dotenv';
-import serverless from 'serverless-http';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fetch from 'node-fetch'; // Importa o node-fetch para robustez
+import serverless from 'serverless-http';
+import fetch from 'node-fetch'; // caso use Node < 18, senão pode remover
 
-dotenv.config();
+// --- Variáveis de diretório ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+// --- App e Router ---
 const app = express();
 const router = express.Router();
 
-const __filename = fileURLToPath(import.meta.url);
-const projectRoot = path.join(path.dirname(__filename), '..', '..');
-
 app.use(express.json());
 
-// --- Rota da API ---
+// --- Rota da API /chat ---
 router.post('/chat', async (req, res) => {
   console.log('--- Requisição /chat recebida ---');
+
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -62,7 +64,6 @@ router.post('/chat', async (req, res) => {
     }
 
     const text = data.candidates[0].content.parts[0].text;
-
     res.json({ response: text });
 
   } catch (error) {
@@ -71,26 +72,20 @@ router.post('/chat', async (req, res) => {
   }
 });
 
-// --- Configuração do Servidor ---
-
+// --- Configuração do Router ---
 app.use('/api', router);
 
-// Configuração apenas para desenvolvimento local
+// --- Servidor local (desenvolvimento) ---
 if (!process.env.NETLIFY) {
-  // Mova as declarações para cá
-  const __filename = fileURLToPath(import.meta.url);
-  const projectRoot = path.join(path.dirname(__filename), '..', '..');
-
+  const projectRoot = path.join(__dirname, '..', '..');
   app.use(express.static(projectRoot));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(projectRoot, 'index.html'));
-  });
+  app.get('*', (req, res) => res.sendFile(path.join(projectRoot, 'index.html')));
 
   const port = 3000;
-  app.listen(port, () => {
-    console.log(`Servidor de desenvolvimento iniciado! Acesse o site em http://localhost:${port}`);
-  });
+  app.listen(port, () => console.log(`Servidor local rodando em http://localhost:${port}`));
 }
 
-// Exporta o handler para a Netlify
+// --- Exporta para Netlify ---
 export const handler = serverless(app);
+
+// --- Fim do server.js ---
