@@ -181,6 +181,17 @@
             opacity: 1;
             visibility: visible;
         }
+        
+        #ai-chats-modal {
+             justify-content: flex-end;
+        }
+        #ai-chats-modal .modal-content {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        #ai-chats-modal.show .modal-content {
+            transform: translateX(0);
+        }
 
         .modal-content {
             background: white;
@@ -1278,7 +1289,9 @@
                     });
                     item.querySelector('.ai-delete-chat-btn').addEventListener('click', (e) => {
                         e.stopPropagation();
-                        confirmDelete(chat.id, `ai-chats`);
+                        confirmDelete(chat.id, 'ai-chats', () => {
+                            chatsModal.classList.remove('show');
+                        });
                     });
                     container.appendChild(item);
                 });
