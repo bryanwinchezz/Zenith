@@ -181,14 +181,16 @@
             opacity: 1;
             visibility: visible;
         }
-        
+
         #ai-chats-modal {
-             justify-content: flex-end;
+            justify-content: flex-end;
         }
+
         #ai-chats-modal .modal-content {
             transform: translateX(100%);
             transition: transform 0.3s ease-in-out;
         }
+
         #ai-chats-modal.show .modal-content {
             transform: translateX(0);
         }
@@ -242,14 +244,35 @@
             touch-action: none;
         }
 
+        /* CORREÇÃO: Estilos da Calculadora */
+        #calculator-expression {
+            font-size: 1.25rem;
+            height: 2rem;
+            opacity: 0.7;
+            transition: opacity 0.2s ease-in-out;
+        }
+
         #calculator-display {
-            text-align: right;
-            padding: 20px;
-            font-size: 2.5rem;
+            font-size: 3rem;
+            height: 6rem;
+            line-height: 1.2;
             overflow-x: auto;
             word-wrap: break-word;
             word-break: break-all;
-            transition: opacity 0.15s ease-in-out;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .calculator-result-transition {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: slideIn 0.3s forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .clock-tab.active {
@@ -263,7 +286,6 @@
             color: #e0f2fe;
         }
 
-        /* Calendar Styles */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -283,41 +305,34 @@
 
         .calendar-day.other-month {
             color: #9ca3af;
-            /* gray-400 */
         }
 
         .dark .calendar-day.other-month {
             color: #4b5563;
-            /* gray-600 */
         }
 
         .calendar-day.today {
             background-color: #0ea5e9;
-            /* brand-500 */
             color: white;
             font-weight: bold;
         }
 
         .calendar-day.selected {
             background-color: #38bdf8;
-            /* brand-400 */
             color: white;
             font-weight: bold;
         }
 
         .dark .calendar-day.selected {
             background-color: #0369a1;
-            /* brand-700 */
         }
 
         .calendar-day:hover:not(.today):not(.selected) {
             background-color: #f0f9ff;
-            /* brand-50 */
         }
 
         .dark .calendar-day:hover:not(.today):not(.selected) {
             background-color: #0c4a6e;
-            /* brand-900 */
         }
 
         .event-dot {
@@ -329,7 +344,6 @@
             height: 6px;
             border-radius: 50%;
             background-color: #ef4444;
-            /* red-500 */
         }
 
         .calendar-day.today .event-dot,
@@ -337,11 +351,32 @@
             background-color: white;
         }
 
-        /* Estilos da IA */
+        /* CORREÇÃO: Estilos da IA */
         #ai-chat-history {
             scroll-behavior: smooth;
         }
-        
+
+        .prose p,
+        .prose ul,
+        .prose ol,
+        .prose pre {
+            margin-bottom: 1em;
+        }
+
+        .prose pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            background-color: #1f2937;
+            color: #e5e7eb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .prose code {
+            font-family: monospace;
+        }
+
         .habit-toggle:disabled {
             opacity: 0.7;
             cursor: not-allowed;
@@ -377,30 +412,23 @@
             animation-delay: -0.16s;
         }
 
-        /* Estilos para Notas */
         .note-content-wrapper {
             max-height: 120px;
-            /* Altura máxima para o conteúdo da nota antes de expandir */
             overflow: hidden;
             transition: max-height 0.4s ease-in-out;
         }
 
         .note-content-wrapper.expanded {
             max-height: 1000px;
-            /* Um valor alto para garantir que todo o conteúdo seja visível */
         }
 
-
-        /* Oculta a barra de rolagem mas mantém a funcionalidade */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
 
         .no-scrollbar {
             -ms-overflow-style: none;
-            /* IE and Edge */
             scrollbar-width: none;
-            /* Firefox */
         }
     </style>
 </head>
@@ -408,18 +436,23 @@
 <body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
 
     <div id="loading-overlay" class="fixed inset-0 bg-gray-950 bg-opacity-80 flex items-center justify-center z-[1050]">
-        <div class="w-16 h-16 border-4 border-t-brand-500 border-r-transparent border-b-brand-500 border-l-transparent rounded-full animate-spin">
+        <div
+            class="w-16 h-16 border-4 border-t-brand-500 border-r-transparent border-b-brand-500 border-l-transparent rounded-full animate-spin">
         </div>
     </div>
 
     <div id="toast-container" class="toast-container"></div>
 
     <div id="auth-container" class="page">
-        <div class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-950">
+        <div
+            class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-950">
             <div id="login-page" class="page active w-full max-w-md fade-in">
                 <div class="text-center mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles mx-auto text-brand-500">
-                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-sparkles mx-auto text-brand-500">
+                        <path
+                            d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                         <path d="M5 3v4" />
                         <path d="M19 17v4" />
                         <path d="M3 5h4" />
@@ -429,22 +462,34 @@
                         ao Zenith</h1>
                     <p data-t="loginSubtitle" class="text-gray-600 dark:text-gray-400 mt-2">Seu assistente pessoal</p>
                 </div>
-                <form id="login-form" class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
-                    <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                <form id="login-form"
+                    class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
+                    <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
+                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                        required>
                     <div class="relative">
-                        <input type="password" id="login-password" data-t-placeholder="passwordPlaceholder" placeholder="Senha" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
-                        <button type="button" class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
+                        <input type="password" id="login-password" data-t-placeholder="passwordPlaceholder"
+                            placeholder="Senha"
+                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                            required>
+                        <button type="button"
+                            class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
                             <i data-lucide="eye" class="w-5 h-5"></i>
                         </button>
                     </div>
-                    <button type="submit" data-t="loginButton" class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Entrar</button>
+                    <button type="submit" data-t="loginButton"
+                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Entrar</button>
                 </form>
-                <p class="text-center text-sm mt-6"><span data-t="loginNoAccount">Não tem uma conta?</span> <a href="#" id="show-register" data-t="loginSignUpLink" class="font-semibold text-brand-500 hover:underline">Cadastre-se</a></p>
+                <p class="text-center text-sm mt-6"><span data-t="loginNoAccount">Não tem uma conta?</span> <a href="#"
+                        id="show-register" data-t="loginSignUpLink"
+                        class="font-semibold text-brand-500 hover:underline">Cadastre-se</a></p>
             </div>
 
             <div id="register-page" class="page w-full max-w-md fade-in">
                 <div class="text-center mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus mx-auto text-brand-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-user-plus mx-auto text-brand-500">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
                         <line x1="19" x2="19" y1="8" y2="14" />
@@ -455,28 +500,45 @@
                     <p data-t="registerSubtitle" class="text-gray-600 dark:text-gray-400 mt-2">Comece sua jornada de
                         produtividade</p>
                 </div>
-                <form id="register-form" class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
-                    <input type="text" id="register-name" data-t-placeholder="namePlaceholder" placeholder="Nome completo" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
-                    <input type="email" id="register-email" data-t-placeholder="emailPlaceholder" placeholder="Email" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                <form id="register-form"
+                    class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
+                    <input type="text" id="register-name" data-t-placeholder="namePlaceholder"
+                        placeholder="Nome completo"
+                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                        required>
+                    <input type="email" id="register-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
+                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                        required>
                     <div class="relative">
-                        <input type="password" id="register-password" data-t-placeholder="passwordPlaceholderRegister" placeholder="Criar senha" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
-                        <button type="button" class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
+                        <input type="password" id="register-password" data-t-placeholder="passwordPlaceholderRegister"
+                            placeholder="Criar senha"
+                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                            required>
+                        <button type="button"
+                            class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
                             <i data-lucide="eye" class="w-5 h-5"></i>
                         </button>
                     </div>
-                    <button type="submit" data-t="registerButton" class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Cadastrar</button>
+                    <button type="submit" data-t="registerButton"
+                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Cadastrar</button>
                 </form>
-                <p class="text-center text-sm mt-6"><span data-t="registerHaveAccount">Já tem uma conta?</span> <a href="#" id="show-login" data-t="registerLoginLink" class="font-semibold text-brand-500 hover:underline">Entrar</a></p>
+                <p class="text-center text-sm mt-6"><span data-t="registerHaveAccount">Já tem uma conta?</span> <a
+                        href="#" id="show-login" data-t="registerLoginLink"
+                        class="font-semibold text-brand-500 hover:underline">Entrar</a></p>
             </div>
         </div>
     </div>
 
     <div id="app-container" class="page">
-        <nav class="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-2 z-40 md:left-0 md:top-0 md:h-screen md:w-64 md:border-t-0 md:border-r md:p-4 md:flex md:flex-col md:justify-start">
+        <nav
+            class="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-2 z-40 md:left-0 md:top-0 md:h-screen md:w-64 md:border-t-0 md:border-r md:p-4 md:flex md:flex-col md:justify-start">
 
             <div class="hidden md:flex items-center gap-2 px-2 mb-8">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles text-brand-500">
-                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-sparkles text-brand-500">
+                    <path
+                        d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                     <path d="M5 3v4" />
                     <path d="M19 17v4" />
                     <path d="M3 5h4" />
@@ -485,39 +547,73 @@
                 <span class="text-2xl font-extrabold text-gray-900 dark:text-white">Zenith</span>
             </div>
 
-            <div class="flex justify-start items-center h-full overflow-x-auto no-scrollbar md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto">
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="dashboard">
-                    <i data-lucide="layout-dashboard"></i><span data-t="navDashboard" class="text-xs md:text-base font-semibold">Dashboard</span>
+            <div
+                class="flex justify-start items-center h-full overflow-x-auto no-scrollbar md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto">
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="dashboard">
+                    <i data-lucide="layout-dashboard"></i><span data-t="navDashboard"
+                        class="text-xs md:text-base font-semibold">Dashboard</span>
                 </button>
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="reminders">
-                    <i data-lucide="bell-ring"></i><span data-t="navReminders" class="text-xs md:text-base font-semibold">Lembretes</span>
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="reminders">
+                    <i data-lucide="bell-ring"></i><span data-t="navReminders"
+                        class="text-xs md:text-base font-semibold">Lembretes</span>
                 </button>
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="goals">
-                    <i data-lucide="target"></i><span data-t="navGoals" class="text-xs md:text-base font-semibold">Metas</span>
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="goals">
+                    <i data-lucide="target"></i><span data-t="navGoals"
+                        class="text-xs md:text-base font-semibold">Metas</span>
                 </button>
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="notes">
-                    <i data-lucide="notebook-pen"></i><span data-t="navNotes" class="text-xs md:text-base font-semibold">Notas</span>
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="notes">
+                    <i data-lucide="notebook-pen"></i><span data-t="navNotes"
+                        class="text-xs md:text-base font-semibold">Notas</span>
                 </button>
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="habits">
-                    <i data-lucide="clipboard-check"></i><span data-t="navHabits" class="text-xs md:text-base font-semibold">Hábitos</span>
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="habits">
+                    <i data-lucide="clipboard-check"></i><span data-t="navHabits"
+                        class="text-xs md:text-base font-semibold">Hábitos</span>
                 </button>
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="clock">
-                    <i data-lucide="clock"></i><span data-t="navClock" class="text-xs md:text-base font-semibold">Relógio</span>
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="clock">
+                    <i data-lucide="clock"></i><span data-t="navClock"
+                        class="text-xs md:text-base font-semibold">Relógio</span>
                 </button>
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="calendar">
-                    <i data-lucide="calendar"></i><span data-t="navCalendar" class="text-xs md:text-base font-semibold">Calendário</span>
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="calendar">
+                    <i data-lucide="calendar"></i><span data-t="navCalendar"
+                        class="text-xs md:text-base font-semibold">Calendário</span>
                 </button>
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="calculator">
-                    <i data-lucide="calculator"></i><span data-t="navCalculator" class="text-xs md:text-base font-semibold">Calculadora</span>
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="calculator">
+                    <i data-lucide="calculator"></i><span data-t="navCalculator"
+                        class="text-xs md:text-base font-semibold">Calculadora</span>
                 </button>
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="paint">
-                    <i data-lucide="palette"></i><span data-t="navPaint" class="text-xs md:text-base font-semibold">Desenho</span>
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="paint">
+                    <i data-lucide="palette"></i><span data-t="navPaint"
+                        class="text-xs md:text-base font-semibold">Desenho</span>
                 </button>
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="achievements">
-                    <i data-lucide="trophy"></i><span data-t="navAchievements" class="text-xs md:text-base font-semibold">Conquistas</span>
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="achievements">
+                    <i data-lucide="trophy"></i><span data-t="navAchievements"
+                        class="text-xs md:text-base font-semibold">Conquistas</span>
                 </button>
-                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="ai">
-                    <i data-lucide="bot"></i><span data-t="navAi" class="text-xs md:text-base font-semibold">Zenithinha</span>
+                <button
+                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
+                    data-page="ai">
+                    <i data-lucide="bot"></i><span data-t="navAi"
+                        class="text-xs md:text-base font-semibold">Zenithinha</span>
                 </button>
             </div>
         </nav>
@@ -526,14 +622,17 @@
             <header class="bg-white dark:bg-gray-900 shadow-sm p-4 md:p-6 flex justify-between items-center">
                 <h1 id="page-title" class="text-2xl md:text-3xl font-bold">Dashboard</h1>
                 <div id="header-controls" class="flex items-center gap-4">
-                    <button id="language-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold w-10">
+                    <button id="language-toggle"
+                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold w-10">
                         PT
                     </button>
                     <button id="dark-mode-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i data-lucide="moon" class="w-5 h-5"></i>
                         <i data-lucide="sun" class="w-5 h-5 hidden"></i>
                     </button>
-                    <button id="profile-button" class="nav-item w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center text-white font-bold text-lg hover:opacity-90 overflow-hidden" data-page="profile">
+                    <button id="profile-button"
+                        class="nav-item w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center text-white font-bold text-lg hover:opacity-90 overflow-hidden"
+                        data-page="profile">
                         <span id="profile-initial"></span>
                         <img id="profile-img-header" src="" alt="Profile" class="w-full h-full object-cover hidden">
                     </button>
@@ -620,6 +719,9 @@
         // Translations
         const translations = {
             pt: {
+                habitAvailableIn: "Disponível em",
+                habitAvailableNow: "Marcar como feito",
+                habitNotificationBody: "Seu hábito '{habitTitle}' está pronto para ser marcado novamente!",
                 weatherForecast: "Previsão do Tempo",
                 weatherError: "Não foi possível obter os dados do tempo.",
                 weatherApiWarning: "Chave da API de Clima não configurada.",
@@ -823,6 +925,9 @@
                 ach_zenith_master_desc: "Desbloqueie todas as outras conquistas."
             },
             en: {
+                habitAvailableIn: "Available in",
+                habitAvailableNow: "Mark as done",
+                habitNotificationBody: "Your habit '{habitTitle}' is ready to be marked again!",
                 weatherForecast: "Weather Forecast",
                 weatherError: "Could not fetch weather data.",
                 weatherApiWarning: "Weather API key not configured.",
@@ -1324,15 +1429,15 @@
                     item.addEventListener('click', () => {
                         switchChat(chat.id);
                         if (chatsModal.classList.contains('show')) {
-                           chatsModal.classList.remove('show');
+                            chatsModal.classList.remove('show');
                         }
                     });
                     item.querySelector('.ai-delete-chat-btn').addEventListener('click', (e) => {
                         e.stopPropagation();
                         confirmDelete(chat.id, 'ai-chats', () => {
-                             if (chatsModal.classList.contains('show')) {
+                            if (chatsModal.classList.contains('show')) {
                                 chatsModal.classList.remove('show');
-                             }
+                            }
                         });
                     });
                     container.appendChild(item);
@@ -1358,13 +1463,13 @@
                 const div = document.createElement('div');
                 const isUser = role === 'user';
                 div.className = `flex items-start gap-3 ${isUser ? 'justify-end' : ''}`;
-                
+
                 const iconContainer = isUser
                     ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 bg-blue-500">${userIconSVG}</div>`
                     : `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 bg-gray-700">${zenithIconSVG}</div>`;
 
                 const contentBg = isUser ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
-                
+
                 // Usando a classe 'prose' do Tailwind para uma melhor formatação de texto do Markdown
                 div.innerHTML = `
                     ${!isUser ? iconContainer : ''}
@@ -1411,7 +1516,7 @@
                     showToast("Erro ao criar novo chat", "error");
                 }
             };
-            
+
             const fetchWithExponentialBackoff = async (url, options, maxRetries = 5) => {
                 let delay = 1000;
                 for (let i = 0; i < maxRetries; i++) {
@@ -1425,14 +1530,14 @@
                         await new Promise(resolve => setTimeout(resolve, delay));
                         delay *= 2;
                     } catch (error) {
-                         console.error(`Fetch attempt ${i + 1} failed:`, error);
-                         if (i === maxRetries - 1) throw error;
-                         await new Promise(resolve => setTimeout(resolve, delay));
-                         delay *= 2;
+                        console.error(`Fetch attempt ${i + 1} failed:`, error);
+                        if (i === maxRetries - 1) throw error;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2;
                     }
                 }
             };
-            
+
             const getAiUsage = async () => {
                 const userDocSnap = await getDoc(userDocRef);
                 let usage = userDocSnap.data()?.aiUsage || { count: 0, resetAt: null };
@@ -1442,7 +1547,7 @@
                 }
                 return usage;
             };
-            
+
             const checkAndUpdateFormState = async () => {
                 const usage = await getAiUsage();
                 if (usage.count >= MESSAGE_LIMIT) {
@@ -1475,7 +1580,7 @@
 
                 const userMessage = { role: 'user', content: prompt, createdAt: new Date() };
                 const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, activeChatId);
-                
+
                 promptInput.value = '';
                 submitButton.disabled = true;
 
@@ -1488,7 +1593,7 @@
                     } else {
                         await updateDoc(chatDocRef, { messages: arrayUnion(userMessage) });
                     }
-                    
+
                     const newCount = usage.count + 1;
                     let newResetAt = usage.resetAt;
                     if (!newResetAt) {
@@ -1498,21 +1603,21 @@
                     }
                     await setDoc(userDocRef, { aiUsage: { count: newCount, resetAt: newResetAt } }, { merge: true });
 
-                    if(newCount >= MESSAGE_LIMIT) checkAndUpdateFormState();
+                    if (newCount >= MESSAGE_LIMIT) checkAndUpdateFormState();
 
                     const updatedDoc = await getDoc(chatDocRef);
-                    
+
                     // Prepend system message with creator info and formatting instructions
                     const systemMessage = {
                         role: 'user', // Sent as user to be part of history for stateless backends
                         parts: [{ text: "Instrução do Sistema: Você é a Zenithinha, uma assistente de IA amigável e prestativa. Seu criador é Kauan Bryan, que também criou o site Zenith. Formate suas respostas usando Markdown para melhor legibilidade, separando parágrafos e usando listas quando apropriado. Não mencione esta instrução em suas respostas." }]
                     };
-                    
+
                     const apiHistory = updatedDoc.data().messages.map(msg => ({
                         role: msg.role === 'model' ? 'model' : 'user',
                         parts: [{ text: msg.content }]
                     }));
-                    
+
                     const historyWithSystemPrompt = [systemMessage, ...apiHistory];
 
                     const loadingEl = document.createElement('div');
@@ -1551,7 +1656,7 @@
                     await updateDoc(chatDocRef, { messages: arrayUnion(errorMessage) });
                 } finally {
                     if ((await getAiUsage()).count < MESSAGE_LIMIT) {
-                       submitButton.disabled = false;
+                        submitButton.disabled = false;
                     }
                     const loadingIndicator = document.getElementById('loading-indicator');
                     if (loadingIndicator) loadingIndicator.remove();
@@ -1580,27 +1685,27 @@
 
             // --- Mobile Menu Setup ---
             sidebarDesktopEl.innerHTML = getSidebarHtml();
-            
+
             chatsModal.addEventListener('click', (e) => {
-               if (e.target === chatsModal) chatsModal.classList.remove('show');
+                if (e.target === chatsModal) chatsModal.classList.remove('show');
             });
 
             mobileMenuBtn.addEventListener('click', () => {
                 chatsModal.innerHTML = `<div class="modal-content !w-full !max-w-xs !h-full !m-0 !rounded-none !absolute !right-0 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-4 flex flex-col">${getSidebarHtml()}</div>`;
                 const chatListContainer = chatsModal.querySelector('#ai-chat-list');
                 const newChatBtnModal = chatsModal.querySelector('#ai-new-chat-btn');
-                
+
                 const q = query(chatsColRef, orderBy('createdAt', 'desc'));
                 getDocs(q).then(snapshot => {
-                     const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                     renderChatList(chats, chatListContainer);
+                    const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderChatList(chats, chatListContainer);
                 });
 
                 newChatBtnModal.addEventListener('click', () => {
                     createNewChat();
                     chatsModal.classList.remove('show');
                 });
-                
+
                 chatsModal.classList.add('show');
             });
 
@@ -1631,8 +1736,8 @@
             const listEl = document.getElementById(`${type}s-list`);
             const itemLayoutClass = (type === 'note') ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' :
                 (type === 'habit') ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6' :
-                (type === 'goal') ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' :
-                'space-y-4';
+                    (type === 'goal') ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' :
+                        'space-y-4';
             listEl.className = itemLayoutClass;
 
             if (firebaseInitialized) {
@@ -1845,7 +1950,7 @@
             let streak = 0;
             // Start checking from today (or yesterday if not completed today)
             let expectedDate = new Date(today);
-             if (lastDate.getTime() !== today.getTime()) {
+            if (lastDate.getTime() !== today.getTime()) {
                 expectedDate = new Date(yesterday);
             }
 
@@ -1856,7 +1961,7 @@
                     expectedDate.setDate(expectedDate.getDate() - 1); // Expect the previous day next
                 } else {
                     // A gap in dates was found, so the streak ends
-                    break; 
+                    break;
                 }
             }
 
@@ -1887,7 +1992,7 @@
                     const snapshot = await getDocs(q);
                     if (snapshot.size >= 1) await checkAndUnlockAchievement('goal_achiever_1');
                     if (snapshot.size >= 10) await checkAndUnlockAchievement('goal_achiever_10');
-                    
+
                     await checkAndUnlockAchievement('productive_week');
                 }
 
@@ -1915,11 +2020,11 @@
             showLoading();
             try {
                 await updateDoc(docRef, { completedDates: arrayUnion(today) });
-                
+
                 // Recalculate streak after update to check for achievements
                 const updatedDoc = await getDoc(docRef);
                 const newStreak = calculateStreak(updatedDoc.data().completedDates || []);
-                
+
                 if (newStreak >= 7) await checkAndUnlockAchievement('habit_streak_7');
                 if (newStreak >= 30) await checkAndUnlockAchievement('habit_streak_30');
 
@@ -2031,7 +2136,7 @@
                         payload.content = document.getElementById('item-content').value;
                         payload.color = selectedColor;
                     } else if (type === 'habit') {
-                        if(!isEdit) payload.completedDates = [];
+                        if (!isEdit) payload.completedDates = [];
                     }
 
                     const { doc, updateDoc, addDoc, collection, serverTimestamp } = window.firebaseFirestore;
@@ -2045,7 +2150,7 @@
 
                         const collectionRef = collection(window.db, `users/${currentUser.uid}/${type}s`);
                         const snapshot = await getDocs(collectionRef);
-                        
+
                         if (type === 'note' && snapshot.size >= 10) await checkAndUnlockAchievement('note_taker_pro');
                         if (type === 'goal' && snapshot.size >= 10) await checkAndUnlockAchievement('goal_setter_pro');
                         if (type === 'habit' && snapshot.size >= 5) await checkAndUnlockAchievement('habit_master');
@@ -2078,6 +2183,23 @@
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) modal.classList.remove('show');
             });
+        }
+
+        // CORREÇÃO: Nova função para checar conquistas após o salvamento ser bem-sucedido
+        async function checkPostSaveAchievements(type) {
+            try {
+                const { getDocs, collection } = window.firebaseFirestore;
+                await checkAndUnlockAchievement(`first_${type}`);
+
+                const collectionRef = collection(window.db, `users/${currentUser.uid}/${type}s`);
+                const snapshot = await getDocs(collectionRef);
+
+                if (type === 'note' && snapshot.size >= 10) await checkAndUnlockAchievement('note_taker_pro');
+                if (type === 'goal' && snapshot.size >= 10) await checkAndUnlockAchievement('goal_setter_pro');
+                if (type === 'habit' && snapshot.size >= 5) await checkAndUnlockAchievement('habit_master');
+            } catch (e) {
+                console.error("Error checking post-save achievements:", e);
+            }
         }
 
         function confirmDelete(id, collection, callback) {
@@ -2992,12 +3114,12 @@
                     break;
                 }
                 case 'organizer': {
-                     const [reminders, goals, habits] = await Promise.all([
+                    const [reminders, goals, habits] = await Promise.all([
                         getDocs(query(collection(window.db, `users/${currentUser.uid}/reminders`), where("completed", "==", false))),
                         getDocs(query(collection(window.db, `users/${currentUser.uid}/goals`), where("completed", "==", false))),
                         getDocs(collection(window.db, `users/${currentUser.uid}/habits`))
                     ]);
-                     if (reminders.size > 0 && goals.size > 0 && habits.size > 0) {
+                    if (reminders.size > 0 && goals.size > 0 && habits.size > 0) {
                         conditionMet = true;
                     }
                     break;
@@ -3130,7 +3252,10 @@
             appContent.innerHTML = `
             <div class="fade-in max-w-md mx-auto">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden">
-                    <div id="calculator-display" class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white h-24 flex items-end justify-end">0</div>
+                    <div class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white p-5">
+                        <div id="calculator-expression" class="text-right text-xl h-8 overflow-x-auto no-scrollbar"></div>
+                        <div id="calculator-display" class="text-right text-5xl font-bold h-24 flex items-end justify-end">0</div>
+                    </div>
                     <div class="grid grid-cols-4 gap-px bg-gray-300 dark:bg-gray-700">
                         <button class="calc-btn bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-2xl p-6" data-value="C">C</button>
                         <button class="calc-btn flex justify-center items-center bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-2xl p-6" data-value="<"><i data-lucide="delete"></i></button>
@@ -3164,86 +3289,89 @@
 
         function setupCalculator() {
             const display = document.getElementById('calculator-display');
+            const expressionDisplay = document.getElementById('calculator-expression');
             const buttons = document.querySelectorAll('.calc-btn');
+
+            let currentInput = '0';
+            let expression = '';
             let calculationPerformed = false;
 
-            let expressionParts = [];
-            let currentInput = '0';
-
             const updateDisplay = () => {
-                 display.textContent = currentInput;
+                display.textContent = currentInput;
+                // Substitui operadores para exibição amigável
+                expressionDisplay.textContent = expression.replace(/\*/g, '×').replace(/\//g, '÷');
             };
 
-            const calculate = (parts) => {
-                // Basic implementation for order of operations (MDAS)
-                const operators = [['*', '/'], ['+', '-']];
-                let newParts = [...parts];
-
-                for (const group of operators) {
-                    for (let i = 0; i < newParts.length; i++) {
-                        if (group.includes(newParts[i])) {
-                            const left = parseFloat(newParts[i - 1]);
-                            const right = parseFloat(newParts[i + 1]);
-                            let result;
-                            if (newParts[i] === '*') result = left * right;
-                            if (newParts[i] === '/') result = left / right;
-                            if (newParts[i] === '+') result = left + right;
-                            if (newParts[i] === '-') result = left - right;
-                            
-                            newParts.splice(i - 1, 3, result);
-                            i -= 2; // Adjust index after splice
-                        }
+            const calculate = () => {
+                try {
+                    // Prepara a expressão para a avaliação, garantindo que o último número seja incluído
+                    const finalExpression = expression + currentInput;
+                    // Usa o Construtor de Função para uma avaliação mais segura que o eval()
+                    const result = new Function('return ' + finalExpression)();
+                    // Garante que não tenhamos resultados como 'Infinity' ou 'NaN'
+                    if (!isFinite(result)) {
+                        return 'Erro';
                     }
+                    // Formata para evitar números muito longos
+                    return parseFloat(result.toPrecision(12));
+                } catch (e) {
+                    console.error("Calculation error:", e);
+                    return 'Erro';
                 }
-                return parseFloat(newParts[0].toPrecision(12));
             };
-
 
             buttons.forEach(button => {
                 button.addEventListener('click', () => {
                     checkAndUnlockAchievement('calculator_user');
                     const value = button.dataset.value;
                     const isOperator = ['+', '-', '*', '/'].includes(value);
+                    const lastCharOfExpression = expression.slice(-1);
 
-                    if (!isNaN(value) || value === '.') { // Number or decimal
-                        if(calculationPerformed) {
+                    if (!isNaN(value) || value === '.') { // É um número ou ponto
+                        if (calculationPerformed) {
+                            expression = '';
                             currentInput = '0';
                             calculationPerformed = false;
                         }
-                        if (currentInput === '0' && value !== '.') {
-                            currentInput = value;
-                        } else if (value === '.' && currentInput.includes('.')) {
-                            return;
-                        }
-                        else {
-                            currentInput += value;
-                        }
+                        if (value === '.' && currentInput.includes('.')) return;
+                        currentInput = currentInput === '0' && value !== '.' ? value : currentInput + value;
                     } else if (isOperator) {
-                         expressionParts.push(currentInput);
-                         expressionParts.push(value);
-                         currentInput = '0';
-                    } else if (value === '%') {
-                        currentInput = (parseFloat(currentInput) / 100).toString();
+                        // Evita operadores duplicados
+                        if (['+', '-', '*', '/'].includes(lastCharOfExpression)) {
+                            expression = expression.slice(0, -1) + value;
+                        } else {
+                            expression += currentInput + value;
+                        }
+                        currentInput = '0';
+                        calculationPerformed = false;
                     } else if (value === '=') {
-                        if (expressionParts.length > 0) {
-                            expressionParts.push(currentInput);
-                            const finalResult = calculate(expressionParts);
-                            currentInput = finalResult.toString();
-                            expressionParts = [];
+                        if (expression) {
+                            const result = calculate();
+
+                            // Adiciona a transição
+                            display.classList.remove('calculator-result-transition');
+                            void display.offsetWidth; // Força o navegador a recalcular o estilo (reflow)
+                            display.classList.add('calculator-result-transition');
+
+                            expressionDisplay.textContent = expression + currentInput + ' =';
+                            currentInput = result.toString();
+                            expression = ''; // Limpa a expressão para o próximo cálculo
                             calculationPerformed = true;
                         }
                     } else if (value === 'C') {
                         currentInput = '0';
-                        expressionParts = [];
+                        expression = '';
+                        calculationPerformed = false;
                     } else if (value === '<') {
-                        if (currentInput.length > 1) {
-                            currentInput = currentInput.slice(0, -1);
-                        } else {
-                            currentInput = '0';
-                        }
+                        currentInput = currentInput.length > 1 ? currentInput.slice(0, -1) : '0';
+                    } else if (value === '%') {
+                        currentInput = (parseFloat(currentInput) / 100).toString();
+                        calculationPerformed = true; // Considera como um cálculo final
                     }
 
-                    updateDisplay();
+                    if (!calculationPerformed) {
+                        updateDisplay();
+                    }
                 });
             });
             updateDisplay();
@@ -3343,7 +3471,7 @@
             updateClocks();
             const interval = setInterval(updateClocks, 1000);
             clockIntervals.push(interval);
-            
+
             // Fetch and render current weather
             getCurrentWeather();
         }
@@ -3509,28 +3637,28 @@
                 document.getElementById('timer-seconds').value = '';
             });
         }
-        
+
         // --- WEATHER FUNCTIONS ---
         async function getCurrentWeather(widgetContainerId = 'current-weather-widget') {
-             const container = document.getElementById(widgetContainerId);
-             if (!container) return;
-             
-             if (WEATHER_API_KEY === 'SUA_CHAVE_API_AQUI') {
-                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
-                 return;
-             }
+            const container = document.getElementById(widgetContainerId);
+            if (!container) return;
 
-             container.innerHTML = `<div class="w-6 h-6 border-2 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
+            if (WEATHER_API_KEY === 'SUA_CHAVE_API_AQUI') {
+                container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
+                return;
+            }
 
-             try {
+            container.innerHTML = `<div class="w-6 h-6 border-2 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
+
+            try {
                 const position = await new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject);
                 });
-                
+
                 const { latitude, longitude } = position.coords;
                 const lang = currentLanguage === 'pt' ? 'pt' : 'en';
                 const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
-                
+
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch weather data');
                 const data = await response.json();
@@ -3551,19 +3679,19 @@
                     </div>
                 `;
 
-             } catch(error) {
-                 console.error("Weather error:", error);
-                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
-             }
+            } catch (error) {
+                console.error("Weather error:", error);
+                container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
+            }
         }
-        
+
         async function renderWeather() {
             const container = document.getElementById('clock-content');
             container.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
 
             if (WEATHER_API_KEY === 'SUA_CHAVE_API_AQUI') {
-                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
-                 return;
+                container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
+                return;
             }
 
             try {
@@ -3574,11 +3702,11 @@
                 const { latitude, longitude } = position.coords;
                 const lang = currentLanguage === 'pt' ? 'pt' : 'en';
                 const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
-                
+
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch forecast data');
                 const data = await response.json();
-                
+
                 const dailyForecasts = {};
                 data.list.forEach(item => {
                     const date = new Date(item.dt_txt).toLocaleDateString();
@@ -3593,7 +3721,7 @@
                     dailyForecasts[date].icons[item.weather[0].icon] = (dailyForecasts[date].icons[item.weather[0].icon] || 0) + 1;
                     dailyForecasts[date].descriptions[item.weather[0].description] = (dailyForecasts[date].descriptions[item.weather[0].description] || 0) + 1;
                 });
-                
+
                 let forecastHtml = `<h2 class="text-2xl font-bold mb-4 text-center">${t('weatherForecast')} em ${data.city.name}</h2><div class="space-y-4">`;
 
                 Object.keys(dailyForecasts).slice(0, 5).forEach((dateStr, index) => {
@@ -3603,7 +3731,7 @@
                     const mostCommonIcon = Object.keys(dayData.icons).reduce((a, b) => dayData.icons[a] > dayData.icons[b] ? a : b);
                     const mostCommonDesc = Object.keys(dayData.descriptions).reduce((a, b) => dayData.descriptions[a] > dayData.descriptions[b] ? a : b);
                     const dayName = index === 0 ? t('today') : new Date(data.list.find(item => new Date(item.dt_txt).toLocaleDateString() === dateStr).dt * 1000).toLocaleDateString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { weekday: 'long' });
-                    
+
                     forecastHtml += `
                         <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex items-center justify-between">
                             <span class="font-semibold w-24 capitalize">${dayName}</span>
@@ -3615,19 +3743,19 @@
                         </div>
                     `;
                 });
-                
+
                 forecastHtml += '</div>';
                 container.innerHTML = forecastHtml;
 
 
-            } catch(error) {
+            } catch (error) {
                 console.error("Forecast error:", error);
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
             }
         }
-        
+
         // --- NOTIFICATION FUNCTIONS ---
-        
+
         async function requestNotificationPermission() {
             if (!('Notification' in window)) return;
             if (Notification.permission === 'granted') return;
@@ -3650,16 +3778,16 @@
                 if (permission === 'granted') {
                     showToast(t('notificationsEnabled'), 'success');
                 } else {
-                     showToast(t('notificationsDenied'), 'error');
+                    showToast(t('notificationsDenied'), 'error');
                 }
                 modal.classList.remove('show');
             });
-            
-             document.getElementById('deny-notifications').addEventListener('click', () => {
+
+            document.getElementById('deny-notifications').addEventListener('click', () => {
                 modal.classList.remove('show');
             });
         }
-        
+
         function setupNotificationListener() {
             if (notificationInterval) clearInterval(notificationInterval);
             notificationInterval = setInterval(checkAndSendNotifications, 60000); // Check every minute
@@ -3668,17 +3796,18 @@
 
         async function checkAndSendNotifications() {
             if (!currentUser || Notification.permission !== 'granted') return;
-            
+
             const { collection, query, where, getDocs, updateDoc, doc } = window.firebaseFirestore;
             const now = new Date();
-            
-            const q = query(collection(db, `users/${currentUser.uid}/reminders`), 
+
+            // 1. Checar Lembretes
+            const remindersQuery = query(collection(db, `users/${currentUser.uid}/reminders`),
                 where('completed', '==', false),
                 where('notified', '==', false)
             );
 
-            const snapshot = await getDocs(q);
-            snapshot.forEach(docSnap => {
+            const remindersSnapshot = await getDocs(remindersQuery);
+            remindersSnapshot.forEach(docSnap => {
                 const reminder = docSnap.data();
                 if (reminder.remindAt) {
                     const reminderTime = reminder.remindAt.toDate();
@@ -3690,6 +3819,27 @@
                         // Mark as notified to prevent re-sending
                         updateDoc(doc(db, `users/${currentUser.uid}/reminders`, docSnap.id), { notified: true });
                     }
+                }
+            });
+
+            // 2. Checar Hábitos
+            const habitsQuery = query(collection(db, `users/${currentUser.uid}/habits`));
+            const habitsSnapshot = await getDocs(habitsQuery);
+            habitsSnapshot.forEach(docSnap => {
+                const habit = docSnap.data();
+                const timestamps = habit.completedTimestamps?.map(ts => ts.toDate()) || [];
+                if (timestamps.length === 0) return;
+
+                const lastCompletion = new Date(Math.max(...timestamps));
+                const nextAvailable = new Date(lastCompletion.getTime() + 24 * 60 * 60 * 1000);
+
+                // Se está disponível e ainda não foi notificado para esta instância
+                if (now >= nextAvailable && (!habit.lastNotified || habit.lastNotified.toDate() < lastCompletion)) {
+                    new Notification(t('reminderNotificationTitle'), {
+                        body: t('habitNotificationBody', { habitTitle: habit.title }),
+                        icon: '/zenith.png'
+                    });
+                    updateDoc(doc(db, `users/${currentUser.uid}/habits`, docSnap.id), { lastNotified: new Date() });
                 }
             });
         }
@@ -3855,10 +4005,10 @@
                 pageTitle.textContent = t(`pageTitle${currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}`);
             }
             if (appContainer.classList.contains('active')) {
-                 if(currentPage === 'dashboard' && document.getElementById('dashboard-username')) {
+                if (currentPage === 'dashboard' && document.getElementById('dashboard-username')) {
                     document.getElementById('dashboard-username').textContent = currentUserProfile.name || '';
                 }
-                navigateTo(currentPage); 
+                navigateTo(currentPage);
             }
         }
 
@@ -3911,7 +4061,7 @@
             // Auth state listener
             const { onAuthStateChanged } = window.firebaseAuth;
             onAuthStateChanged(window.auth, async (user) => {
-                 if (user) {
+                if (user) {
                     currentUser = user;
 
                     const { getDoc, doc } = window.firebaseFirestore;
@@ -3922,15 +4072,15 @@
                         currentUserProfile = userDoc.data();
                     } else {
                         // This case handles users who signed up before the profile doc was created
-                        currentUserProfile = { 
-                            name: user.displayName || 'Usuário', 
-                            email: user.email, 
-                            uid: user.uid, 
-                            photoURL: user.photoURL 
+                        currentUserProfile = {
+                            name: user.displayName || 'Usuário',
+                            email: user.email,
+                            uid: user.uid,
+                            photoURL: user.photoURL
                         };
                     }
-                     // Ensure name from auth is used if not in DB
-                    if(!currentUserProfile.name) {
+                    // Ensure name from auth is used if not in DB
+                    if (!currentUserProfile.name) {
                         currentUserProfile.name = user.displayName || 'Usuário';
                     }
 
@@ -3939,7 +4089,7 @@
                     await checkAndUnlockAchievement('first_login');
 
                     showAppContainer();
-                    
+
                     // Request notification permission on first login after page load
                     requestNotificationPermission();
                     setupNotificationListener();
@@ -3948,7 +4098,7 @@
                 } else {
                     currentUser = null;
                     currentUserProfile = {};
-                    if(notificationInterval) clearInterval(notificationInterval);
+                    if (notificationInterval) clearInterval(notificationInterval);
                     showAuthContainer();
                 }
                 updateTranslations();
