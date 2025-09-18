@@ -464,16 +464,20 @@
                 </div>
                 <form id="login-form"
                     class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
-                    <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
-                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                        required>
+                    <div>
+                        <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
+                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
+                            required>
+                        <p id="login-email-error" class="text-red-500 text-xs mt-1 h-4"></p>
+                    </div>
                     <div class="relative">
                         <input type="password" id="login-password" data-t-placeholder="passwordPlaceholder"
                             placeholder="Senha"
                             class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
                             required>
+                        <p id="login-password-error" class="text-red-500 text-xs mt-1 h-4"></p>
                         <button type="button"
-                            class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
+                            class="password-toggle absolute top-0 right-0 px-4 h-[calc(100%-1rem)] flex items-center text-gray-500 hover:text-brand-500">
                             <i data-lucide="eye" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -719,6 +723,7 @@
         // Translations
         const translations = {
             pt: {
+                habitNextAvailable: "Próximo",
                 habitAvailableIn: "Disponível em",
                 habitAvailableNow: "Marcar como feito",
                 habitNotificationBody: "Seu hábito '{habitTitle}' está pronto para ser marcado novamente!",
@@ -738,7 +743,7 @@
                 reminderNotificationTitle: "Lembrete do Zenith",
                 limitExceeded: "Limite de mensagens diárias atingido.",
                 limitResetsAt: "Você poderá conversar novamente às {time}.",
-                aiWelcomeWithLimit: "Olá, sou a Zenithinha. Posso ajudar com suas tarefas. Lembre-se, você tem um limite de 50 mensagens por dia.",
+                aiWelcomeWithLimit: "Olá, sou a Zenithinha. Posso ajudar com suas tarefas. Lembre-se, você tem um limite de 50 mensagens por dia. Oque você deseja?",
                 showMore: "Ver nota completa",
                 showLess: "Mostrar menos",
                 navAi: "Zenithinha",
@@ -1883,24 +1888,70 @@
                         ${noteHasOverflow ? `<button class="view-note-btn text-xs font-semibold mt-2 text-brand-600 dark:text-brand-400 self-start hover:underline">${t('showMore')}</button>` : ''}
                     </div>`;
                 case 'habit':
-                    const completedToday = data.completedDates && data.completedDates.includes(today);
-                    const streak = calculateStreak(data.completedDates || []);
+                    const completedTimestamps = data.completedTimestamps?.map(ts => ts.toDate()) || [];
+                    const lastCompletion = completedTimestamps.length > 0 ? new Date(Math.max(...completedTimestamps)) : null;
+                    const streak = calculateStreak(completedTimestamps);
+
+                    let buttonHtml = '';
+                    let nextAvailableHtml = '';
+
+                    if (lastCompletion && new Date() < new Date(lastCompletion.getTime() + 24 * 60 * 60 * 1000)) {
+                        const nextAvailable = new Date(lastCompletion.getTime() + 24 * 60 * 60 * 1000);
+                        const now = new Date();
+                        const diff = nextAvailable - now;
+
+                        const h = Math.floor(diff / (1000 * 60 * 60));
+                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const s = Math.floor((diff % (1000 * 60)) / 1000);
+                        const countdownText = `${t('habitAvailableIn')} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                        buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold bg-gray-300 dark:bg-gray-600 text-sm" disabled>${countdownText}</button>`;
+
+                        const nextTimeString = nextAvailable.toLocaleTimeString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+                        nextAvailableHtml = `<p class="text-xs text-gray-400 mt-2 text-right">${t('habitNextAvailable')}: ${nextTimeString}</p>`;
+
+                        const intervalId = setInterval(() => {
+                            const btn = document.querySelector(`[data-item-id="${id}"] .habit-toggle`);
+                            if (!btn) {
+                                clearInterval(intervalId);
+                                return;
+                            }
+                            const now = new Date();
+                            if (now >= nextAvailable) {
+                                btn.disabled = false;
+                                btn.textContent = t('habitMarkDone');
+                                btn.classList.remove('bg-gray-300', 'dark:bg-gray-600', 'text-sm');
+                                btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'hover:bg-brand-500', 'hover:text-white');
+                                const nextTimeEl = document.querySelector(`[data-item-id="${id}"] .next-available-time`);
+                                if (nextTimeEl) nextTimeEl.remove();
+                                clearInterval(intervalId);
+                            } else {
+                                const diff = nextAvailable - now;
+                                const h = Math.floor(diff / (1000 * 60 * 60));
+                                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                                btn.textContent = `${t('habitAvailableIn')} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                            }
+                        }, 1000);
+                        clockIntervals.push(intervalId);
+                    } else {
+                        buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white">${t('habitMarkDone')}</button>`;
+                    }
+
                     return `
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="font-semibold text-lg">${data.title}</h3>
-                            <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                            <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95">
                                 <i data-lucide="edit" class="w-5 h-5"></i>
                             </button>
                         </div>
+                        <div class="flex-grow"></div>
                         <div class="flex items-center justify-between">
                             <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl text-orange-500">${streak} 🔥</span></p>
-                            <button 
-                                class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 ${completedToday ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white'}" 
-                                data-id="${id}"
-                                ${completedToday ? 'disabled' : ''}>
-                                ${completedToday ? t('habitDoneToday') : t('habitMarkDone')}
-                            </button>
+                            <div class="flex flex-col items-end">
+                                ${buttonHtml}
+                                <div class="next-available-time">${nextAvailableHtml}</div>
+                            </div>
                         </div>
                     </div>`;
             }
@@ -1927,10 +1978,10 @@
         }
 
 
-        function calculateStreak(completedDates) {
-            if (!completedDates || completedDates.length === 0) return 0;
+        function calculateStreak(completedTimestamps) {
+            if (!completedTimestamps || completedTimestamps.length === 0) return 0;
 
-            const uniqueDates = [...new Set(completedDates)].map(d => new Date(d));
+            const uniqueDates = [...new Set(completedTimestamps.map(ts => new Date(ts).toDateString()))].map(d => new Date(d));
             uniqueDates.sort((a, b) => b - a);
 
             const today = new Date();
@@ -1942,13 +1993,11 @@
             let lastDate = uniqueDates[0];
             lastDate.setHours(0, 0, 0, 0);
 
-            // If the last completion was not today or yesterday, the streak is broken.
             if (lastDate.getTime() !== today.getTime() && lastDate.getTime() !== yesterday.getTime()) {
                 return 0;
             }
 
             let streak = 0;
-            // Start checking from today (or yesterday if not completed today)
             let expectedDate = new Date(today);
             if (lastDate.getTime() !== today.getTime()) {
                 expectedDate = new Date(yesterday);
@@ -1958,13 +2007,11 @@
                 date.setHours(0, 0, 0, 0);
                 if (date.getTime() === expectedDate.getTime()) {
                     streak++;
-                    expectedDate.setDate(expectedDate.getDate() - 1); // Expect the previous day next
+                    expectedDate.setDate(expectedDate.getDate() - 1);
                 } else {
-                    // A gap in dates was found, so the streak ends
                     break;
                 }
             }
-
             return streak;
         }
 
@@ -2007,23 +2054,16 @@
 
         async function toggleHabitToday(id) {
             if (!firebaseInitialized || !currentUser) return;
-            const today = new Date().toDateString();
-            const { doc, getDoc, updateDoc, arrayUnion } = window.firebaseFirestore;
+            const { doc, getDoc, updateDoc, arrayUnion, Timestamp } = window.firebaseFirestore;
             const docRef = doc(window.db, `users/${currentUser.uid}/habits`, id);
-
-            const docSnap = await getDoc(docRef);
-            if (!docSnap.exists()) return;
-
-            const completedDates = docSnap.data().completedDates || [];
-            if (completedDates.includes(today)) return; // Already completed today, do nothing
 
             showLoading();
             try {
-                await updateDoc(docRef, { completedDates: arrayUnion(today) });
+                // Salva o timestamp completo em vez de apenas a data
+                await updateDoc(docRef, { completedTimestamps: arrayUnion(Timestamp.now()) });
 
-                // Recalculate streak after update to check for achievements
                 const updatedDoc = await getDoc(docRef);
-                const newStreak = calculateStreak(updatedDoc.data().completedDates || []);
+                const newStreak = calculateStreak(updatedDoc.data().completedTimestamps.map(ts => ts.toDate()));
 
                 if (newStreak >= 7) await checkAndUnlockAchievement('habit_streak_7');
                 if (newStreak >= 30) await checkAndUnlockAchievement('habit_streak_30');
@@ -2119,6 +2159,8 @@
             document.getElementById('item-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 showLoading();
+                let success = false;
+                let isNewItem = !id;
 
                 try {
                     let payload = { title: document.getElementById('item-title').value };
@@ -2136,7 +2178,11 @@
                         payload.content = document.getElementById('item-content').value;
                         payload.color = selectedColor;
                     } else if (type === 'habit') {
-                        if (!isEdit) payload.completedDates = [];
+                        if (!isNewItem) {
+                            payload.completedTimestamps = data.completedTimestamps || [];
+                        } else {
+                            payload.completedTimestamps = [];
+                        }
                     }
 
                     const { doc, updateDoc, addDoc, collection, serverTimestamp } = window.firebaseFirestore;
@@ -2146,23 +2192,20 @@
                     } else {
                         payload.createdAt = serverTimestamp();
                         await addDoc(collection(window.db, `users/${currentUser.uid}/${type}s`), payload);
-                        await checkAndUnlockAchievement(`first_${type}`);
-
-                        const collectionRef = collection(window.db, `users/${currentUser.uid}/${type}s`);
-                        const snapshot = await getDocs(collectionRef);
-
-                        if (type === 'note' && snapshot.size >= 10) await checkAndUnlockAchievement('note_taker_pro');
-                        if (type === 'goal' && snapshot.size >= 10) await checkAndUnlockAchievement('goal_setter_pro');
-                        if (type === 'habit' && snapshot.size >= 5) await checkAndUnlockAchievement('habit_master');
                     }
-
-                    modal.classList.remove('show');
-                    showToast(t('itemSaved'), 'success');
+                    success = true;
                 } catch (error) {
                     console.error('Error saving item:', error);
                     showToast(t('errorSaving'), 'error');
                 } finally {
                     hideLoading();
+                    if (success) {
+                        modal.classList.remove('show');
+                        showToast(t('itemSaved'), 'success');
+                        if (isNewItem) {
+                            checkPostSaveAchievements(type);
+                        }
+                    }
                 }
             });
 
@@ -3689,7 +3732,7 @@
             const container = document.getElementById('clock-content');
             container.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
 
-            if (WEATHER_API_KEY === 'SUA_CHAVE_API_AQUI') {
+            if (WEATHER_API_KEY === '2f3410f5517837200509d829af334e4d' || !WEATHER_API_KEY) {
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
                 return;
             }
@@ -3709,12 +3752,13 @@
 
                 const dailyForecasts = {};
                 data.list.forEach(item => {
-                    const date = new Date(item.dt_txt).toLocaleDateString();
+                    const date = new Date(item.dt_txt).toDateString(); // Usar toDateString() para agrupar por dia
                     if (!dailyForecasts[date]) {
                         dailyForecasts[date] = {
                             temps: [],
                             icons: {},
-                            descriptions: {}
+                            descriptions: {},
+                            dt: item.dt
                         };
                     }
                     dailyForecasts[date].temps.push(item.main.temp);
@@ -3723,14 +3767,16 @@
                 });
 
                 let forecastHtml = `<h2 class="text-2xl font-bold mb-4 text-center">${t('weatherForecast')} em ${data.city.name}</h2><div class="space-y-4">`;
+                const todayStr = new Date().toDateString();
 
-                Object.keys(dailyForecasts).slice(0, 5).forEach((dateStr, index) => {
+                Object.keys(dailyForecasts).slice(0, 5).forEach(dateStr => {
                     const dayData = dailyForecasts[dateStr];
                     const minTemp = Math.round(Math.min(...dayData.temps));
                     const maxTemp = Math.round(Math.max(...dayData.temps));
                     const mostCommonIcon = Object.keys(dayData.icons).reduce((a, b) => dayData.icons[a] > dayData.icons[b] ? a : b);
                     const mostCommonDesc = Object.keys(dayData.descriptions).reduce((a, b) => dayData.descriptions[a] > dayData.descriptions[b] ? a : b);
-                    const dayName = index === 0 ? t('today') : new Date(data.list.find(item => new Date(item.dt_txt).toLocaleDateString() === dateStr).dt * 1000).toLocaleDateString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { weekday: 'long' });
+
+                    const dayName = (dateStr === todayStr) ? t('today') : new Date(dayData.dt * 1000).toLocaleDateString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { weekday: 'long' });
 
                     forecastHtml += `
                         <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex items-center justify-between">
@@ -3746,7 +3792,6 @@
 
                 forecastHtml += '</div>';
                 container.innerHTML = forecastHtml;
-
 
             } catch (error) {
                 console.error("Forecast error:", error);
@@ -3868,6 +3913,15 @@
 
         async function handleLogin(email, password) {
             showLoading();
+            // Limpa erros anteriores
+            const emailErrorEl = document.getElementById('login-email-error');
+            const passwordErrorEl = document.getElementById('login-password-error');
+            emailErrorEl.textContent = '';
+            passwordErrorEl.textContent = '';
+            document.getElementById('login-email').classList.remove('border-red-500');
+            document.getElementById('login-password').classList.remove('border-red-500');
+
+
             if (!firebaseInitialized) {
                 showToast("Firebase não configurado. Login não disponível.", 'error');
                 hideLoading();
@@ -3878,8 +3932,19 @@
                 await signInWithEmailAndPassword(window.auth, email, password);
                 showToast('Login realizado com sucesso!', 'success');
             } catch (error) {
-                console.error('Login error:', error);
-                showToast(getAuthErrorMessage(error.code), 'error');
+                console.error('Login error:', error.code);
+                const errorMessage = getAuthErrorMessage(error.code);
+
+                // Exibe o erro no campo correspondente
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email' || error.code === 'auth/invalid-credential') {
+                    emailErrorEl.textContent = errorMessage;
+                    document.getElementById('login-email').classList.add('border-red-500');
+                } else if (error.code === 'auth/wrong-password') {
+                    passwordErrorEl.textContent = errorMessage;
+                    document.getElementById('login-password').classList.add('border-red-500');
+                } else {
+                    showToast(errorMessage, 'error');
+                }
             } finally {
                 hideLoading();
             }
