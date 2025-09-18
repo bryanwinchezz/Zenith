@@ -670,7 +670,6 @@
         let timerState = { running: false, paused: false, endTime: 0, interval: null };
 
         // --- Weather API Key ---
-        // ATENÇÃO: Substitua pela sua própria chave da API do OpenWeatherMap
         const WEATHER_API_KEY = '2f3410f5517837200509d829af334e4d';
 
         // DOM elements
@@ -3438,42 +3437,61 @@
 
         function renderWorldClocks() {
             const contentEl = document.getElementById('clock-content');
+            if (!contentEl) return;
             checkAndUnlockAchievement('world_traveler');
 
+            // Estrutura principal com widget de clima no topo e grid de relógios
+            contentEl.innerHTML = `
+                <div class="space-y-6">
+                                        <div id="current-weather-widget"></div> 
+                                        <div id="world-clocks-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+            `;
+
+            // Chama a função já existente no seu código para buscar e renderizar o clima atual
+            getCurrentWeather('current-weather-widget');
+
+            const clocksContainer = document.getElementById('world-clocks-container');
             const timezones = [
                 { label: t('localTime'), tz: Intl.DateTimeFormat().resolvedOptions().timeZone },
+                { label: 'São Paulo', tz: 'America/Sao_Paulo' },
                 { label: 'Nova York', tz: 'America/New_York' },
                 { label: 'Londres', tz: 'Europe/London' },
-                { label: 'Tóquio', tz: 'Asia/Tokyo' }
+                { label: 'Paris', tz: 'Europe/Paris' },
+                { label: 'Tóquio', tz: 'Asia/Tokyo' },
+                { label: 'Sydney', tz: 'Australia/Sydney' }
             ];
 
-            let html = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">';
+            let clocksHtml = '';
             timezones.forEach((zone, index) => {
-                html += `
-                    <div class="text-center p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
-                        <h3 class="font-semibold text-lg">${zone.label}</h3>
-                        <p id="clock-${index}" class="text-4xl font-mono"></p>
-                        <p class="text-sm text-gray-500">${zone.tz.replace('_', ' ')}</p>
+                clocksHtml += `
+                <div class="text-left p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex justify-between items-baseline">
+                        <h3 class="font-semibold text-gray-800 dark:text-gray-200">${zone.label}</h3>
+                        <p id="clock-date-${index}" class="text-xs text-gray-500 dark:text-gray-400"></p>
                     </div>
-                `;
+                    <p id="clock-time-${index}" class="text-3xl font-mono text-brand-600 dark:text-brand-400 mt-1"></p>
+                </div>
+            `;
             });
-            html += '</div>';
-            contentEl.innerHTML = html;
+            clocksContainer.innerHTML = clocksHtml;
 
             const updateClocks = () => {
+                const lang = currentLanguage === 'pt' ? 'pt-BR' : 'en-US';
                 timezones.forEach((zone, index) => {
-                    const clockEl = document.getElementById(`clock-${index}`);
-                    if (clockEl) {
+                    const timeEl = document.getElementById(`clock-time-${index}`);
+                    const dateEl = document.getElementById(`clock-date-${index}`);
+                    if (timeEl && dateEl) {
                         const now = new Date();
-                        clockEl.textContent = now.toLocaleTimeString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { timeZone: zone.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        timeEl.textContent = now.toLocaleTimeString(lang, { timeZone: zone.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        dateEl.textContent = now.toLocaleDateString(lang, { timeZone: zone.tz, weekday: 'short', day: 'numeric', month: 'short' });
                     }
                 });
             };
 
-            // Clear previous interval if it exists
             if (window.worldClockInterval) clearInterval(window.worldClockInterval);
 
-            updateClocks(); // Initial call
+            updateClocks();
             window.worldClockInterval = setInterval(updateClocks, 1000);
         }
 
