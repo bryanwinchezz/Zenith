@@ -1807,53 +1807,53 @@
                 case 'reminder':
                     const isOverdue = data.remindAt && new Date(data.remindAt.toDate()) < new Date() && !data.completed;
                     return `
-                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''} ${isOverdue ? 'border-l-4 border-red-500' : ''}">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
-                                ${data.remindAt ? `<p class="text-sm text-gray-500">${new Date(data.remindAt.toDate()).toLocaleString()}</p>` : ''}
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95">
-                                    <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
-                                </button>
-                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95">
-                                    <i data-lucide="edit" class="w-5 h-5"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>`;
+                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''} ${isOverdue ? 'border-l-4 border-red-500' : ''}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
+                                ${data.remindAt ? `<p class="text-sm text-gray-500">${new Date(data.remindAt.toDate()).toLocaleString()}</p>` : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                    <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
+                                </button>
+                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                    <i data-lucide="edit" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
                 case 'goal':
                     const progress = data.targetValue > 0 ? Math.min((data.currentValue / data.targetValue) * 100, 100) : 0;
                     return `
-                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''}">
-                        <div class="flex items-start justify-between mb-3">
-                            <div>
-                                <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
-                                <p class="text-sm text-gray-500">${progress.toFixed(0)}% ${t('complete')}</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95">
-                                    <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
-                                </button>
-                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95">
-                                    <i data-lucide="edit" class="w-5 h-5"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
-                            <div class="bg-brand-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                             <div>
-                                <p class="font-semibold text-lg">${data.currentValue} / ${data.targetValue}</p>
-                             </div>
-                             <div class="flex gap-2">
-                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-amount="-1"><i data-lucide="minus"></i></button>
-                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-amount="1"><i data-lucide="plus"></i></button>
-                             </div>
-                        </div>
-                    </div>`;
+                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''}">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
+                                <p class="text-sm text-gray-500">${progress.toFixed(0)}% ${t('complete')}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                    <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
+                                </button>
+                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                    <i data-lucide="edit" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                            <div class="bg-brand-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                             <div>
+                                <p class="font-semibold text-lg">${data.currentValue} / ${data.targetValue}</p>
+                             </div>
+                             <div class="flex gap-2">
+                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="-1"><i data-lucide="minus"></i></button>
+                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="1"><i data-lucide="plus"></i></button>
+                             </div>
+                        </div>
+                    </div>`;
                 case 'note':
                     const noteColorClasses = {
                         yellow: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200',
@@ -1865,18 +1865,18 @@
                     const noteHasOverflow = data.content && (data.content.split('\n').length > 5 || data.content.length > 250);
 
                     return `
-                    <div data-item-id="${id}" class="p-4 rounded-lg shadow-md ${noteColorClasses[data.color] || noteColorClasses.yellow} flex flex-col">
-                        <div class="flex items-start justify-between mb-2">
-                            <h3 class="font-bold">${data.title}</h3>
-                            <button class="edit-btn p-1 opacity-70 hover:opacity-100 hover:scale-105 transition-transform">
-                                <i data-lucide="edit" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <div class="note-content-wrapper">
-                            <p class="text-sm opacity-90 whitespace-pre-wrap">${data.content}</p>
-                        </div>
-                        ${noteHasOverflow ? `<button class="view-note-btn text-xs font-semibold mt-2 text-brand-600 dark:text-brand-400 self-start hover:underline">${t('showMore')}</button>` : ''}
-                    </div>`;
+                    <div data-item-id="${id}" class="p-4 rounded-lg shadow-md ${noteColorClasses[data.color] || noteColorClasses.yellow} flex flex-col">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-bold">${data.title}</h3>
+                            <button class="edit-btn p-1 opacity-70 hover:opacity-100 hover:scale-105 transition-transform" data-id="${id}">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="note-content-wrapper">
+                            <p class="text-sm opacity-90 whitespace-pre-wrap">${data.content}</p>
+                        </div>
+                        ${noteHasOverflow ? `<button class="view-note-btn text-xs font-semibold mt-2 text-brand-600 dark:text-brand-400 self-start hover:underline">${t('showMore')}</button>` : ''}
+                    </div>`;
                 case 'habit':
                     const completedTimestamps = data.completedTimestamps?.map(ts => ts.toDate()) || [];
                     const lastCompletion = completedTimestamps.length > 0 ? new Date(Math.max(...completedTimestamps)) : null;
@@ -1912,31 +1912,31 @@
 
                         setTimeout(updateCountdown, 0); // Start immediately
 
-                        buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold bg-gray-300 dark:bg-gray-600 text-sm" disabled></button>`;
+                        buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold bg-gray-300 dark:bg-gray-600 text-sm" data-id="${id}" disabled></button>`;
                         const nextTimeString = nextAvailable.toLocaleTimeString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { hour: '2-digit', minute: '2-digit' });
                         nextAvailableHtml = `<p class="text-xs text-gray-400 mt-2 text-right">${t('habitNextAvailable')}: ${nextTimeString}</p>`;
 
                     } else {
-                        buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white">${t('habitMarkDone')}</button>`;
+                        buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white" data-id="${id}">${t('habitMarkDone')}</button>`;
                     }
 
                     return `
-                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-semibold text-lg">${data.title}</h3>
-                            <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95">
-                                <i data-lucide="edit" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                        <div class="flex-grow"></div>
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl text-orange-500">${streak} 🔥</span></p>
-                            <div class="flex flex-col items-end">
-                                ${buttonHtml}
-                                <div class="next-available-time">${nextAvailableHtml}</div>
-                            </div>
-                        </div>
-                    </div>`;
+                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-lg">${data.title}</h3>
+                            <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                <i data-lucide="edit" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <div class="flex-grow"></div>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl text-orange-500">${streak} 🔥</span></p>
+                            <div class="flex flex-col items-end">
+                                ${buttonHtml}
+                                <div class="next-available-time">${nextAvailableHtml}</div>
+                            </div>
+                        </div>
+                    </div>`;
             }
         }
 
@@ -2058,7 +2058,7 @@
             } finally {
                 hideLoading();
             }
-        }   hideLoading();
+        } hideLoading();
 
         function loadReminders() { commonListPage('reminder', 'Lembretes', 'bell-ring'); }
         function loadGoals() { commonListPage('goal', 'Metas', 'target'); }
@@ -3131,7 +3131,8 @@
                     const requiredStreak = achievementId === 'habit_streak_7' ? 7 : 30;
                     const habitsSnapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/habits`));
                     for (const doc of habitsSnapshot.docs) {
-                        const streak = calculateStreak(doc.data().completedDates || []);
+                        const timestamps = doc.data().completedTimestamps || [];
+                        const streak = calculateStreak(timestamps.map(ts => ts.toDate()));
                         if (streak >= requiredStreak) {
                             conditionMet = true;
                             break;
@@ -3435,6 +3436,47 @@
             loadTabContent('world');
         }
 
+        function renderWorldClocks() {
+            const contentEl = document.getElementById('clock-content');
+            checkAndUnlockAchievement('world_traveler');
+
+            const timezones = [
+                { label: t('localTime'), tz: Intl.DateTimeFormat().resolvedOptions().timeZone },
+                { label: 'Nova York', tz: 'America/New_York' },
+                { label: 'Londres', tz: 'Europe/London' },
+                { label: 'Tóquio', tz: 'Asia/Tokyo' }
+            ];
+
+            let html = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">';
+            timezones.forEach((zone, index) => {
+                html += `
+                    <div class="text-center p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+                        <h3 class="font-semibold text-lg">${zone.label}</h3>
+                        <p id="clock-${index}" class="text-4xl font-mono"></p>
+                        <p class="text-sm text-gray-500">${zone.tz.replace('_', ' ')}</p>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            contentEl.innerHTML = html;
+
+            const updateClocks = () => {
+                timezones.forEach((zone, index) => {
+                    const clockEl = document.getElementById(`clock-${index}`);
+                    if (clockEl) {
+                        const now = new Date();
+                        clockEl.textContent = now.toLocaleTimeString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { timeZone: zone.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    }
+                });
+            };
+
+            // Clear previous interval if it exists
+            if (window.worldClockInterval) clearInterval(window.worldClockInterval);
+
+            updateClocks(); // Initial call
+            window.worldClockInterval = setInterval(updateClocks, 1000);
+        }
+
         function renderStopwatch() {
             document.getElementById('clock-content').innerHTML = `
                 <div class="text-center">
@@ -3618,7 +3660,7 @@
         async function getCurrentWeather(widgetContainerId = 'current-weather-widget') {
             const container = document.getElementById(widgetContainerId);
             if (!container) return;
-            
+
             if (WEATHER_API_KEY === '2f3410f5517837200509d829af334e4d' || !WEATHER_API_KEY) {
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
                 return;
@@ -3630,11 +3672,11 @@
                 const position = await new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
                 });
-                
+
                 const { latitude, longitude } = position.coords;
                 const lang = currentLanguage === 'pt' ? 'pt' : 'en';
                 const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
-                
+
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch weather data');
                 const data = await response.json();
@@ -3655,12 +3697,12 @@
                     </div>
                 `;
 
-            } catch(error) {
+            } catch (error) {
                 console.error("Weather error:", error);
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
             }
         }
-        
+
         async function renderWeather() {
             const container = document.getElementById('clock-content');
             container.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
@@ -3678,11 +3720,11 @@
                 const { latitude, longitude } = position.coords;
                 const lang = currentLanguage === 'pt' ? 'pt' : 'en';
                 const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
-                
+
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch forecast data');
                 const data = await response.json();
-                
+
                 const dailyForecasts = {};
                 data.list.forEach(item => {
                     const date = new Date(item.dt_txt).toDateString(); // Usar toDateString() para agrupar por dia
@@ -3698,7 +3740,7 @@
                     dailyForecasts[date].icons[item.weather[0].icon] = (dailyForecasts[date].icons[item.weather[0].icon] || 0) + 1;
                     dailyForecasts[date].descriptions[item.weather[0].description] = (dailyForecasts[date].descriptions[item.weather[0].description] || 0) + 1;
                 });
-                
+
                 let forecastHtml = `<h2 class="text-2xl font-bold mb-4 text-center">${t('weatherForecast')} em ${data.city.name}</h2><div class="space-y-4">`;
                 const todayStr = new Date().toDateString();
 
@@ -3710,7 +3752,7 @@
                     const mostCommonDesc = Object.keys(dayData.descriptions).reduce((a, b) => dayData.descriptions[a] > dayData.descriptions[b] ? a : b);
 
                     const dayName = (dateStr === todayStr) ? t('today') : new Date(dayData.dt * 1000).toLocaleDateString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { weekday: 'long' });
-                    
+
                     forecastHtml += `
                         <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex items-center justify-between">
                             <span class="font-semibold w-24 capitalize">${dayName}</span>
@@ -3722,12 +3764,12 @@
                         </div>
                     `;
                 });
-                
+
                 forecastHtml += '</div>';
                 container.innerHTML = forecastHtml;
 
 
-            } catch(error) {
+            } catch (error) {
                 console.error("Forecast error:", error);
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
             }
