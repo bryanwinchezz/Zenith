@@ -664,8 +664,10 @@
         let calendarUnsubscribe = null;
         let calendarEventsCache = {};
         let aiChatUnsubscribe = null; // Unsubscribe for AI chats
-        let aiMessagesUnsubscribe = null; // Unsubscribe for AI messages
+        let aiMessagesUnsubscribe = null;
         let notificationInterval = null;
+        let stopwatchState = { running: false, startTime: 0, savedTime: 0, interval: null };
+        let timerState = { running: false, paused: false, endTime: 0, interval: null };
 
         // --- Weather API Key ---
         // ATENÇÃO: Substitua pela sua própria chave da API do OpenWeatherMap
@@ -1195,41 +1197,29 @@
                 return;
             }
 
-            // Do not re-render if it's the same page, except for dashboard
+            // Não recarrega a página se já estiver nela (exceto dashboard)
             if (currentPage === page && appContent.innerHTML.trim() !== '' && page !== 'dashboard') return;
 
-
-            // Clear previous intervals
+            // Limpa APENAS os intervalos que não devem persistir, como os relógios mundiais.
+            // O cronômetro e o temporizador agora têm seus próprios intervalos e não são limpos aqui.
             clockIntervals.forEach(interval => clearInterval(interval));
             clockIntervals = [];
-            if (calendarUnsubscribe) {
-                calendarUnsubscribe();
-                calendarUnsubscribe = null;
-            }
 
+            if (calendarUnsubscribe) { calendarUnsubscribe(); calendarUnsubscribe = null; }
 
-            // Clear previous unsubscribes for the old page
             unsubscribes.forEach(unsub => unsub());
             unsubscribes = [];
-            if (aiChatUnsubscribe) {
-                aiChatUnsubscribe();
-                aiChatUnsubscribe = null;
-            }
-            if (aiMessagesUnsubscribe) {
-                aiMessagesUnsubscribe();
-                aiMessagesUnsubscribe = null;
-            }
-
+            if (aiChatUnsubscribe) { aiChatUnsubscribe(); aiChatUnsubscribe = null; }
+            if (aiMessagesUnsubscribe) { aiMessagesUnsubscribe(); aiMessagesUnsubscribe = null; }
 
             currentPage = page;
             pageTitle.textContent = t(`pageTitle${page.charAt(0).toUpperCase() + page.slice(1)}`);
-            // Adjust padding based on page
+
             if (page === 'ai') {
                 appContent.classList.remove('p-4', 'md:p-6', 'pb-20', 'md:pb-6');
             } else {
                 appContent.classList.add('p-4', 'md:p-6', 'pb-20', 'md:pb-6');
             }
-
 
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.page === page);
@@ -1817,17 +1807,17 @@
                 case 'reminder':
                     const isOverdue = data.remindAt && new Date(data.remindAt.toDate()) < new Date() && !data.completed;
                     return `
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''} ${isOverdue ? 'border-l-4 border-red-500' : ''}">
+                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''} ${isOverdue ? 'border-l-4 border-red-500' : ''}">
                         <div class="flex items-center justify-between">
                             <div class="flex-1">
                                 <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
                                 ${data.remindAt ? `<p class="text-sm text-gray-500">${new Date(data.remindAt.toDate()).toLocaleString()}</p>` : ''}
                             </div>
                             <div class="flex gap-2">
-                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95">
                                     <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
                                 </button>
-                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95">
                                     <i data-lucide="edit" class="w-5 h-5"></i>
                                 </button>
                             </div>
@@ -1836,17 +1826,17 @@
                 case 'goal':
                     const progress = data.targetValue > 0 ? Math.min((data.currentValue / data.targetValue) * 100, 100) : 0;
                     return `
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''}">
+                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''}">
                         <div class="flex items-start justify-between mb-3">
                             <div>
                                 <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
                                 <p class="text-sm text-gray-500">${progress.toFixed(0)}% ${t('complete')}</p>
                             </div>
                             <div class="flex gap-2">
-                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95">
                                     <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
                                 </button>
-                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95">
                                     <i data-lucide="edit" class="w-5 h-5"></i>
                                 </button>
                             </div>
@@ -1859,8 +1849,8 @@
                                 <p class="font-semibold text-lg">${data.currentValue} / ${data.targetValue}</p>
                              </div>
                              <div class="flex gap-2">
-                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="-1"><i data-lucide="minus"></i></button>
-                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="1"><i data-lucide="plus"></i></button>
+                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-amount="-1"><i data-lucide="minus"></i></button>
+                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-amount="1"><i data-lucide="plus"></i></button>
                              </div>
                         </div>
                     </div>`;
@@ -1875,10 +1865,10 @@
                     const noteHasOverflow = data.content && (data.content.split('\n').length > 5 || data.content.length > 250);
 
                     return `
-                    <div class="p-4 rounded-lg shadow-md ${noteColorClasses[data.color] || noteColorClasses.yellow} flex flex-col">
+                    <div data-item-id="${id}" class="p-4 rounded-lg shadow-md ${noteColorClasses[data.color] || noteColorClasses.yellow} flex flex-col">
                         <div class="flex items-start justify-between mb-2">
                             <h3 class="font-bold">${data.title}</h3>
-                            <button class="edit-btn p-1 opacity-70 hover:opacity-100 hover:scale-105 transition-transform" data-id="${id}">
+                            <button class="edit-btn p-1 opacity-70 hover:opacity-100 hover:scale-105 transition-transform">
                                 <i data-lucide="edit" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -1897,24 +1887,11 @@
 
                     if (lastCompletion && new Date() < new Date(lastCompletion.getTime() + 24 * 60 * 60 * 1000)) {
                         const nextAvailable = new Date(lastCompletion.getTime() + 24 * 60 * 60 * 1000);
-                        const now = new Date();
-                        const diff = nextAvailable - now;
 
-                        const h = Math.floor(diff / (1000 * 60 * 60));
-                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                        const s = Math.floor((diff % (1000 * 60)) / 1000);
-                        const countdownText = `${t('habitAvailableIn')} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-                        buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold bg-gray-300 dark:bg-gray-600 text-sm" disabled>${countdownText}</button>`;
-
-                        const nextTimeString = nextAvailable.toLocaleTimeString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { hour: '2-digit', minute: '2-digit' });
-                        nextAvailableHtml = `<p class="text-xs text-gray-400 mt-2 text-right">${t('habitNextAvailable')}: ${nextTimeString}</p>`;
-
-                        const intervalId = setInterval(() => {
+                        const updateCountdown = () => {
                             const btn = document.querySelector(`[data-item-id="${id}"] .habit-toggle`);
-                            if (!btn) {
-                                clearInterval(intervalId);
-                                return;
-                            }
+                            if (!btn) return;
+
                             const now = new Date();
                             if (now >= nextAvailable) {
                                 btn.disabled = false;
@@ -1922,17 +1899,23 @@
                                 btn.classList.remove('bg-gray-300', 'dark:bg-gray-600', 'text-sm');
                                 btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'hover:bg-brand-500', 'hover:text-white');
                                 const nextTimeEl = document.querySelector(`[data-item-id="${id}"] .next-available-time`);
-                                if (nextTimeEl) nextTimeEl.remove();
-                                clearInterval(intervalId);
+                                if (nextTimeEl) nextTimeEl.innerHTML = '';
                             } else {
                                 const diff = nextAvailable - now;
                                 const h = Math.floor(diff / (1000 * 60 * 60));
                                 const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                                 const s = Math.floor((diff % (1000 * 60)) / 1000);
                                 btn.textContent = `${t('habitAvailableIn')} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                                setTimeout(updateCountdown, 1000);
                             }
-                        }, 1000);
-                        clockIntervals.push(intervalId);
+                        };
+
+                        setTimeout(updateCountdown, 0); // Start immediately
+
+                        buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold bg-gray-300 dark:bg-gray-600 text-sm" disabled></button>`;
+                        const nextTimeString = nextAvailable.toLocaleTimeString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+                        nextAvailableHtml = `<p class="text-xs text-gray-400 mt-2 text-right">${t('habitNextAvailable')}: ${nextTimeString}</p>`;
+
                     } else {
                         buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white">${t('habitMarkDone')}</button>`;
                     }
@@ -2075,7 +2058,7 @@
             } finally {
                 hideLoading();
             }
-        }
+        }   hideLoading();
 
         function loadReminders() { commonListPage('reminder', 'Lembretes', 'bell-ring'); }
         function loadGoals() { commonListPage('goal', 'Metas', 'target'); }
@@ -3295,9 +3278,9 @@
             appContent.innerHTML = `
             <div class="fade-in max-w-md mx-auto">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden">
-                    <div class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white p-5">
-                        <div id="calculator-expression" class="text-right text-xl h-8 overflow-x-auto no-scrollbar"></div>
-                        <div id="calculator-display" class="text-right text-5xl font-bold h-24 flex items-end justify-end">0</div>
+                    <div class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white p-5 text-right">
+                        <div id="calculator-expression" class="h-8 text-xl opacity-70 overflow-x-auto no-scrollbar"></div>
+                        <div id="calculator-display" class="font-bold text-5xl h-24 flex items-end justify-end">0</div>
                     </div>
                     <div class="grid grid-cols-4 gap-px bg-gray-300 dark:bg-gray-700">
                         <button class="calc-btn bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-2xl p-6" data-value="C">C</button>
@@ -3341,24 +3324,15 @@
 
             const updateDisplay = () => {
                 display.textContent = currentInput;
-                // Substitui operadores para exibição amigável
                 expressionDisplay.textContent = expression.replace(/\*/g, '×').replace(/\//g, '÷');
             };
 
             const calculate = () => {
                 try {
-                    // Prepara a expressão para a avaliação, garantindo que o último número seja incluído
-                    const finalExpression = expression + currentInput;
-                    // Usa o Construtor de Função para uma avaliação mais segura que o eval()
-                    const result = new Function('return ' + finalExpression)();
-                    // Garante que não tenhamos resultados como 'Infinity' ou 'NaN'
-                    if (!isFinite(result)) {
-                        return 'Erro';
-                    }
-                    // Formata para evitar números muito longos
-                    return parseFloat(result.toPrecision(12));
+                    const finalExpression = expression.replace(/×/g, '*').replace(/÷/g, '/');
+                    // Usando o Construtor de Função para avaliação segura
+                    return new Function('return ' + finalExpression)();
                 } catch (e) {
-                    console.error("Calculation error:", e);
                     return 'Erro';
                 }
             };
@@ -3368,37 +3342,36 @@
                     checkAndUnlockAchievement('calculator_user');
                     const value = button.dataset.value;
                     const isOperator = ['+', '-', '*', '/'].includes(value);
-                    const lastCharOfExpression = expression.slice(-1);
 
-                    if (!isNaN(value) || value === '.') { // É um número ou ponto
+                    if (!isNaN(value) || value === '.') {
                         if (calculationPerformed) {
                             expression = '';
                             currentInput = '0';
                             calculationPerformed = false;
                         }
                         if (value === '.' && currentInput.includes('.')) return;
-                        currentInput = currentInput === '0' && value !== '.' ? value : currentInput + value;
+                        currentInput = (currentInput === '0' && value !== '.') ? value : currentInput + value;
                     } else if (isOperator) {
-                        // Evita operadores duplicados
-                        if (['+', '-', '*', '/'].includes(lastCharOfExpression)) {
+                        if (currentInput === '0' && expression) {
                             expression = expression.slice(0, -1) + value;
                         } else {
                             expression += currentInput + value;
+                            currentInput = '0';
                         }
-                        currentInput = '0';
                         calculationPerformed = false;
                     } else if (value === '=') {
                         if (expression) {
+                            expression += currentInput;
                             const result = calculate();
 
-                            // Adiciona a transição
                             display.classList.remove('calculator-result-transition');
-                            void display.offsetWidth; // Força o navegador a recalcular o estilo (reflow)
+                            void display.offsetWidth;
                             display.classList.add('calculator-result-transition');
 
-                            expressionDisplay.textContent = expression + currentInput + ' =';
+                            updateDisplay(); // Mostra a expressão final
                             currentInput = result.toString();
-                            expression = ''; // Limpa a expressão para o próximo cálculo
+                            display.textContent = currentInput;
+                            expression = '';
                             calculationPerformed = true;
                         }
                     } else if (value === 'C') {
@@ -3409,7 +3382,6 @@
                         currentInput = currentInput.length > 1 ? currentInput.slice(0, -1) : '0';
                     } else if (value === '%') {
                         currentInput = (parseFloat(currentInput) / 100).toString();
-                        calculationPerformed = true; // Considera como um cálculo final
                     }
 
                     if (!calculationPerformed) {
@@ -3437,11 +3409,13 @@
 
         function setupClockTabs() {
             const tabs = document.querySelectorAll('.clock-tab');
-            const contentContainer = document.getElementById('clock-content');
 
             const loadTabContent = (tabId) => {
-                clockIntervals.forEach(interval => clearInterval(interval));
-                clockIntervals = [];
+                // Limpa apenas o intervalo dos relógios mundiais se existir
+                if (window.worldClockInterval) {
+                    clearInterval(window.worldClockInterval);
+                    window.worldClockInterval = null;
+                }
 
                 tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
 
@@ -3458,80 +3432,18 @@
                 tab.addEventListener('click', () => loadTabContent(tab.dataset.tab));
             });
 
-            loadTabContent('world'); // Load default tab
-        }
-
-        function renderWorldClocks() {
-            const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' ');
-            document.getElementById('clock-content').innerHTML = `
-                <div id="current-weather-widget" class="mb-8"></div>
-                <div id="local-clock" class="text-center mb-8">
-                    <h3 class="text-lg font-semibold text-brand-500">${t('localTime')} (${userTimeZone})</h3>
-                    <h2 id="local-time" class="text-5xl md:text-7xl font-bold tracking-tighter"></h2>
-                    <p id="local-date" class="text-lg text-gray-500 dark:text-gray-400"></p>
-                </div>
-                <div id="world-clocks-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-            `;
-            checkAndUnlockAchievement('world_traveler');
-
-            const cities = [
-                { name: 'São Paulo', timeZone: 'America/Sao_Paulo' },
-                { name: 'New York', timeZone: 'America/New_York' },
-                { name: 'Los Angeles', timeZone: 'America/Los_Angeles' },
-                { name: 'London', timeZone: 'Europe/London' },
-                { name: 'Paris', timeZone: 'Europe/Paris' },
-                { name: 'Moscow', timeZone: 'Europe/Moscow' },
-                { name: 'Tokyo', timeZone: 'Asia/Tokyo' },
-                { name: 'Dubai', timeZone: 'Asia/Dubai' },
-                { name: 'Sydney', timeZone: 'Australia/Sydney' },
-            ];
-
-            const localTimeEl = document.getElementById('local-time');
-            const localDateEl = document.getElementById('local-date');
-            const worldClocksListEl = document.getElementById('world-clocks-list');
-
-            const updateClocks = () => {
-                const now = new Date();
-                const lang = currentLanguage === 'pt' ? 'pt-BR' : 'en-US';
-
-                localTimeEl.textContent = now.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                localDateEl.textContent = now.toLocaleDateString(lang, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-                worldClocksListEl.innerHTML = cities.map(city => {
-                    const time = now.toLocaleTimeString(lang, { timeZone: city.timeZone, hour: '2-digit', minute: '2-digit' });
-                    const date = now.toLocaleDateString(lang, { timeZone: city.timeZone, month: 'short', day: 'numeric' });
-                    return `
-                    <div class="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg flex justify-between items-center">
-                        <div>
-                            <h3 class="font-semibold text-lg">${city.name}</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">${date}</p>
-                        </div>
-                        <p class="text-3xl font-semibold">${time}</p>
-                    </div>`;
-                }).join('');
-            };
-
-            updateClocks();
-            const interval = setInterval(updateClocks, 1000);
-            clockIntervals.push(interval);
-
-            // Fetch and render current weather
-            getCurrentWeather();
+            loadTabContent('world');
         }
 
         function renderStopwatch() {
-            let startTime, savedTime = 0, tInterval;
-            let running = false;
-
             document.getElementById('clock-content').innerHTML = `
                 <div class="text-center">
                     <div id="stopwatch-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
                     <div class="flex justify-center gap-4">
-                        <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('stopwatchStart')}</button>
+                        <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95"></button>
                         <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('stopwatchReset')}</button>
                     </div>
-                </div>
-            `;
+                </div>`;
 
             const display = document.getElementById('stopwatch-display');
             const startStopBtn = document.getElementById('stopwatch-start-stop');
@@ -3546,48 +3458,58 @@
                 return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
             };
 
-
             const update = () => {
-                const difference = (new Date().getTime() - startTime) + savedTime;
+                const difference = (Date.now() - stopwatchState.startTime) + stopwatchState.savedTime;
                 display.textContent = formatTime(difference);
             };
 
-            startStopBtn.addEventListener('click', () => {
-                if (!running) { // Start or Continue
-                    startTime = new Date().getTime();
-                    tInterval = setInterval(update, 10);
-                    clockIntervals.push(tInterval);
-                    startStopBtn.textContent = t('stopwatchPause');
-                    startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
-                    startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
-                    running = true;
-                } else { // Pause
-                    clearInterval(tInterval);
-                    savedTime += new Date().getTime() - startTime;
-                    startStopBtn.textContent = t('stopwatchContinue');
-                    startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
-                    startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
-                    running = false;
-                }
-            });
+            const start = () => {
+                if (stopwatchState.running) return;
+                stopwatchState.running = true;
+                stopwatchState.startTime = Date.now();
+                stopwatchState.interval = setInterval(update, 10);
+                startStopBtn.textContent = t('stopwatchPause');
+                startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
+                startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
+            };
 
-            resetBtn.addEventListener('click', () => {
-                clearInterval(tInterval);
+            const stop = () => {
+                if (!stopwatchState.running) return;
+                stopwatchState.running = false;
+                clearInterval(stopwatchState.interval);
+                stopwatchState.savedTime += Date.now() - stopwatchState.startTime;
+                startStopBtn.textContent = t('stopwatchContinue');
+                startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
+                startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
+            };
+
+            const reset = () => {
+                stopwatchState.running = false;
+                clearInterval(stopwatchState.interval);
+                stopwatchState.savedTime = 0;
                 display.textContent = "00:00:00.00";
-                running = false;
-                savedTime = 0;
                 startStopBtn.textContent = t('stopwatchStart');
                 startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
                 startStopBtn.classList.add('bg-brand-600', 'hover:bg-brand-700');
-            });
+            };
+
+            // UI Initialization
+            if (stopwatchState.running) {
+                start();
+                stop(); // Immediately pause to show correct state and time
+                start(); // And restart the interval
+            } else if (stopwatchState.savedTime > 0) {
+                display.textContent = formatTime(stopwatchState.savedTime);
+                startStopBtn.textContent = t('stopwatchContinue');
+            } else {
+                startStopBtn.textContent = t('stopwatchStart');
+            }
+
+            startStopBtn.addEventListener('click', () => stopwatchState.running ? stop() : start());
+            resetBtn.addEventListener('click', reset);
         }
 
         function renderTimer() {
-            let timerInterval;
-            let totalSeconds = 0;
-            let running = false;
-            let paused = false;
-
             document.getElementById('clock-content').innerHTML = `
                 <div class="text-center">
                     <div id="timer-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00</div>
@@ -3596,8 +3518,8 @@
                         <input type="number" id="timer-minutes" placeholder="${t('timerMinutes')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
                         <input type="number" id="timer-seconds" placeholder="${t('timerSeconds')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
                     </div>
-                     <div class="flex justify-center gap-4">
-                        <button id="timer-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('timerStart')}</button>
+                    <div class="flex justify-center gap-4">
+                        <button id="timer-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95"></button>
                         <button id="timer-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('timerReset')}</button>
                     </div>
                 </div>`;
@@ -3610,66 +3532,61 @@
             const formatTime = (seconds) => {
                 const h = Math.floor(seconds / 3600);
                 const m = Math.floor((seconds % 3600) / 60);
-                const s = seconds % 60;
+                const s = Math.round(seconds % 60);
                 return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
             };
 
-            const updateTimer = () => {
-                if (totalSeconds <= 0) {
-                    clearInterval(timerInterval);
+            const update = () => {
+                const remaining = Math.max(0, (timerState.endTime - Date.now()) / 1000);
+                display.textContent = formatTime(remaining);
+
+                if (remaining <= 0) {
                     display.textContent = t('timerFinished');
-                    startStopBtn.textContent = t('timerStart');
-                    startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
-                    startStopBtn.classList.add('bg-brand-600', 'hover:bg-brand-700');
-                    inputsContainer.style.display = 'flex';
-                    running = false;
-                    paused = false;
-                    return;
+                    reset();
                 }
-                totalSeconds--;
-                display.textContent = formatTime(totalSeconds);
             };
 
+            const start = () => {
+                if (timerState.running) return;
 
-            startStopBtn.addEventListener('click', () => {
-                if (!running) { // Is initial state or paused
-                    if (!paused) { // Initial Start
-                        const hours = parseInt(document.getElementById('timer-hours').value) || 0;
-                        const minutes = parseInt(document.getElementById('timer-minutes').value) || 0;
-                        const seconds = parseInt(document.getElementById('timer-seconds').value) || 0;
-                        totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
-
-                        if (totalSeconds <= 0) return;
-
-                        if (hours >= 1) {
-                            checkAndUnlockAchievement('timer_master');
-                        }
-                    }
-
-                    paused = false;
-                    running = true;
-                    inputsContainer.style.display = 'none';
-                    display.textContent = formatTime(totalSeconds);
-                    timerInterval = setInterval(updateTimer, 1000);
-                    clockIntervals.push(timerInterval);
-                    startStopBtn.textContent = t('timerPause');
-                    startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
-                    startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
-
-                } else { // Is running, so pause it
-                    clearInterval(timerInterval);
-                    running = false;
-                    paused = true;
-                    startStopBtn.textContent = t('timerContinue');
-                    startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
-                    startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
+                if (!timerState.paused) {
+                    const hours = parseInt(document.getElementById('timer-hours').value) || 0;
+                    const minutes = parseInt(document.getElementById('timer-minutes').value) || 0;
+                    const seconds = parseInt(document.getElementById('timer-seconds').value) || 0;
+                    timerState.totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+                    if (timerState.totalSeconds <= 0) return;
+                    if (hours >= 1) checkAndUnlockAchievement('timer_master');
                 }
-            });
 
-            resetBtn.addEventListener('click', () => {
-                clearInterval(timerInterval);
-                running = false;
-                paused = false;
+                timerState.running = true;
+                timerState.paused = false;
+                timerState.endTime = Date.now() + timerState.totalSeconds * 1000;
+                timerState.interval = setInterval(update, 1000);
+
+                inputsContainer.style.display = 'none';
+                startStopBtn.textContent = t('timerPause');
+                startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
+                startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
+                update();
+            };
+
+            const stop = () => {
+                if (!timerState.running) return;
+                timerState.running = false;
+                timerState.paused = true;
+                clearInterval(timerState.interval);
+                timerState.totalSeconds = Math.max(0, (timerState.endTime - Date.now()) / 1000);
+                startStopBtn.textContent = t('timerContinue');
+                startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
+                startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
+            };
+
+            const reset = () => {
+                clearInterval(timerState.interval);
+                timerState.running = false;
+                timerState.paused = false;
+                timerState.totalSeconds = 0;
+                timerState.endTime = 0;
                 display.textContent = "00:00:00";
                 startStopBtn.textContent = t('timerStart');
                 startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
@@ -3678,15 +3595,31 @@
                 document.getElementById('timer-hours').value = '';
                 document.getElementById('timer-minutes').value = '';
                 document.getElementById('timer-seconds').value = '';
-            });
+            };
+
+            // UI Initialization
+            if (timerState.running || timerState.paused) {
+                inputsContainer.style.display = 'none';
+                update();
+                if (timerState.running) {
+                    start(); stop(); start(); // Restart interval
+                } else {
+                    startStopBtn.textContent = t('timerContinue');
+                }
+            } else {
+                startStopBtn.textContent = t('timerStart');
+            }
+
+            startStopBtn.addEventListener('click', () => timerState.running ? stop() : start());
+            resetBtn.addEventListener('click', reset);
         }
 
         // --- WEATHER FUNCTIONS ---
         async function getCurrentWeather(widgetContainerId = 'current-weather-widget') {
             const container = document.getElementById(widgetContainerId);
             if (!container) return;
-
-            if (WEATHER_API_KEY === 'SUA_CHAVE_API_AQUI') {
+            
+            if (WEATHER_API_KEY === '2f3410f5517837200509d829af334e4d' || !WEATHER_API_KEY) {
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
                 return;
             }
@@ -3695,13 +3628,13 @@
 
             try {
                 const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
                 });
-
+                
                 const { latitude, longitude } = position.coords;
                 const lang = currentLanguage === 'pt' ? 'pt' : 'en';
                 const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
-
+                
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch weather data');
                 const data = await response.json();
@@ -3722,12 +3655,12 @@
                     </div>
                 `;
 
-            } catch (error) {
+            } catch(error) {
                 console.error("Weather error:", error);
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
             }
         }
-
+        
         async function renderWeather() {
             const container = document.getElementById('clock-content');
             container.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
@@ -3739,17 +3672,17 @@
 
             try {
                 const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
                 });
 
                 const { latitude, longitude } = position.coords;
                 const lang = currentLanguage === 'pt' ? 'pt' : 'en';
                 const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
-
+                
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch forecast data');
                 const data = await response.json();
-
+                
                 const dailyForecasts = {};
                 data.list.forEach(item => {
                     const date = new Date(item.dt_txt).toDateString(); // Usar toDateString() para agrupar por dia
@@ -3765,7 +3698,7 @@
                     dailyForecasts[date].icons[item.weather[0].icon] = (dailyForecasts[date].icons[item.weather[0].icon] || 0) + 1;
                     dailyForecasts[date].descriptions[item.weather[0].description] = (dailyForecasts[date].descriptions[item.weather[0].description] || 0) + 1;
                 });
-
+                
                 let forecastHtml = `<h2 class="text-2xl font-bold mb-4 text-center">${t('weatherForecast')} em ${data.city.name}</h2><div class="space-y-4">`;
                 const todayStr = new Date().toDateString();
 
@@ -3777,7 +3710,7 @@
                     const mostCommonDesc = Object.keys(dayData.descriptions).reduce((a, b) => dayData.descriptions[a] > dayData.descriptions[b] ? a : b);
 
                     const dayName = (dateStr === todayStr) ? t('today') : new Date(dayData.dt * 1000).toLocaleDateString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { weekday: 'long' });
-
+                    
                     forecastHtml += `
                         <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex items-center justify-between">
                             <span class="font-semibold w-24 capitalize">${dayName}</span>
@@ -3789,11 +3722,12 @@
                         </div>
                     `;
                 });
-
+                
                 forecastHtml += '</div>';
                 container.innerHTML = forecastHtml;
 
-            } catch (error) {
+
+            } catch(error) {
                 console.error("Forecast error:", error);
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
             }
