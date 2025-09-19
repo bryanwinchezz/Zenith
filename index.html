@@ -341,6 +341,11 @@
         #ai-chat-history {
             scroll-behavior: smooth;
         }
+        
+        .habit-toggle:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
 
         @keyframes bounce {
 
@@ -557,6 +562,11 @@
         let calendarEventsCache = {};
         let aiChatUnsubscribe = null; // Unsubscribe for AI chats
         let aiMessagesUnsubscribe = null; // Unsubscribe for AI messages
+        let notificationInterval = null;
+
+        // --- Weather API Key ---
+        // ATENÇÃO: Substitua pela sua própria chave da API do OpenWeatherMap
+        const WEATHER_API_KEY = 'SUA_CHAVE_API_AQUI';
 
         // DOM elements
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -610,6 +620,20 @@
         // Translations
         const translations = {
             pt: {
+                weatherForecast: "Previsão do Tempo",
+                weatherError: "Não foi possível obter os dados do tempo.",
+                weatherApiWarning: "Chave da API de Clima não configurada.",
+                today: "Hoje",
+                feelsLike: "Sensação",
+                humidity: "Umidade",
+                wind: "Vento",
+                notificationPermissionTitle: "Permissão para Notificações",
+                notificationPermissionBody: "O Zenith gostaria de enviar notificações para te lembrar de suas tarefas.",
+                allow: "Permitir",
+                deny: "Negar",
+                notificationsEnabled: "Notificações ativadas!",
+                notificationsDenied: "Você bloqueou as notificações. Ative nas configurações do seu navegador.",
+                reminderNotificationTitle: "Lembrete do Zenith",
                 limitExceeded: "Limite de mensagens diárias atingido.",
                 limitResetsAt: "Você poderá conversar novamente às {time}.",
                 aiWelcomeWithLimit: "Olá, sou a Zenithinha. Posso ajudar com suas tarefas. Lembre-se, você tem um limite de 50 mensagens por dia.",
@@ -799,6 +823,20 @@
                 ach_zenith_master_desc: "Desbloqueie todas as outras conquistas."
             },
             en: {
+                weatherForecast: "Weather Forecast",
+                weatherError: "Could not fetch weather data.",
+                weatherApiWarning: "Weather API key not configured.",
+                today: "Today",
+                feelsLike: "Feels like",
+                humidity: "Humidity",
+                wind: "Wind",
+                notificationPermissionTitle: "Notification Permission",
+                notificationPermissionBody: "Zenith would like to send you notifications to remind you of your tasks.",
+                allow: "Allow",
+                deny: "Deny",
+                notificationsEnabled: "Notifications enabled!",
+                notificationsDenied: "You have blocked notifications. Please enable them in your browser settings.",
+                reminderNotificationTitle: "Zenith Reminder",
                 limitExceeded: "Daily message limit reached.",
                 limitResetsAt: "You can chat again at {time}.",
                 aiWelcomeWithLimit: "Hello, I'm Zenithinha. I can help with your tasks. Remember, you have a 50 message limit per day.",
@@ -967,7 +1005,7 @@
                 ach_habit_master_desc: "Create 5 habits.",
                 ach_goal_achiever_1_title: "First Victory",
                 ach_goal_achiever_1_desc: "Complete your first goal.",
-                ach_goal_achiever_10_title: "Conqueror",
+                ach_goal_achiever_1_title: "Conqueror",
                 ach_goal_achiever_10_desc: "Complete 10 goals.",
                 ach_habit_streak_30_title: "Unstoppable",
                 ach_habit_streak_30_desc: "Keep a habit for 30 days.",
@@ -1114,7 +1152,7 @@
             appContent.innerHTML = `
             <div class="fade-in space-y-6">
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                    <h2 class="text-3xl font-bold mb-2">${t('welcomeBack')}, <span class="text-brand-500">${currentUserProfile.name || 'Usuário'}!</span></h2>
+                    <h2 class="text-3xl font-bold mb-2">${t('welcomeBack')}, <span id="dashboard-username" class="text-brand-500">${currentUserProfile.name || ''}</span>!</h2>
                     <p class="text-gray-600 dark:text-gray-400" data-t="dashboardSubtitle">${t('dashboardSubtitle')}</p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1196,7 +1234,7 @@
             appContent.innerHTML = `
             <div id="ai-chat-container" class="flex w-full h-[calc(100dvh-120px)] md:h-[calc(100vh-88px)] fade-in">
                 <!-- Barra Lateral de Chats (Desktop) -->
-                <aside id="ai-sidebar-desktop" class="bg-gray-800 text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
+                <aside id="ai-sidebar-desktop" class="bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
                     <!-- Conteúdo da sidebar será preenchido por JS -->
                 </aside>
 
@@ -1270,13 +1308,13 @@
                 if (!container) return;
                 container.innerHTML = '';
                 if (chats.length === 0) {
-                    container.innerHTML = '<p class="text-gray-400 text-sm p-2">Nenhum chat salvo.</p>';
+                    container.innerHTML = `<p class="text-gray-400 dark:text-gray-500 text-sm p-2">${t('noItemsFound', { item: 'chats' })}</p>`;
                     return;
                 }
                 chats.forEach(chat => {
                     const isActive = chat.id === activeChatId;
                     const item = document.createElement('div');
-                    item.className = `flex items-center justify-between p-2 rounded-lg cursor-pointer my-1 ${isActive ? 'bg-blue-500' : 'hover:bg-gray-700'}`;
+                    item.className = `flex items-center justify-between p-2 rounded-lg cursor-pointer my-1 ${isActive ? 'bg-blue-500 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`;
                     item.innerHTML = `
                         <span class="truncate flex-grow">${chat.title}</span>
                         <button class="ai-delete-chat-btn text-gray-400 hover:text-red-500 ml-2 p-1">
@@ -1285,12 +1323,16 @@
                     `;
                     item.addEventListener('click', () => {
                         switchChat(chat.id);
-                        chatsModal.classList.remove('show');
+                        if (chatsModal.classList.contains('show')) {
+                           chatsModal.classList.remove('show');
+                        }
                     });
                     item.querySelector('.ai-delete-chat-btn').addEventListener('click', (e) => {
                         e.stopPropagation();
                         confirmDelete(chat.id, 'ai-chats', () => {
-                            chatsModal.classList.remove('show');
+                             if (chatsModal.classList.contains('show')) {
+                                chatsModal.classList.remove('show');
+                             }
                         });
                     });
                     container.appendChild(item);
@@ -1301,7 +1343,7 @@
                 if (!chatHistoryEl) return;
                 chatHistoryEl.innerHTML = '';
                 if (!messages || messages.length === 0) {
-                    chatHistoryEl.innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-gray-500 dark:text-gray-400">Faça a primeira pergunta para começar!</p></div>';
+                    chatHistoryEl.innerHTML = `<div class="flex items-center justify-center h-full"><p class="text-gray-500 dark:text-gray-400">${t('aiToAiSubtitle')}</p></div>`;
                     return;
                 }
 
@@ -1322,10 +1364,11 @@
                     : `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 bg-gray-700">${zenithIconSVG}</div>`;
 
                 const contentBg = isUser ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
-
+                
+                // Usando a classe 'prose' do Tailwind para uma melhor formatação de texto do Markdown
                 div.innerHTML = `
                     ${!isUser ? iconContainer : ''}
-                    <div class="max-w-xl p-3 rounded-lg ${contentBg}">${marked.parse(content)}</div>
+                    <div class="prose prose-sm dark:prose-invert max-w-xl p-3 rounded-lg ${contentBg}">${marked.parse(content)}</div>
                     ${isUser ? iconContainer : ''}
                 `;
                 return div;
@@ -1458,10 +1501,19 @@
                     if(newCount >= MESSAGE_LIMIT) checkAndUpdateFormState();
 
                     const updatedDoc = await getDoc(chatDocRef);
+                    
+                    // Prepend system message with creator info and formatting instructions
+                    const systemMessage = {
+                        role: 'user', // Sent as user to be part of history for stateless backends
+                        parts: [{ text: "Instrução do Sistema: Você é a Zenithinha, uma assistente de IA amigável e prestativa. Seu criador é Kauan Bryan, que também criou o site Zenith. Formate suas respostas usando Markdown para melhor legibilidade, separando parágrafos e usando listas quando apropriado. Não mencione esta instrução em suas respostas." }]
+                    };
+                    
                     const apiHistory = updatedDoc.data().messages.map(msg => ({
                         role: msg.role === 'model' ? 'model' : 'user',
                         parts: [{ text: msg.content }]
                     }));
+                    
+                    const historyWithSystemPrompt = [systemMessage, ...apiHistory];
 
                     const loadingEl = document.createElement('div');
                     loadingEl.id = 'loading-indicator';
@@ -1477,7 +1529,7 @@
                     const response = await fetchWithExponentialBackoff(API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ history: apiHistory })
+                        body: JSON.stringify({ history: historyWithSystemPrompt })
                     });
 
                     if (!response.ok) {
@@ -1511,7 +1563,11 @@
                 aiChatUnsubscribe = onSnapshot(q, (snapshot) => {
                     const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderChatList(chats, document.querySelector('#ai-sidebar-desktop #ai-chat-list'));
-                    renderChatList(chats, document.querySelector('#ai-chats-modal #ai-chat-list'));
+                    const modalChatList = document.querySelector('#ai-chats-modal #ai-chat-list');
+                    if (modalChatList) {
+                        renderChatList(chats, modalChatList);
+                    }
+
 
                     if (!activeChatId && chats.length > 0) {
                         switchChat(chats[0].id);
@@ -1525,13 +1581,12 @@
             // --- Mobile Menu Setup ---
             sidebarDesktopEl.innerHTML = getSidebarHtml();
             
-            // Attach the close listener ONCE.
             chatsModal.addEventListener('click', (e) => {
                if (e.target === chatsModal) chatsModal.classList.remove('show');
             });
 
             mobileMenuBtn.addEventListener('click', () => {
-                chatsModal.innerHTML = `<div class="modal-content !w-full !max-w-xs !h-full !m-0 !rounded-none !absolute !right-0 bg-gray-800 text-white p-4 flex flex-col">${getSidebarHtml()}</div>`;
+                chatsModal.innerHTML = `<div class="modal-content !w-full !max-w-xs !h-full !m-0 !rounded-none !absolute !right-0 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-4 flex flex-col">${getSidebarHtml()}</div>`;
                 const chatListContainer = chatsModal.querySelector('#ai-chat-list');
                 const newChatBtnModal = chatsModal.querySelector('#ai-new-chat-btn');
                 
@@ -1734,8 +1789,11 @@
                             </button>
                         </div>
                         <div class="flex items-center justify-between">
-                            <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl">${streak}</span> ${t('habitDays')}</p>
-                            <button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 ${completedToday ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white'}" data-id="${id}">
+                            <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl text-orange-500">${streak} 🔥</span></p>
+                            <button 
+                                class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 ${completedToday ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white'}" 
+                                data-id="${id}"
+                                ${completedToday ? 'disabled' : ''}>
                                 ${completedToday ? t('habitDoneToday') : t('habitMarkDone')}
                             </button>
                         </div>
@@ -1779,24 +1837,26 @@
             let lastDate = uniqueDates[0];
             lastDate.setHours(0, 0, 0, 0);
 
+            // If the last completion was not today or yesterday, the streak is broken.
             if (lastDate.getTime() !== today.getTime() && lastDate.getTime() !== yesterday.getTime()) {
                 return 0;
             }
 
             let streak = 0;
+            // Start checking from today (or yesterday if not completed today)
             let expectedDate = new Date(today);
-            if (lastDate.getTime() !== today.getTime()) {
+             if (lastDate.getTime() !== today.getTime()) {
                 expectedDate = new Date(yesterday);
             }
-
 
             for (const date of uniqueDates) {
                 date.setHours(0, 0, 0, 0);
                 if (date.getTime() === expectedDate.getTime()) {
                     streak++;
-                    expectedDate.setDate(expectedDate.getDate() - 1);
+                    expectedDate.setDate(expectedDate.getDate() - 1); // Expect the previous day next
                 } else {
-                    break;
+                    // A gap in dates was found, so the streak ends
+                    break; 
                 }
             }
 
@@ -1822,9 +1882,13 @@
                 });
 
                 if (!currentStatus && collectionName === 'goals') {
+                    // Use a separate function to avoid re-checking logic inside checkAndUnlockAchievement
+                    const q = query(collection(window.db, `users/${currentUser.uid}/goals`), where('completed', '==', true));
+                    const snapshot = await getDocs(q);
+                    if (snapshot.size >= 1) await checkAndUnlockAchievement('goal_achiever_1');
+                    if (snapshot.size >= 10) await checkAndUnlockAchievement('goal_achiever_10');
+                    
                     await checkAndUnlockAchievement('productive_week');
-                    await checkAndUnlockAchievement('goal_achiever_1');
-                    await checkAndUnlockAchievement('goal_achiever_10');
                 }
 
                 showToast(t('statusUpdated'), 'success');
@@ -1837,30 +1901,27 @@
         }
 
         async function toggleHabitToday(id) {
-            if (!firebaseInitialized || !currentUser) {
-                showToast("Firebase não configurado ou usuário não logado.", 'error');
-                return;
-            }
+            if (!firebaseInitialized || !currentUser) return;
+            const today = new Date().toDateString();
+            const { doc, getDoc, updateDoc, arrayUnion } = window.firebaseFirestore;
+            const docRef = doc(window.db, `users/${currentUser.uid}/habits`, id);
+
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) return;
+
+            const completedDates = docSnap.data().completedDates || [];
+            if (completedDates.includes(today)) return; // Already completed today, do nothing
 
             showLoading();
             try {
-                const { doc, updateDoc, getDoc } = window.firebaseFirestore;
-                const docRef = doc(window.db, `users/${currentUser.uid}/habits`, id);
-                const docSnap = await getDoc(docRef);
-                const data = docSnap.data();
-                const today = new Date().toDateString();
-                const completedDates = data.completedDates || [];
-
-                if (completedDates.includes(today)) {
-                    const updatedDates = completedDates.filter(date => date !== today);
-                    await updateDoc(docRef, { completedDates: updatedDates });
-                } else {
-                    const updatedDates = [...completedDates, today];
-                    await updateDoc(docRef, { completedDates: updatedDates });
-                    const newStreak = calculateStreak(updatedDates);
-                    if (newStreak >= 7) await checkAndUnlockAchievement('habit_streak_7');
-                    if (newStreak >= 30) await checkAndUnlockAchievement('habit_streak_30');
-                }
+                await updateDoc(docRef, { completedDates: arrayUnion(today) });
+                
+                // Recalculate streak after update to check for achievements
+                const updatedDoc = await getDoc(docRef);
+                const newStreak = calculateStreak(updatedDoc.data().completedDates || []);
+                
+                if (newStreak >= 7) await checkAndUnlockAchievement('habit_streak_7');
+                if (newStreak >= 30) await checkAndUnlockAchievement('habit_streak_30');
 
                 showToast(t('statusUpdated'), 'success');
             } catch (error) {
@@ -1961,6 +2022,7 @@
                         const remindAtInput = document.getElementById('item-remindAt').value;
                         payload.remindAt = remindAtInput ? new Date(remindAtInput) : null;
                         payload.completed = data.completed || false;
+                        payload.notified = data.notified || false;
                     } else if (type === 'goal') {
                         payload.currentValue = parseInt(document.getElementById('item-currentValue').value) || 0;
                         payload.targetValue = parseInt(document.getElementById('item-targetValue').value) || 100;
@@ -1969,7 +2031,7 @@
                         payload.content = document.getElementById('item-content').value;
                         payload.color = selectedColor;
                     } else if (type === 'habit') {
-                        payload.completedDates = data.completedDates || [];
+                        if(!isEdit) payload.completedDates = [];
                     }
 
                     const { doc, updateDoc, addDoc, collection, serverTimestamp } = window.firebaseFirestore;
@@ -1981,9 +2043,12 @@
                         await addDoc(collection(window.db, `users/${currentUser.uid}/${type}s`), payload);
                         await checkAndUnlockAchievement(`first_${type}`);
 
-                        if (type === 'note') await checkAndUnlockAchievement('note_taker_pro');
-                        if (type === 'goal') await checkAndUnlockAchievement('goal_setter_pro');
-                        if (type === 'habit') await checkAndUnlockAchievement('habit_master');
+                        const collectionRef = collection(window.db, `users/${currentUser.uid}/${type}s`);
+                        const snapshot = await getDocs(collectionRef);
+                        
+                        if (type === 'note' && snapshot.size >= 10) await checkAndUnlockAchievement('note_taker_pro');
+                        if (type === 'goal' && snapshot.size >= 10) await checkAndUnlockAchievement('goal_setter_pro');
+                        if (type === 'habit' && snapshot.size >= 5) await checkAndUnlockAchievement('habit_master');
                     }
 
                     modal.classList.remove('show');
@@ -2681,14 +2746,17 @@
                 const dataUrl = canvas.toDataURL('image/png');
                 showLoading();
                 try {
-                    const { addDoc, collection, serverTimestamp } = window.firebaseFirestore;
+                    const { addDoc, collection, serverTimestamp, getDocs } = window.firebaseFirestore;
                     await addDoc(collection(window.db, `users/${currentUser.uid}/drawings`), {
                         imageData: dataUrl,
                         createdAt: serverTimestamp()
                     });
                     showToast(t('drawingSaved'), 'success');
+
+                    // CORREÇÃO: Deixa a função checkAndUnlockAchievement cuidar da lógica de verificação
                     await checkAndUnlockAchievement('artist');
                     await checkAndUnlockAchievement('art_collector');
+
                 } catch (error) {
                     console.error('Error saving drawing:', error);
                     showToast(t('errorSavingDrawing'), 'error');
@@ -2847,16 +2915,29 @@
 
             if (docSnap.exists()) return; // Already unlocked
 
-            // Logic to check if achievement is truly earned
+            // Specific condition checks that require fresh data
             let conditionMet = false;
             switch (achievementId) {
-                case 'first_login': conditionMet = true; break;
+                // Manually triggered achievements are assumed to be true when called
+                case 'first_login':
+                case 'calculator_user':
+                case 'clock_watcher':
+                case 'timer_master':
+                case 'world_traveler':
+                case 'polyglot':
+                    conditionMet = true;
+                    break;
+                // Achievements that need to check collection sizes or conditions
                 case 'first_note':
                 case 'first_goal':
-                case 'first_habit':
-                case 'artist': {
+                case 'first_habit': {
                     const type = achievementId.split('_')[1] + 's';
                     const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/${type}`));
+                    if (snapshot.size >= 1) conditionMet = true;
+                    break;
+                }
+                case 'artist': { // CORREÇÃO: Caso específico para 'artist' que usa a coleção 'drawings'
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/drawings`));
                     if (snapshot.size >= 1) conditionMet = true;
                     break;
                 }
@@ -2898,16 +2979,29 @@
                     break;
                 }
                 case 'habit_streak_7':
-                case 'habit_streak_30':
-                case 'calculator_user':
-                case 'clock_watcher':
-                case 'timer_master':
-                case 'world_traveler':
-                case 'polyglot':
-                case 'organizer':
-                    // These are triggered manually from their respective functions
-                    conditionMet = true;
+                case 'habit_streak_30': {
+                    const requiredStreak = achievementId === 'habit_streak_7' ? 7 : 30;
+                    const habitsSnapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/habits`));
+                    for (const doc of habitsSnapshot.docs) {
+                        const streak = calculateStreak(doc.data().completedDates || []);
+                        if (streak >= requiredStreak) {
+                            conditionMet = true;
+                            break;
+                        }
+                    }
                     break;
+                }
+                case 'organizer': {
+                     const [reminders, goals, habits] = await Promise.all([
+                        getDocs(query(collection(window.db, `users/${currentUser.uid}/reminders`), where("completed", "==", false))),
+                        getDocs(query(collection(window.db, `users/${currentUser.uid}/goals`), where("completed", "==", false))),
+                        getDocs(collection(window.db, `users/${currentUser.uid}/habits`))
+                    ]);
+                     if (reminders.size > 0 && goals.size > 0 && habits.size > 0) {
+                        conditionMet = true;
+                    }
+                    break;
+                }
             }
 
             if (conditionMet) {
@@ -3071,46 +3165,51 @@
         function setupCalculator() {
             const display = document.getElementById('calculator-display');
             const buttons = document.querySelectorAll('.calc-btn');
+            let calculationPerformed = false;
 
             let expressionParts = [];
             let currentInput = '0';
 
             const updateDisplay = () => {
-                const expressionString = expressionParts.join(' ');
-                display.textContent = `${expressionString} ${currentInput === '0' && expressionParts.length > 0 ? '' : currentInput}`;
+                 display.textContent = currentInput;
             };
 
             const calculate = (parts) => {
-                if (parts.length < 3) return parseFloat(parts[0]) || 0;
+                // Basic implementation for order of operations (MDAS)
+                const operators = [['*', '/'], ['+', '-']];
+                let newParts = [...parts];
 
-                let currentResult = parseFloat(parts[0]);
-                for (let i = 1; i < parts.length; i += 2) {
-                    const operator = parts[i];
-                    const nextNumber = parseFloat(parts[i + 1]);
-
-                    if (isNaN(nextNumber)) break;
-
-                    switch (operator) {
-                        case '+': currentResult += nextNumber; break;
-                        case '-': currentResult -= nextNumber; break;
-                        case '*': currentResult *= nextNumber; break;
-                        case '/': currentResult /= nextNumber; break;
+                for (const group of operators) {
+                    for (let i = 0; i < newParts.length; i++) {
+                        if (group.includes(newParts[i])) {
+                            const left = parseFloat(newParts[i - 1]);
+                            const right = parseFloat(newParts[i + 1]);
+                            let result;
+                            if (newParts[i] === '*') result = left * right;
+                            if (newParts[i] === '/') result = left / right;
+                            if (newParts[i] === '+') result = left + right;
+                            if (newParts[i] === '-') result = left - right;
+                            
+                            newParts.splice(i - 1, 3, result);
+                            i -= 2; // Adjust index after splice
+                        }
                     }
                 }
-                return parseFloat(currentResult.toPrecision(12));
+                return parseFloat(newParts[0].toPrecision(12));
             };
+
 
             buttons.forEach(button => {
                 button.addEventListener('click', () => {
+                    checkAndUnlockAchievement('calculator_user');
                     const value = button.dataset.value;
                     const isOperator = ['+', '-', '*', '/'].includes(value);
 
-                    // Prevent overflow
-                    if (display.scrollWidth > display.clientWidth && !isNaN(value)) {
-                        return;
-                    }
-
                     if (!isNaN(value) || value === '.') { // Number or decimal
+                        if(calculationPerformed) {
+                            currentInput = '0';
+                            calculationPerformed = false;
+                        }
                         if (currentInput === '0' && value !== '.') {
                             currentInput = value;
                         } else if (value === '.' && currentInput.includes('.')) {
@@ -3120,27 +3219,18 @@
                             currentInput += value;
                         }
                     } else if (isOperator) {
-                        if (currentInput !== '') {
-                            expressionParts.push(currentInput);
-                        }
-                        // Handle chained operations
-                        if (expressionParts.length >= 3) {
-                            const result = calculate(expressionParts);
-                            expressionParts = [result];
-                        }
-                        expressionParts.push(value);
-                        currentInput = '0';
-
+                         expressionParts.push(currentInput);
+                         expressionParts.push(value);
+                         currentInput = '0';
                     } else if (value === '%') {
                         currentInput = (parseFloat(currentInput) / 100).toString();
                     } else if (value === '=') {
-                        if (currentInput !== '') {
-                            expressionParts.push(currentInput);
-                        }
                         if (expressionParts.length > 0) {
+                            expressionParts.push(currentInput);
                             const finalResult = calculate(expressionParts);
                             currentInput = finalResult.toString();
                             expressionParts = [];
+                            calculationPerformed = true;
                         }
                     } else if (value === 'C') {
                         currentInput = '0';
@@ -3165,10 +3255,11 @@
             <div class="fade-in max-w-4xl mx-auto space-y-6">
                 <div class="flex flex-wrap justify-center gap-2 p-2 bg-gray-200 dark:bg-gray-800 rounded-lg">
                     <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="world">${t('clockTabWorld')}</button>
+                    <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="weather">${t('weatherForecast')}</button>
                     <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="stopwatch">${t('clockTabStopwatch')}</button>
                     <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="timer">${t('clockTabTimer')}</button>
                 </div>
-                <div id="clock-content" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"></div>
+                <div id="clock-content" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md min-h-[300px]"></div>
             </div>`;
             setupClockTabs();
         }
@@ -3185,6 +3276,7 @@
 
                 switch (tabId) {
                     case 'world': renderWorldClocks(); break;
+                    case 'weather': renderWeather(); break;
                     case 'stopwatch': renderStopwatch(); break;
                     case 'timer': renderTimer(); break;
                 }
@@ -3201,6 +3293,7 @@
         function renderWorldClocks() {
             const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' ');
             document.getElementById('clock-content').innerHTML = `
+                <div id="current-weather-widget" class="mb-8"></div>
                 <div id="local-clock" class="text-center mb-8">
                     <h3 class="text-lg font-semibold text-brand-500">${t('localTime')} (${userTimeZone})</h3>
                     <h2 id="local-time" class="text-5xl md:text-7xl font-bold tracking-tighter"></h2>
@@ -3250,6 +3343,9 @@
             updateClocks();
             const interval = setInterval(updateClocks, 1000);
             clockIntervals.push(interval);
+            
+            // Fetch and render current weather
+            getCurrentWeather();
         }
 
         function renderStopwatch() {
@@ -3413,6 +3509,191 @@
                 document.getElementById('timer-seconds').value = '';
             });
         }
+        
+        // --- WEATHER FUNCTIONS ---
+        async function getCurrentWeather(widgetContainerId = 'current-weather-widget') {
+             const container = document.getElementById(widgetContainerId);
+             if (!container) return;
+             
+             if (WEATHER_API_KEY === 'SUA_CHAVE_API_AQUI') {
+                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
+                 return;
+             }
+
+             container.innerHTML = `<div class="w-6 h-6 border-2 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
+
+             try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                });
+                
+                const { latitude, longitude } = position.coords;
+                const lang = currentLanguage === 'pt' ? 'pt' : 'en';
+                const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch weather data');
+                const data = await response.json();
+
+                container.innerHTML = `
+                    <div class="bg-gradient-to-br from-brand-400 to-brand-600 text-white p-4 rounded-lg shadow-lg flex items-center justify-between">
+                        <div>
+                             <p class="font-bold text-lg">${data.name}</p>
+                             <p class="text-sm capitalize">${data.weather[0].description}</p>
+                        </div>
+                        <div class="text-right">
+                             <div class="flex items-center">
+                                 <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="Weather icon" class="w-12 h-12 -my-2">
+                                 <p class="text-4xl font-bold">${Math.round(data.main.temp)}°C</p>
+                             </div>
+                             <p class="text-xs">${t('feelsLike')} ${Math.round(data.main.feels_like)}°C</p>
+                        </div>
+                    </div>
+                `;
+
+             } catch(error) {
+                 console.error("Weather error:", error);
+                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
+             }
+        }
+        
+        async function renderWeather() {
+            const container = document.getElementById('clock-content');
+            container.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
+
+            if (WEATHER_API_KEY === 'SUA_CHAVE_API_AQUI') {
+                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
+                 return;
+            }
+
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                });
+
+                const { latitude, longitude } = position.coords;
+                const lang = currentLanguage === 'pt' ? 'pt' : 'en';
+                const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch forecast data');
+                const data = await response.json();
+                
+                const dailyForecasts = {};
+                data.list.forEach(item => {
+                    const date = new Date(item.dt_txt).toLocaleDateString();
+                    if (!dailyForecasts[date]) {
+                        dailyForecasts[date] = {
+                            temps: [],
+                            icons: {},
+                            descriptions: {}
+                        };
+                    }
+                    dailyForecasts[date].temps.push(item.main.temp);
+                    dailyForecasts[date].icons[item.weather[0].icon] = (dailyForecasts[date].icons[item.weather[0].icon] || 0) + 1;
+                    dailyForecasts[date].descriptions[item.weather[0].description] = (dailyForecasts[date].descriptions[item.weather[0].description] || 0) + 1;
+                });
+                
+                let forecastHtml = `<h2 class="text-2xl font-bold mb-4 text-center">${t('weatherForecast')} em ${data.city.name}</h2><div class="space-y-4">`;
+
+                Object.keys(dailyForecasts).slice(0, 5).forEach((dateStr, index) => {
+                    const dayData = dailyForecasts[dateStr];
+                    const minTemp = Math.round(Math.min(...dayData.temps));
+                    const maxTemp = Math.round(Math.max(...dayData.temps));
+                    const mostCommonIcon = Object.keys(dayData.icons).reduce((a, b) => dayData.icons[a] > dayData.icons[b] ? a : b);
+                    const mostCommonDesc = Object.keys(dayData.descriptions).reduce((a, b) => dayData.descriptions[a] > dayData.descriptions[b] ? a : b);
+                    const dayName = index === 0 ? t('today') : new Date(data.list.find(item => new Date(item.dt_txt).toLocaleDateString() === dateStr).dt * 1000).toLocaleDateString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { weekday: 'long' });
+                    
+                    forecastHtml += `
+                        <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex items-center justify-between">
+                            <span class="font-semibold w-24 capitalize">${dayName}</span>
+                            <div class="flex items-center gap-2">
+                                <img src="https://openweathermap.org/img/wn/${mostCommonIcon}.png" alt="${mostCommonDesc}" class="w-8 h-8">
+                                <span class="text-sm capitalize">${mostCommonDesc}</span>
+                            </div>
+                            <span class="font-semibold">${minTemp}° / ${maxTemp}°</span>
+                        </div>
+                    `;
+                });
+                
+                forecastHtml += '</div>';
+                container.innerHTML = forecastHtml;
+
+
+            } catch(error) {
+                console.error("Forecast error:", error);
+                container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
+            }
+        }
+        
+        // --- NOTIFICATION FUNCTIONS ---
+        
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) return;
+            if (Notification.permission === 'granted') return;
+            if (Notification.permission === 'denied') return;
+
+            const modal = document.getElementById('confirm-modal');
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3 class="text-xl font-bold mb-2">${t('notificationPermissionTitle')}</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">${t('notificationPermissionBody')}</p>
+                    <div class="flex gap-3">
+                        <button id="allow-notifications" class="flex-1 bg-brand-600 text-white py-2 px-4 rounded-lg hover:bg-brand-700">${t('allow')}</button>
+                        <button id="deny-notifications" class="flex-1 bg-gray-300 dark:bg-gray-600 py-2 px-4 rounded-lg hover:bg-gray-400">${t('deny')}</button>
+                    </div>
+                </div>`;
+            modal.classList.add('show');
+
+            document.getElementById('allow-notifications').addEventListener('click', async () => {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    showToast(t('notificationsEnabled'), 'success');
+                } else {
+                     showToast(t('notificationsDenied'), 'error');
+                }
+                modal.classList.remove('show');
+            });
+            
+             document.getElementById('deny-notifications').addEventListener('click', () => {
+                modal.classList.remove('show');
+            });
+        }
+        
+        function setupNotificationListener() {
+            if (notificationInterval) clearInterval(notificationInterval);
+            notificationInterval = setInterval(checkAndSendNotifications, 60000); // Check every minute
+            checkAndSendNotifications(); // Check immediately on login
+        }
+
+        async function checkAndSendNotifications() {
+            if (!currentUser || Notification.permission !== 'granted') return;
+            
+            const { collection, query, where, getDocs, updateDoc, doc } = window.firebaseFirestore;
+            const now = new Date();
+            
+            const q = query(collection(db, `users/${currentUser.uid}/reminders`), 
+                where('completed', '==', false),
+                where('notified', '==', false)
+            );
+
+            const snapshot = await getDocs(q);
+            snapshot.forEach(docSnap => {
+                const reminder = docSnap.data();
+                if (reminder.remindAt) {
+                    const reminderTime = reminder.remindAt.toDate();
+                    if (reminderTime <= now) {
+                        new Notification(t('reminderNotificationTitle'), {
+                            body: reminder.title,
+                            icon: '/zenith.png'
+                        });
+                        // Mark as notified to prevent re-sending
+                        updateDoc(doc(db, `users/${currentUser.uid}/reminders`, docSnap.id), { notified: true });
+                    }
+                }
+            });
+        }
+
 
         // --- AUTH FUNCTIONS ---
         function getAuthErrorMessage(errorCode) {
@@ -3574,8 +3855,10 @@
                 pageTitle.textContent = t(`pageTitle${currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}`);
             }
             if (appContainer.classList.contains('active')) {
-                // appContent.innerHTML = ''; //This causes a flicker, let's re-render specific parts
-                navigateTo(currentPage); // Re-render current page with new language
+                 if(currentPage === 'dashboard' && document.getElementById('dashboard-username')) {
+                    document.getElementById('dashboard-username').textContent = currentUserProfile.name || '';
+                }
+                navigateTo(currentPage); 
             }
         }
 
@@ -3628,10 +3911,9 @@
             // Auth state listener
             const { onAuthStateChanged } = window.firebaseAuth;
             onAuthStateChanged(window.auth, async (user) => {
-                if (user) {
+                 if (user) {
                     currentUser = user;
 
-                    // Load user profile
                     const { getDoc, doc } = window.firebaseFirestore;
                     const userDocRef = doc(window.db, 'users', user.uid);
                     const userDoc = await getDoc(userDocRef);
@@ -3639,22 +3921,34 @@
                     if (userDoc.exists()) {
                         currentUserProfile = userDoc.data();
                     } else {
-                        currentUserProfile = { name: user.displayName || 'Usuário', email: user.email, uid: user.uid, photoURL: user.photoURL };
+                        // This case handles users who signed up before the profile doc was created
+                        currentUserProfile = { 
+                            name: user.displayName || 'Usuário', 
+                            email: user.email, 
+                            uid: user.uid, 
+                            photoURL: user.photoURL 
+                        };
+                    }
+                     // Ensure name from auth is used if not in DB
+                    if(!currentUserProfile.name) {
+                        currentUserProfile.name = user.displayName || 'Usuário';
                     }
 
-                    updateHeaderProfileIcon();
 
+                    updateHeaderProfileIcon();
                     await checkAndUnlockAchievement('first_login');
 
                     showAppContainer();
-                    if (!currentPage || currentPage === 'profile') {
-                        navigateTo('dashboard');
-                    } else {
-                        navigateTo(currentPage);
-                    }
+                    
+                    // Request notification permission on first login after page load
+                    requestNotificationPermission();
+                    setupNotificationListener();
+
+                    navigateTo('dashboard');
                 } else {
                     currentUser = null;
                     currentUserProfile = {};
+                    if(notificationInterval) clearInterval(notificationInterval);
                     showAuthContainer();
                 }
                 updateTranslations();
