@@ -181,16 +181,14 @@
             opacity: 1;
             visibility: visible;
         }
-
+        
         #ai-chats-modal {
-            justify-content: flex-end;
+             justify-content: flex-end;
         }
-
         #ai-chats-modal .modal-content {
             transform: translateX(100%);
             transition: transform 0.3s ease-in-out;
         }
-
         #ai-chats-modal.show .modal-content {
             transform: translateX(0);
         }
@@ -244,35 +242,14 @@
             touch-action: none;
         }
 
-        /* CORREÇÃO: Estilos da Calculadora */
-        #calculator-expression {
-            font-size: 1.25rem;
-            height: 2rem;
-            opacity: 0.7;
-            transition: opacity 0.2s ease-in-out;
-        }
-
         #calculator-display {
-            font-size: 3rem;
-            height: 6rem;
-            line-height: 1.2;
+            text-align: right;
+            padding: 20px;
+            font-size: 2.5rem;
             overflow-x: auto;
             word-wrap: break-word;
             word-break: break-all;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .calculator-result-transition {
-            opacity: 0;
-            transform: translateY(10px);
-            animation: slideIn 0.3s forwards;
-        }
-
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            transition: opacity 0.15s ease-in-out;
         }
 
         .clock-tab.active {
@@ -286,6 +263,7 @@
             color: #e0f2fe;
         }
 
+        /* Calendar Styles */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -305,34 +283,41 @@
 
         .calendar-day.other-month {
             color: #9ca3af;
+            /* gray-400 */
         }
 
         .dark .calendar-day.other-month {
             color: #4b5563;
+            /* gray-600 */
         }
 
         .calendar-day.today {
             background-color: #0ea5e9;
+            /* brand-500 */
             color: white;
             font-weight: bold;
         }
 
         .calendar-day.selected {
             background-color: #38bdf8;
+            /* brand-400 */
             color: white;
             font-weight: bold;
         }
 
         .dark .calendar-day.selected {
             background-color: #0369a1;
+            /* brand-700 */
         }
 
         .calendar-day:hover:not(.today):not(.selected) {
             background-color: #f0f9ff;
+            /* brand-50 */
         }
 
         .dark .calendar-day:hover:not(.today):not(.selected) {
             background-color: #0c4a6e;
+            /* brand-900 */
         }
 
         .event-dot {
@@ -344,6 +329,7 @@
             height: 6px;
             border-radius: 50%;
             background-color: #ef4444;
+            /* red-500 */
         }
 
         .calendar-day.today .event-dot,
@@ -351,35 +337,9 @@
             background-color: white;
         }
 
-        /* CORREÇÃO: Estilos da IA */
+        /* Estilos da IA */
         #ai-chat-history {
             scroll-behavior: smooth;
-        }
-
-        .prose p,
-        .prose ul,
-        .prose ol,
-        .prose pre {
-            margin-bottom: 1em;
-        }
-
-        .prose pre {
-            white-space: pre-wrap;
-            word-break: break-all;
-            background-color: #1f2937;
-            color: #e5e7eb;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            overflow-x: auto;
-        }
-
-        .prose code {
-            font-family: monospace;
-        }
-
-        .habit-toggle:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
         }
 
         @keyframes bounce {
@@ -412,23 +372,30 @@
             animation-delay: -0.16s;
         }
 
+        /* Estilos para Notas */
         .note-content-wrapper {
             max-height: 120px;
+            /* Altura máxima para o conteúdo da nota antes de expandir */
             overflow: hidden;
             transition: max-height 0.4s ease-in-out;
         }
 
         .note-content-wrapper.expanded {
             max-height: 1000px;
+            /* Um valor alto para garantir que todo o conteúdo seja visível */
         }
 
+
+        /* Oculta a barra de rolagem mas mantém a funcionalidade */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
 
         .no-scrollbar {
             -ms-overflow-style: none;
+            /* IE and Edge */
             scrollbar-width: none;
+            /* Firefox */
         }
     </style>
 </head>
@@ -436,23 +403,18 @@
 <body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
 
     <div id="loading-overlay" class="fixed inset-0 bg-gray-950 bg-opacity-80 flex items-center justify-center z-[1050]">
-        <div
-            class="w-16 h-16 border-4 border-t-brand-500 border-r-transparent border-b-brand-500 border-l-transparent rounded-full animate-spin">
+        <div class="w-16 h-16 border-4 border-t-brand-500 border-r-transparent border-b-brand-500 border-l-transparent rounded-full animate-spin">
         </div>
     </div>
 
     <div id="toast-container" class="toast-container"></div>
 
     <div id="auth-container" class="page">
-        <div
-            class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-950">
+        <div class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-950">
             <div id="login-page" class="page active w-full max-w-md fade-in">
                 <div class="text-center mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-sparkles mx-auto text-brand-500">
-                        <path
-                            d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles mx-auto text-brand-500">
+                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                         <path d="M5 3v4" />
                         <path d="M19 17v4" />
                         <path d="M3 5h4" />
@@ -462,38 +424,22 @@
                         ao Zenith</h1>
                     <p data-t="loginSubtitle" class="text-gray-600 dark:text-gray-400 mt-2">Seu assistente pessoal</p>
                 </div>
-                <form id="login-form"
-                    class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
-                    <div>
-                        <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
-                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                            required>
-                        <p id="login-email-error" class="text-red-500 text-xs mt-1 h-4"></p>
-                    </div>
+                <form id="login-form" class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
+                    <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
                     <div class="relative">
-                        <input type="password" id="login-password" data-t-placeholder="passwordPlaceholder"
-                            placeholder="Senha"
-                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                            required>
-                        <p id="login-password-error" class="text-red-500 text-xs mt-1 h-4"></p>
-                        <button type="button"
-                            class="password-toggle absolute top-0 right-0 px-4 h-[calc(100%-1rem)] flex items-center text-gray-500 hover:text-brand-500">
+                        <input type="password" id="login-password" data-t-placeholder="passwordPlaceholder" placeholder="Senha" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                        <button type="button" class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
                             <i data-lucide="eye" class="w-5 h-5"></i>
                         </button>
                     </div>
-                    <button type="submit" data-t="loginButton"
-                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Entrar</button>
+                    <button type="submit" data-t="loginButton" class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Entrar</button>
                 </form>
-                <p class="text-center text-sm mt-6"><span data-t="loginNoAccount">Não tem uma conta?</span> <a href="#"
-                        id="show-register" data-t="loginSignUpLink"
-                        class="font-semibold text-brand-500 hover:underline">Cadastre-se</a></p>
+                <p class="text-center text-sm mt-6"><span data-t="loginNoAccount">Não tem uma conta?</span> <a href="#" id="show-register" data-t="loginSignUpLink" class="font-semibold text-brand-500 hover:underline">Cadastre-se</a></p>
             </div>
 
             <div id="register-page" class="page w-full max-w-md fade-in">
                 <div class="text-center mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-user-plus mx-auto text-brand-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus mx-auto text-brand-500">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
                         <line x1="19" x2="19" y1="8" y2="14" />
@@ -504,45 +450,28 @@
                     <p data-t="registerSubtitle" class="text-gray-600 dark:text-gray-400 mt-2">Comece sua jornada de
                         produtividade</p>
                 </div>
-                <form id="register-form"
-                    class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
-                    <input type="text" id="register-name" data-t-placeholder="namePlaceholder"
-                        placeholder="Nome completo"
-                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                        required>
-                    <input type="email" id="register-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
-                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                        required>
+                <form id="register-form" class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
+                    <input type="text" id="register-name" data-t-placeholder="namePlaceholder" placeholder="Nome completo" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                    <input type="email" id="register-email" data-t-placeholder="emailPlaceholder" placeholder="Email" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
                     <div class="relative">
-                        <input type="password" id="register-password" data-t-placeholder="passwordPlaceholderRegister"
-                            placeholder="Criar senha"
-                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                            required>
-                        <button type="button"
-                            class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
+                        <input type="password" id="register-password" data-t-placeholder="passwordPlaceholderRegister" placeholder="Criar senha" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                        <button type="button" class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
                             <i data-lucide="eye" class="w-5 h-5"></i>
                         </button>
                     </div>
-                    <button type="submit" data-t="registerButton"
-                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Cadastrar</button>
+                    <button type="submit" data-t="registerButton" class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Cadastrar</button>
                 </form>
-                <p class="text-center text-sm mt-6"><span data-t="registerHaveAccount">Já tem uma conta?</span> <a
-                        href="#" id="show-login" data-t="registerLoginLink"
-                        class="font-semibold text-brand-500 hover:underline">Entrar</a></p>
+                <p class="text-center text-sm mt-6"><span data-t="registerHaveAccount">Já tem uma conta?</span> <a href="#" id="show-login" data-t="registerLoginLink" class="font-semibold text-brand-500 hover:underline">Entrar</a></p>
             </div>
         </div>
     </div>
 
     <div id="app-container" class="page">
-        <nav
-            class="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-2 z-40 md:left-0 md:top-0 md:h-screen md:w-64 md:border-t-0 md:border-r md:p-4 md:flex md:flex-col md:justify-start">
+        <nav class="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-2 z-40 md:left-0 md:top-0 md:h-screen md:w-64 md:border-t-0 md:border-r md:p-4 md:flex md:flex-col md:justify-start">
 
             <div class="hidden md:flex items-center gap-2 px-2 mb-8">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-sparkles text-brand-500">
-                    <path
-                        d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles text-brand-500">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                     <path d="M5 3v4" />
                     <path d="M19 17v4" />
                     <path d="M3 5h4" />
@@ -551,73 +480,39 @@
                 <span class="text-2xl font-extrabold text-gray-900 dark:text-white">Zenith</span>
             </div>
 
-            <div
-                class="flex justify-start items-center h-full overflow-x-auto no-scrollbar md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto">
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="dashboard">
-                    <i data-lucide="layout-dashboard"></i><span data-t="navDashboard"
-                        class="text-xs md:text-base font-semibold">Dashboard</span>
+            <div class="flex justify-start items-center h-full overflow-x-auto no-scrollbar md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto">
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="dashboard">
+                    <i data-lucide="layout-dashboard"></i><span data-t="navDashboard" class="text-xs md:text-base font-semibold">Dashboard</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="reminders">
-                    <i data-lucide="bell-ring"></i><span data-t="navReminders"
-                        class="text-xs md:text-base font-semibold">Lembretes</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="reminders">
+                    <i data-lucide="bell-ring"></i><span data-t="navReminders" class="text-xs md:text-base font-semibold">Lembretes</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="goals">
-                    <i data-lucide="target"></i><span data-t="navGoals"
-                        class="text-xs md:text-base font-semibold">Metas</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="goals">
+                    <i data-lucide="target"></i><span data-t="navGoals" class="text-xs md:text-base font-semibold">Metas</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="notes">
-                    <i data-lucide="notebook-pen"></i><span data-t="navNotes"
-                        class="text-xs md:text-base font-semibold">Notas</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="notes">
+                    <i data-lucide="notebook-pen"></i><span data-t="navNotes" class="text-xs md:text-base font-semibold">Notas</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="habits">
-                    <i data-lucide="clipboard-check"></i><span data-t="navHabits"
-                        class="text-xs md:text-base font-semibold">Hábitos</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="habits">
+                    <i data-lucide="clipboard-check"></i><span data-t="navHabits" class="text-xs md:text-base font-semibold">Hábitos</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="clock">
-                    <i data-lucide="clock"></i><span data-t="navClock"
-                        class="text-xs md:text-base font-semibold">Relógio</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="clock">
+                    <i data-lucide="clock"></i><span data-t="navClock" class="text-xs md:text-base font-semibold">Relógio</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="calendar">
-                    <i data-lucide="calendar"></i><span data-t="navCalendar"
-                        class="text-xs md:text-base font-semibold">Calendário</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="calendar">
+                    <i data-lucide="calendar"></i><span data-t="navCalendar" class="text-xs md:text-base font-semibold">Calendário</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="calculator">
-                    <i data-lucide="calculator"></i><span data-t="navCalculator"
-                        class="text-xs md:text-base font-semibold">Calculadora</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="calculator">
+                    <i data-lucide="calculator"></i><span data-t="navCalculator" class="text-xs md:text-base font-semibold">Calculadora</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="paint">
-                    <i data-lucide="palette"></i><span data-t="navPaint"
-                        class="text-xs md:text-base font-semibold">Desenho</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="paint">
+                    <i data-lucide="palette"></i><span data-t="navPaint" class="text-xs md:text-base font-semibold">Desenho</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="achievements">
-                    <i data-lucide="trophy"></i><span data-t="navAchievements"
-                        class="text-xs md:text-base font-semibold">Conquistas</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="achievements">
+                    <i data-lucide="trophy"></i><span data-t="navAchievements" class="text-xs md:text-base font-semibold">Conquistas</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="ai">
-                    <i data-lucide="bot"></i><span data-t="navAi"
-                        class="text-xs md:text-base font-semibold">Zenithinha</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="ai">
+                    <i data-lucide="bot"></i><span data-t="navAi" class="text-xs md:text-base font-semibold">Zenithinha</span>
                 </button>
             </div>
         </nav>
@@ -626,17 +521,14 @@
             <header class="bg-white dark:bg-gray-900 shadow-sm p-4 md:p-6 flex justify-between items-center">
                 <h1 id="page-title" class="text-2xl md:text-3xl font-bold">Dashboard</h1>
                 <div id="header-controls" class="flex items-center gap-4">
-                    <button id="language-toggle"
-                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold w-10">
+                    <button id="language-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold w-10">
                         PT
                     </button>
                     <button id="dark-mode-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i data-lucide="moon" class="w-5 h-5"></i>
                         <i data-lucide="sun" class="w-5 h-5 hidden"></i>
                     </button>
-                    <button id="profile-button"
-                        class="nav-item w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center text-white font-bold text-lg hover:opacity-90 overflow-hidden"
-                        data-page="profile">
+                    <button id="profile-button" class="nav-item w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center text-white font-bold text-lg hover:opacity-90 overflow-hidden" data-page="profile">
                         <span id="profile-initial"></span>
                         <img id="profile-img-header" src="" alt="Profile" class="w-full h-full object-cover hidden">
                     </button>
@@ -664,13 +556,7 @@
         let calendarUnsubscribe = null;
         let calendarEventsCache = {};
         let aiChatUnsubscribe = null; // Unsubscribe for AI chats
-        let aiMessagesUnsubscribe = null;
-        let notificationInterval = null;
-        let stopwatchState = { running: false, startTime: 0, savedTime: 0, interval: null };
-        let timerState = { running: false, paused: false, endTime: 0, interval: null };
-
-        // --- Weather API Key ---
-        const WEATHER_API_KEY = '2f3410f5517837200509d829af334e4d';
+        let aiMessagesUnsubscribe = null; // Unsubscribe for AI messages
 
         // DOM elements
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -724,27 +610,9 @@
         // Translations
         const translations = {
             pt: {
-                habitNextAvailable: "Próximo",
-                habitAvailableIn: "Disponível em",
-                habitAvailableNow: "Marcar como feito",
-                habitNotificationBody: "Seu hábito '{habitTitle}' está pronto para ser marcado novamente!",
-                weatherForecast: "Previsão do Tempo",
-                weatherError: "Não foi possível obter os dados do tempo.",
-                weatherApiWarning: "Chave da API de Clima não configurada.",
-                today: "Hoje",
-                feelsLike: "Sensação",
-                humidity: "Umidade",
-                wind: "Vento",
-                notificationPermissionTitle: "Permissão para Notificações",
-                notificationPermissionBody: "O Zenith gostaria de enviar notificações para te lembrar de suas tarefas.",
-                allow: "Permitir",
-                deny: "Negar",
-                notificationsEnabled: "Notificações ativadas!",
-                notificationsDenied: "Você bloqueou as notificações. Ative nas configurações do seu navegador.",
-                reminderNotificationTitle: "Lembrete do Zenith",
                 limitExceeded: "Limite de mensagens diárias atingido.",
                 limitResetsAt: "Você poderá conversar novamente às {time}.",
-                aiWelcomeWithLimit: "Olá, sou a Zenithinha. Posso ajudar com suas tarefas. Lembre-se, você tem um limite de 50 mensagens por dia. Oque você deseja?",
+                aiWelcomeWithLimit: "Olá, sou a Zenithinha. Posso ajudar com suas tarefas. Lembre-se, você tem um limite de 50 mensagens por dia.",
                 showMore: "Ver nota completa",
                 showLess: "Mostrar menos",
                 navAi: "Zenithinha",
@@ -931,23 +799,6 @@
                 ach_zenith_master_desc: "Desbloqueie todas as outras conquistas."
             },
             en: {
-                habitAvailableIn: "Available in",
-                habitAvailableNow: "Mark as done",
-                habitNotificationBody: "Your habit '{habitTitle}' is ready to be marked again!",
-                weatherForecast: "Weather Forecast",
-                weatherError: "Could not fetch weather data.",
-                weatherApiWarning: "Weather API key not configured.",
-                today: "Today",
-                feelsLike: "Feels like",
-                humidity: "Humidity",
-                wind: "Wind",
-                notificationPermissionTitle: "Notification Permission",
-                notificationPermissionBody: "Zenith would like to send you notifications to remind you of your tasks.",
-                allow: "Allow",
-                deny: "Deny",
-                notificationsEnabled: "Notifications enabled!",
-                notificationsDenied: "You have blocked notifications. Please enable them in your browser settings.",
-                reminderNotificationTitle: "Zenith Reminder",
                 limitExceeded: "Daily message limit reached.",
                 limitResetsAt: "You can chat again at {time}.",
                 aiWelcomeWithLimit: "Hello, I'm Zenithinha. I can help with your tasks. Remember, you have a 50 message limit per day.",
@@ -1116,7 +967,7 @@
                 ach_habit_master_desc: "Create 5 habits.",
                 ach_goal_achiever_1_title: "First Victory",
                 ach_goal_achiever_1_desc: "Complete your first goal.",
-                ach_goal_achiever_1_title: "Conqueror",
+                ach_goal_achiever_10_title: "Conqueror",
                 ach_goal_achiever_10_desc: "Complete 10 goals.",
                 ach_habit_streak_30_title: "Unstoppable",
                 ach_habit_streak_30_desc: "Keep a habit for 30 days.",
@@ -1196,29 +1047,41 @@
                 return;
             }
 
-            // Não recarrega a página se já estiver nela (exceto dashboard)
+            // Do not re-render if it's the same page, except for dashboard
             if (currentPage === page && appContent.innerHTML.trim() !== '' && page !== 'dashboard') return;
 
-            // Limpa APENAS os intervalos que não devem persistir, como os relógios mundiais.
-            // O cronômetro e o temporizador agora têm seus próprios intervalos e não são limpos aqui.
+
+            // Clear previous intervals
             clockIntervals.forEach(interval => clearInterval(interval));
             clockIntervals = [];
+            if (calendarUnsubscribe) {
+                calendarUnsubscribe();
+                calendarUnsubscribe = null;
+            }
 
-            if (calendarUnsubscribe) { calendarUnsubscribe(); calendarUnsubscribe = null; }
 
+            // Clear previous unsubscribes for the old page
             unsubscribes.forEach(unsub => unsub());
             unsubscribes = [];
-            if (aiChatUnsubscribe) { aiChatUnsubscribe(); aiChatUnsubscribe = null; }
-            if (aiMessagesUnsubscribe) { aiMessagesUnsubscribe(); aiMessagesUnsubscribe = null; }
+            if (aiChatUnsubscribe) {
+                aiChatUnsubscribe();
+                aiChatUnsubscribe = null;
+            }
+            if (aiMessagesUnsubscribe) {
+                aiMessagesUnsubscribe();
+                aiMessagesUnsubscribe = null;
+            }
+
 
             currentPage = page;
             pageTitle.textContent = t(`pageTitle${page.charAt(0).toUpperCase() + page.slice(1)}`);
-
+            // Adjust padding based on page
             if (page === 'ai') {
                 appContent.classList.remove('p-4', 'md:p-6', 'pb-20', 'md:pb-6');
             } else {
                 appContent.classList.add('p-4', 'md:p-6', 'pb-20', 'md:pb-6');
             }
+
 
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.page === page);
@@ -1251,7 +1114,7 @@
             appContent.innerHTML = `
             <div class="fade-in space-y-6">
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                    <h2 class="text-3xl font-bold mb-2">${t('welcomeBack')}, <span id="dashboard-username" class="text-brand-500">${currentUserProfile.name || ''}</span>!</h2>
+                    <h2 class="text-3xl font-bold mb-2">${t('welcomeBack')}, <span class="text-brand-500">${currentUserProfile.name || 'Usuário'}!</span></h2>
                     <p class="text-gray-600 dark:text-gray-400" data-t="dashboardSubtitle">${t('dashboardSubtitle')}</p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1333,7 +1196,7 @@
             appContent.innerHTML = `
             <div id="ai-chat-container" class="flex w-full h-[calc(100dvh-120px)] md:h-[calc(100vh-88px)] fade-in">
                 <!-- Barra Lateral de Chats (Desktop) -->
-                <aside id="ai-sidebar-desktop" class="bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
+                <aside id="ai-sidebar-desktop" class="bg-gray-800 text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
                     <!-- Conteúdo da sidebar será preenchido por JS -->
                 </aside>
 
@@ -1407,13 +1270,13 @@
                 if (!container) return;
                 container.innerHTML = '';
                 if (chats.length === 0) {
-                    container.innerHTML = `<p class="text-gray-400 dark:text-gray-500 text-sm p-2">${t('noItemsFound', { item: 'chats' })}</p>`;
+                    container.innerHTML = '<p class="text-gray-400 text-sm p-2">Nenhum chat salvo.</p>';
                     return;
                 }
                 chats.forEach(chat => {
                     const isActive = chat.id === activeChatId;
                     const item = document.createElement('div');
-                    item.className = `flex items-center justify-between p-2 rounded-lg cursor-pointer my-1 ${isActive ? 'bg-blue-500 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`;
+                    item.className = `flex items-center justify-between p-2 rounded-lg cursor-pointer my-1 ${isActive ? 'bg-blue-500' : 'hover:bg-gray-700'}`;
                     item.innerHTML = `
                         <span class="truncate flex-grow">${chat.title}</span>
                         <button class="ai-delete-chat-btn text-gray-400 hover:text-red-500 ml-2 p-1">
@@ -1422,16 +1285,12 @@
                     `;
                     item.addEventListener('click', () => {
                         switchChat(chat.id);
-                        if (chatsModal.classList.contains('show')) {
-                            chatsModal.classList.remove('show');
-                        }
+                        chatsModal.classList.remove('show');
                     });
                     item.querySelector('.ai-delete-chat-btn').addEventListener('click', (e) => {
                         e.stopPropagation();
                         confirmDelete(chat.id, 'ai-chats', () => {
-                            if (chatsModal.classList.contains('show')) {
-                                chatsModal.classList.remove('show');
-                            }
+                            chatsModal.classList.remove('show');
                         });
                     });
                     container.appendChild(item);
@@ -1442,7 +1301,7 @@
                 if (!chatHistoryEl) return;
                 chatHistoryEl.innerHTML = '';
                 if (!messages || messages.length === 0) {
-                    chatHistoryEl.innerHTML = `<div class="flex items-center justify-center h-full"><p class="text-gray-500 dark:text-gray-400">${t('aiToAiSubtitle')}</p></div>`;
+                    chatHistoryEl.innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-gray-500 dark:text-gray-400">Faça a primeira pergunta para começar!</p></div>';
                     return;
                 }
 
@@ -1457,17 +1316,16 @@
                 const div = document.createElement('div');
                 const isUser = role === 'user';
                 div.className = `flex items-start gap-3 ${isUser ? 'justify-end' : ''}`;
-
+                
                 const iconContainer = isUser
                     ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 bg-blue-500">${userIconSVG}</div>`
                     : `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 bg-gray-700">${zenithIconSVG}</div>`;
 
                 const contentBg = isUser ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
 
-                // Usando a classe 'prose' do Tailwind para uma melhor formatação de texto do Markdown
                 div.innerHTML = `
                     ${!isUser ? iconContainer : ''}
-                    <div class="prose prose-sm dark:prose-invert max-w-xl p-3 rounded-lg ${contentBg}">${marked.parse(content)}</div>
+                    <div class="max-w-xl p-3 rounded-lg ${contentBg}">${marked.parse(content)}</div>
                     ${isUser ? iconContainer : ''}
                 `;
                 return div;
@@ -1510,7 +1368,7 @@
                     showToast("Erro ao criar novo chat", "error");
                 }
             };
-
+            
             const fetchWithExponentialBackoff = async (url, options, maxRetries = 5) => {
                 let delay = 1000;
                 for (let i = 0; i < maxRetries; i++) {
@@ -1524,14 +1382,14 @@
                         await new Promise(resolve => setTimeout(resolve, delay));
                         delay *= 2;
                     } catch (error) {
-                        console.error(`Fetch attempt ${i + 1} failed:`, error);
-                        if (i === maxRetries - 1) throw error;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2;
+                         console.error(`Fetch attempt ${i + 1} failed:`, error);
+                         if (i === maxRetries - 1) throw error;
+                         await new Promise(resolve => setTimeout(resolve, delay));
+                         delay *= 2;
                     }
                 }
             };
-
+            
             const getAiUsage = async () => {
                 const userDocSnap = await getDoc(userDocRef);
                 let usage = userDocSnap.data()?.aiUsage || { count: 0, resetAt: null };
@@ -1541,7 +1399,7 @@
                 }
                 return usage;
             };
-
+            
             const checkAndUpdateFormState = async () => {
                 const usage = await getAiUsage();
                 if (usage.count >= MESSAGE_LIMIT) {
@@ -1574,7 +1432,7 @@
 
                 const userMessage = { role: 'user', content: prompt, createdAt: new Date() };
                 const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, activeChatId);
-
+                
                 promptInput.value = '';
                 submitButton.disabled = true;
 
@@ -1587,7 +1445,7 @@
                     } else {
                         await updateDoc(chatDocRef, { messages: arrayUnion(userMessage) });
                     }
-
+                    
                     const newCount = usage.count + 1;
                     let newResetAt = usage.resetAt;
                     if (!newResetAt) {
@@ -1597,22 +1455,13 @@
                     }
                     await setDoc(userDocRef, { aiUsage: { count: newCount, resetAt: newResetAt } }, { merge: true });
 
-                    if (newCount >= MESSAGE_LIMIT) checkAndUpdateFormState();
+                    if(newCount >= MESSAGE_LIMIT) checkAndUpdateFormState();
 
                     const updatedDoc = await getDoc(chatDocRef);
-
-                    // Prepend system message with creator info and formatting instructions
-                    const systemMessage = {
-                        role: 'user', // Sent as user to be part of history for stateless backends
-                        parts: [{ text: "Instrução do Sistema: Você é a Zenithinha, uma assistente de IA amigável e prestativa. Seu criador é Kauan Bryan, que também criou o site Zenith. Formate suas respostas usando Markdown para melhor legibilidade, separando parágrafos e usando listas quando apropriado. Não mencione esta instrução em suas respostas." }]
-                    };
-
                     const apiHistory = updatedDoc.data().messages.map(msg => ({
                         role: msg.role === 'model' ? 'model' : 'user',
                         parts: [{ text: msg.content }]
                     }));
-
-                    const historyWithSystemPrompt = [systemMessage, ...apiHistory];
 
                     const loadingEl = document.createElement('div');
                     loadingEl.id = 'loading-indicator';
@@ -1628,7 +1477,7 @@
                     const response = await fetchWithExponentialBackoff(API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ history: historyWithSystemPrompt })
+                        body: JSON.stringify({ history: apiHistory })
                     });
 
                     if (!response.ok) {
@@ -1650,7 +1499,7 @@
                     await updateDoc(chatDocRef, { messages: arrayUnion(errorMessage) });
                 } finally {
                     if ((await getAiUsage()).count < MESSAGE_LIMIT) {
-                        submitButton.disabled = false;
+                       submitButton.disabled = false;
                     }
                     const loadingIndicator = document.getElementById('loading-indicator');
                     if (loadingIndicator) loadingIndicator.remove();
@@ -1662,11 +1511,7 @@
                 aiChatUnsubscribe = onSnapshot(q, (snapshot) => {
                     const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderChatList(chats, document.querySelector('#ai-sidebar-desktop #ai-chat-list'));
-                    const modalChatList = document.querySelector('#ai-chats-modal #ai-chat-list');
-                    if (modalChatList) {
-                        renderChatList(chats, modalChatList);
-                    }
-
+                    renderChatList(chats, document.querySelector('#ai-chats-modal #ai-chat-list'));
 
                     if (!activeChatId && chats.length > 0) {
                         switchChat(chats[0].id);
@@ -1679,27 +1524,28 @@
 
             // --- Mobile Menu Setup ---
             sidebarDesktopEl.innerHTML = getSidebarHtml();
-
+            
+            // Attach the close listener ONCE.
             chatsModal.addEventListener('click', (e) => {
-                if (e.target === chatsModal) chatsModal.classList.remove('show');
+               if (e.target === chatsModal) chatsModal.classList.remove('show');
             });
 
             mobileMenuBtn.addEventListener('click', () => {
-                chatsModal.innerHTML = `<div class="modal-content !w-full !max-w-xs !h-full !m-0 !rounded-none !absolute !right-0 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-4 flex flex-col">${getSidebarHtml()}</div>`;
+                chatsModal.innerHTML = `<div class="modal-content !w-full !max-w-xs !h-full !m-0 !rounded-none !absolute !right-0 bg-gray-800 text-white p-4 flex flex-col">${getSidebarHtml()}</div>`;
                 const chatListContainer = chatsModal.querySelector('#ai-chat-list');
                 const newChatBtnModal = chatsModal.querySelector('#ai-new-chat-btn');
-
+                
                 const q = query(chatsColRef, orderBy('createdAt', 'desc'));
                 getDocs(q).then(snapshot => {
-                    const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderChatList(chats, chatListContainer);
+                     const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                     renderChatList(chats, chatListContainer);
                 });
 
                 newChatBtnModal.addEventListener('click', () => {
                     createNewChat();
                     chatsModal.classList.remove('show');
                 });
-
+                
                 chatsModal.classList.add('show');
             });
 
@@ -1730,8 +1576,8 @@
             const listEl = document.getElementById(`${type}s-list`);
             const itemLayoutClass = (type === 'note') ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' :
                 (type === 'habit') ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6' :
-                    (type === 'goal') ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' :
-                        'space-y-4';
+                (type === 'goal') ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' :
+                'space-y-4';
             listEl.className = itemLayoutClass;
 
             if (firebaseInitialized) {
@@ -1806,53 +1652,53 @@
                 case 'reminder':
                     const isOverdue = data.remindAt && new Date(data.remindAt.toDate()) < new Date() && !data.completed;
                     return `
-                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''} ${isOverdue ? 'border-l-4 border-red-500' : ''}">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
-                                ${data.remindAt ? `<p class="text-sm text-gray-500">${new Date(data.remindAt.toDate()).toLocaleString()}</p>` : ''}
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95" data-id="${id}">
-                                    <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
-                                </button>
-                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
-                                    <i data-lucide="edit" class="w-5 h-5"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>`;
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''} ${isOverdue ? 'border-l-4 border-red-500' : ''}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
+                                ${data.remindAt ? `<p class="text-sm text-gray-500">${new Date(data.remindAt.toDate()).toLocaleString()}</p>` : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                    <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
+                                </button>
+                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                    <i data-lucide="edit" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
                 case 'goal':
                     const progress = data.targetValue > 0 ? Math.min((data.currentValue / data.targetValue) * 100, 100) : 0;
                     return `
-                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''}">
-                        <div class="flex items-start justify-between mb-3">
-                            <div>
-                                <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
-                                <p class="text-sm text-gray-500">${progress.toFixed(0)}% ${t('complete')}</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95" data-id="${id}">
-                                    <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
-                                </button>
-                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
-                                    <i data-lucide="edit" class="w-5 h-5"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
-                            <div class="bg-brand-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                             <div>
-                                <p class="font-semibold text-lg">${data.currentValue} / ${data.targetValue}</p>
-                             </div>
-                             <div class="flex gap-2">
-                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="-1"><i data-lucide="minus"></i></button>
-                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="1"><i data-lucide="plus"></i></button>
-                             </div>
-                        </div>
-                    </div>`;
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ${data.completed ? 'opacity-60' : ''}">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <h3 class="font-semibold ${data.completed ? 'line-through' : ''}">${data.title}</h3>
+                                <p class="text-sm text-gray-500">${progress.toFixed(0)}% ${t('complete')}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="toggle-btn p-2 rounded-lg ${data.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                    <i data-lucide="${data.completed ? 'check-circle' : 'circle'}" class="w-5 h-5"></i>
+                                </button>
+                                <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                    <i data-lucide="edit" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                            <div class="bg-brand-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                             <div>
+                                <p class="font-semibold text-lg">${data.currentValue} / ${data.targetValue}</p>
+                             </div>
+                             <div class="flex gap-2">
+                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="-1"><i data-lucide="minus"></i></button>
+                                <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="1"><i data-lucide="plus"></i></button>
+                             </div>
+                        </div>
+                    </div>`;
                 case 'note':
                     const noteColorClasses = {
                         yellow: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200',
@@ -1864,78 +1710,36 @@
                     const noteHasOverflow = data.content && (data.content.split('\n').length > 5 || data.content.length > 250);
 
                     return `
-                    <div data-item-id="${id}" class="p-4 rounded-lg shadow-md ${noteColorClasses[data.color] || noteColorClasses.yellow} flex flex-col">
-                        <div class="flex items-start justify-between mb-2">
-                            <h3 class="font-bold">${data.title}</h3>
-                            <button class="edit-btn p-1 opacity-70 hover:opacity-100 hover:scale-105 transition-transform" data-id="${id}">
-                                <i data-lucide="edit" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <div class="note-content-wrapper">
-                            <p class="text-sm opacity-90 whitespace-pre-wrap">${data.content}</p>
-                        </div>
-                        ${noteHasOverflow ? `<button class="view-note-btn text-xs font-semibold mt-2 text-brand-600 dark:text-brand-400 self-start hover:underline">${t('showMore')}</button>` : ''}
-                    </div>`;
+                    <div class="p-4 rounded-lg shadow-md ${noteColorClasses[data.color] || noteColorClasses.yellow} flex flex-col">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-bold">${data.title}</h3>
+                            <button class="edit-btn p-1 opacity-70 hover:opacity-100 hover:scale-105 transition-transform" data-id="${id}">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="note-content-wrapper">
+                            <p class="text-sm opacity-90 whitespace-pre-wrap">${data.content}</p>
+                        </div>
+                        ${noteHasOverflow ? `<button class="view-note-btn text-xs font-semibold mt-2 text-brand-600 dark:text-brand-400 self-start hover:underline">${t('showMore')}</button>` : ''}
+                    </div>`;
                 case 'habit':
-                    const completedTimestamps = data.completedTimestamps?.map(ts => ts.toDate()) || [];
-                    const lastCompletion = completedTimestamps.length > 0 ? new Date(Math.max(...completedTimestamps)) : null;
-                    const streak = calculateStreak(completedTimestamps);
-
-                    let buttonHtml = '';
-                    let nextAvailableHtml = '';
-
-                    if (lastCompletion && new Date() < new Date(lastCompletion.getTime() + 24 * 60 * 60 * 1000)) {
-                        const nextAvailable = new Date(lastCompletion.getTime() + 24 * 60 * 60 * 1000);
-
-                        const updateCountdown = () => {
-                            const btn = document.querySelector(`[data-item-id="${id}"] .habit-toggle`);
-                            if (!btn) return;
-
-                            const now = new Date();
-                            if (now >= nextAvailable) {
-                                btn.disabled = false;
-                                btn.textContent = t('habitMarkDone');
-                                btn.classList.remove('bg-gray-300', 'dark:bg-gray-600', 'text-sm');
-                                btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'hover:bg-brand-500', 'hover:text-white');
-                                const nextTimeEl = document.querySelector(`[data-item-id="${id}"] .next-available-time`);
-                                if (nextTimeEl) nextTimeEl.innerHTML = '';
-                            } else {
-                                const diff = nextAvailable - now;
-                                const h = Math.floor(diff / (1000 * 60 * 60));
-                                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                                const s = Math.floor((diff % (1000 * 60)) / 1000);
-                                btn.textContent = `${t('habitAvailableIn')} ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-                                setTimeout(updateCountdown, 1000);
-                            }
-                        };
-
-                        setTimeout(updateCountdown, 0); // Start immediately
-
-                        buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold bg-gray-300 dark:bg-gray-600 text-sm" data-id="${id}" disabled></button>`;
-                        const nextTimeString = nextAvailable.toLocaleTimeString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { hour: '2-digit', minute: '2-digit' });
-                        nextAvailableHtml = `<p class="text-xs text-gray-400 mt-2 text-right">${t('habitNextAvailable')}: ${nextTimeString}</p>`;
-
-                    } else {
-                        buttonHtml = `<button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white" data-id="${id}">${t('habitMarkDone')}</button>`;
-                    }
-
+                    const completedToday = data.completedDates && data.completedDates.includes(today);
+                    const streak = calculateStreak(data.completedDates || []);
                     return `
-                    <div data-item-id="${id}" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-semibold text-lg">${data.title}</h3>
-                            <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
-                                <i data-lucide="edit" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                        <div class="flex-grow"></div>
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl text-orange-500">${streak} 🔥</span></p>
-                            <div class="flex flex-col items-end">
-                                ${buttonHtml}
-                                <div class="next-available-time">${nextAvailableHtml}</div>
-                            </div>
-                        </div>
-                    </div>`;
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-lg">${data.title}</h3>
+                            <button class="edit-btn p-2 bg-blue-100 text-blue-600 rounded-lg hover:scale-105 transition-transform active:scale-95" data-id="${id}">
+                                <i data-lucide="edit" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl">${streak}</span> ${t('habitDays')}</p>
+                            <button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 ${completedToday ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white'}" data-id="${id}">
+                                ${completedToday ? t('habitDoneToday') : t('habitMarkDone')}
+                            </button>
+                        </div>
+                    </div>`;
             }
         }
 
@@ -1960,10 +1764,10 @@
         }
 
 
-        function calculateStreak(completedTimestamps) {
-            if (!completedTimestamps || completedTimestamps.length === 0) return 0;
+        function calculateStreak(completedDates) {
+            if (!completedDates || completedDates.length === 0) return 0;
 
-            const uniqueDates = [...new Set(completedTimestamps.map(ts => new Date(ts).toDateString()))].map(d => new Date(d));
+            const uniqueDates = [...new Set(completedDates)].map(d => new Date(d));
             uniqueDates.sort((a, b) => b - a);
 
             const today = new Date();
@@ -1985,6 +1789,7 @@
                 expectedDate = new Date(yesterday);
             }
 
+
             for (const date of uniqueDates) {
                 date.setHours(0, 0, 0, 0);
                 if (date.getTime() === expectedDate.getTime()) {
@@ -1994,6 +1799,7 @@
                     break;
                 }
             }
+
             return streak;
         }
 
@@ -2016,13 +1822,9 @@
                 });
 
                 if (!currentStatus && collectionName === 'goals') {
-                    // Use a separate function to avoid re-checking logic inside checkAndUnlockAchievement
-                    const q = query(collection(window.db, `users/${currentUser.uid}/goals`), where('completed', '==', true));
-                    const snapshot = await getDocs(q);
-                    if (snapshot.size >= 1) await checkAndUnlockAchievement('goal_achiever_1');
-                    if (snapshot.size >= 10) await checkAndUnlockAchievement('goal_achiever_10');
-
                     await checkAndUnlockAchievement('productive_week');
+                    await checkAndUnlockAchievement('goal_achiever_1');
+                    await checkAndUnlockAchievement('goal_achiever_10');
                 }
 
                 showToast(t('statusUpdated'), 'success');
@@ -2035,20 +1837,30 @@
         }
 
         async function toggleHabitToday(id) {
-            if (!firebaseInitialized || !currentUser) return;
-            const { doc, getDoc, updateDoc, arrayUnion, Timestamp } = window.firebaseFirestore;
-            const docRef = doc(window.db, `users/${currentUser.uid}/habits`, id);
+            if (!firebaseInitialized || !currentUser) {
+                showToast("Firebase não configurado ou usuário não logado.", 'error');
+                return;
+            }
 
             showLoading();
             try {
-                // Salva o timestamp completo em vez de apenas a data
-                await updateDoc(docRef, { completedTimestamps: arrayUnion(Timestamp.now()) });
+                const { doc, updateDoc, getDoc } = window.firebaseFirestore;
+                const docRef = doc(window.db, `users/${currentUser.uid}/habits`, id);
+                const docSnap = await getDoc(docRef);
+                const data = docSnap.data();
+                const today = new Date().toDateString();
+                const completedDates = data.completedDates || [];
 
-                const updatedDoc = await getDoc(docRef);
-                const newStreak = calculateStreak(updatedDoc.data().completedTimestamps.map(ts => ts.toDate()));
-
-                if (newStreak >= 7) await checkAndUnlockAchievement('habit_streak_7');
-                if (newStreak >= 30) await checkAndUnlockAchievement('habit_streak_30');
+                if (completedDates.includes(today)) {
+                    const updatedDates = completedDates.filter(date => date !== today);
+                    await updateDoc(docRef, { completedDates: updatedDates });
+                } else {
+                    const updatedDates = [...completedDates, today];
+                    await updateDoc(docRef, { completedDates: updatedDates });
+                    const newStreak = calculateStreak(updatedDates);
+                    if (newStreak >= 7) await checkAndUnlockAchievement('habit_streak_7');
+                    if (newStreak >= 30) await checkAndUnlockAchievement('habit_streak_30');
+                }
 
                 showToast(t('statusUpdated'), 'success');
             } catch (error) {
@@ -2057,7 +1869,7 @@
             } finally {
                 hideLoading();
             }
-        } hideLoading();
+        }
 
         function loadReminders() { commonListPage('reminder', 'Lembretes', 'bell-ring'); }
         function loadGoals() { commonListPage('goal', 'Metas', 'target'); }
@@ -2141,8 +1953,6 @@
             document.getElementById('item-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 showLoading();
-                let success = false;
-                let isNewItem = !id;
 
                 try {
                     let payload = { title: document.getElementById('item-title').value };
@@ -2151,7 +1961,6 @@
                         const remindAtInput = document.getElementById('item-remindAt').value;
                         payload.remindAt = remindAtInput ? new Date(remindAtInput) : null;
                         payload.completed = data.completed || false;
-                        payload.notified = data.notified || false;
                     } else if (type === 'goal') {
                         payload.currentValue = parseInt(document.getElementById('item-currentValue').value) || 0;
                         payload.targetValue = parseInt(document.getElementById('item-targetValue').value) || 100;
@@ -2160,11 +1969,7 @@
                         payload.content = document.getElementById('item-content').value;
                         payload.color = selectedColor;
                     } else if (type === 'habit') {
-                        if (!isNewItem) {
-                            payload.completedTimestamps = data.completedTimestamps || [];
-                        } else {
-                            payload.completedTimestamps = [];
-                        }
+                        payload.completedDates = data.completedDates || [];
                     }
 
                     const { doc, updateDoc, addDoc, collection, serverTimestamp } = window.firebaseFirestore;
@@ -2174,20 +1979,20 @@
                     } else {
                         payload.createdAt = serverTimestamp();
                         await addDoc(collection(window.db, `users/${currentUser.uid}/${type}s`), payload);
+                        await checkAndUnlockAchievement(`first_${type}`);
+
+                        if (type === 'note') await checkAndUnlockAchievement('note_taker_pro');
+                        if (type === 'goal') await checkAndUnlockAchievement('goal_setter_pro');
+                        if (type === 'habit') await checkAndUnlockAchievement('habit_master');
                     }
-                    success = true;
+
+                    modal.classList.remove('show');
+                    showToast(t('itemSaved'), 'success');
                 } catch (error) {
                     console.error('Error saving item:', error);
                     showToast(t('errorSaving'), 'error');
                 } finally {
                     hideLoading();
-                    if (success) {
-                        modal.classList.remove('show');
-                        showToast(t('itemSaved'), 'success');
-                        if (isNewItem) {
-                            checkPostSaveAchievements(type);
-                        }
-                    }
                 }
             });
 
@@ -2208,23 +2013,6 @@
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) modal.classList.remove('show');
             });
-        }
-
-        // CORREÇÃO: Nova função para checar conquistas após o salvamento ser bem-sucedido
-        async function checkPostSaveAchievements(type) {
-            try {
-                const { getDocs, collection } = window.firebaseFirestore;
-                await checkAndUnlockAchievement(`first_${type}`);
-
-                const collectionRef = collection(window.db, `users/${currentUser.uid}/${type}s`);
-                const snapshot = await getDocs(collectionRef);
-
-                if (type === 'note' && snapshot.size >= 10) await checkAndUnlockAchievement('note_taker_pro');
-                if (type === 'goal' && snapshot.size >= 10) await checkAndUnlockAchievement('goal_setter_pro');
-                if (type === 'habit' && snapshot.size >= 5) await checkAndUnlockAchievement('habit_master');
-            } catch (e) {
-                console.error("Error checking post-save achievements:", e);
-            }
         }
 
         function confirmDelete(id, collection, callback) {
@@ -2893,17 +2681,14 @@
                 const dataUrl = canvas.toDataURL('image/png');
                 showLoading();
                 try {
-                    const { addDoc, collection, serverTimestamp, getDocs } = window.firebaseFirestore;
+                    const { addDoc, collection, serverTimestamp } = window.firebaseFirestore;
                     await addDoc(collection(window.db, `users/${currentUser.uid}/drawings`), {
                         imageData: dataUrl,
                         createdAt: serverTimestamp()
                     });
                     showToast(t('drawingSaved'), 'success');
-
-                    // CORREÇÃO: Deixa a função checkAndUnlockAchievement cuidar da lógica de verificação
                     await checkAndUnlockAchievement('artist');
                     await checkAndUnlockAchievement('art_collector');
-
                 } catch (error) {
                     console.error('Error saving drawing:', error);
                     showToast(t('errorSavingDrawing'), 'error');
@@ -3062,29 +2847,16 @@
 
             if (docSnap.exists()) return; // Already unlocked
 
-            // Specific condition checks that require fresh data
+            // Logic to check if achievement is truly earned
             let conditionMet = false;
             switch (achievementId) {
-                // Manually triggered achievements are assumed to be true when called
-                case 'first_login':
-                case 'calculator_user':
-                case 'clock_watcher':
-                case 'timer_master':
-                case 'world_traveler':
-                case 'polyglot':
-                    conditionMet = true;
-                    break;
-                // Achievements that need to check collection sizes or conditions
+                case 'first_login': conditionMet = true; break;
                 case 'first_note':
                 case 'first_goal':
-                case 'first_habit': {
+                case 'first_habit':
+                case 'artist': {
                     const type = achievementId.split('_')[1] + 's';
                     const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/${type}`));
-                    if (snapshot.size >= 1) conditionMet = true;
-                    break;
-                }
-                case 'artist': { // CORREÇÃO: Caso específico para 'artist' que usa a coleção 'drawings'
-                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/drawings`));
                     if (snapshot.size >= 1) conditionMet = true;
                     break;
                 }
@@ -3126,30 +2898,16 @@
                     break;
                 }
                 case 'habit_streak_7':
-                case 'habit_streak_30': {
-                    const requiredStreak = achievementId === 'habit_streak_7' ? 7 : 30;
-                    const habitsSnapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/habits`));
-                    for (const doc of habitsSnapshot.docs) {
-                        const timestamps = doc.data().completedTimestamps || [];
-                        const streak = calculateStreak(timestamps.map(ts => ts.toDate()));
-                        if (streak >= requiredStreak) {
-                            conditionMet = true;
-                            break;
-                        }
-                    }
+                case 'habit_streak_30':
+                case 'calculator_user':
+                case 'clock_watcher':
+                case 'timer_master':
+                case 'world_traveler':
+                case 'polyglot':
+                case 'organizer':
+                    // These are triggered manually from their respective functions
+                    conditionMet = true;
                     break;
-                }
-                case 'organizer': {
-                    const [reminders, goals, habits] = await Promise.all([
-                        getDocs(query(collection(window.db, `users/${currentUser.uid}/reminders`), where("completed", "==", false))),
-                        getDocs(query(collection(window.db, `users/${currentUser.uid}/goals`), where("completed", "==", false))),
-                        getDocs(collection(window.db, `users/${currentUser.uid}/habits`))
-                    ]);
-                    if (reminders.size > 0 && goals.size > 0 && habits.size > 0) {
-                        conditionMet = true;
-                    }
-                    break;
-                }
             }
 
             if (conditionMet) {
@@ -3278,10 +3036,7 @@
             appContent.innerHTML = `
             <div class="fade-in max-w-md mx-auto">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden">
-                    <div class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white p-5 text-right">
-                        <div id="calculator-expression" class="h-8 text-xl opacity-70 overflow-x-auto no-scrollbar"></div>
-                        <div id="calculator-display" class="font-bold text-5xl h-24 flex items-end justify-end">0</div>
-                    </div>
+                    <div id="calculator-display" class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white h-24 flex items-end justify-end">0</div>
                     <div class="grid grid-cols-4 gap-px bg-gray-300 dark:bg-gray-700">
                         <button class="calc-btn bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-2xl p-6" data-value="C">C</button>
                         <button class="calc-btn flex justify-center items-center bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-2xl p-6" data-value="<"><i data-lucide="delete"></i></button>
@@ -3315,78 +3070,90 @@
 
         function setupCalculator() {
             const display = document.getElementById('calculator-display');
-            const expressionDisplay = document.getElementById('calculator-expression');
             const buttons = document.querySelectorAll('.calc-btn');
 
+            let expressionParts = [];
             let currentInput = '0';
-            let expression = '';
-            let calculationPerformed = false;
 
             const updateDisplay = () => {
-                display.textContent = currentInput;
-                expressionDisplay.textContent = expression.replace(/\*/g, '×').replace(/\//g, '÷');
+                const expressionString = expressionParts.join(' ');
+                display.textContent = `${expressionString} ${currentInput === '0' && expressionParts.length > 0 ? '' : currentInput}`;
             };
 
-            const calculate = () => {
-                try {
-                    const finalExpression = expression.replace(/×/g, '*').replace(/÷/g, '/');
-                    // Usando o Construtor de Função para avaliação segura
-                    return new Function('return ' + finalExpression)();
-                } catch (e) {
-                    return 'Erro';
+            const calculate = (parts) => {
+                if (parts.length < 3) return parseFloat(parts[0]) || 0;
+
+                let currentResult = parseFloat(parts[0]);
+                for (let i = 1; i < parts.length; i += 2) {
+                    const operator = parts[i];
+                    const nextNumber = parseFloat(parts[i + 1]);
+
+                    if (isNaN(nextNumber)) break;
+
+                    switch (operator) {
+                        case '+': currentResult += nextNumber; break;
+                        case '-': currentResult -= nextNumber; break;
+                        case '*': currentResult *= nextNumber; break;
+                        case '/': currentResult /= nextNumber; break;
+                    }
                 }
+                return parseFloat(currentResult.toPrecision(12));
             };
 
             buttons.forEach(button => {
                 button.addEventListener('click', () => {
-                    checkAndUnlockAchievement('calculator_user');
                     const value = button.dataset.value;
                     const isOperator = ['+', '-', '*', '/'].includes(value);
 
-                    if (!isNaN(value) || value === '.') {
-                        if (calculationPerformed) {
-                            expression = '';
-                            currentInput = '0';
-                            calculationPerformed = false;
+                    // Prevent overflow
+                    if (display.scrollWidth > display.clientWidth && !isNaN(value)) {
+                        return;
+                    }
+
+                    if (!isNaN(value) || value === '.') { // Number or decimal
+                        if (currentInput === '0' && value !== '.') {
+                            currentInput = value;
+                        } else if (value === '.' && currentInput.includes('.')) {
+                            return;
                         }
-                        if (value === '.' && currentInput.includes('.')) return;
-                        currentInput = (currentInput === '0' && value !== '.') ? value : currentInput + value;
+                        else {
+                            currentInput += value;
+                        }
                     } else if (isOperator) {
-                        if (currentInput === '0' && expression) {
-                            expression = expression.slice(0, -1) + value;
-                        } else {
-                            expression += currentInput + value;
-                            currentInput = '0';
+                        if (currentInput !== '') {
+                            expressionParts.push(currentInput);
                         }
-                        calculationPerformed = false;
+                        // Handle chained operations
+                        if (expressionParts.length >= 3) {
+                            const result = calculate(expressionParts);
+                            expressionParts = [result];
+                        }
+                        expressionParts.push(value);
+                        currentInput = '0';
+
+                    } else if (value === '%') {
+                        currentInput = (parseFloat(currentInput) / 100).toString();
                     } else if (value === '=') {
-                        if (expression) {
-                            expression += currentInput;
-                            const result = calculate();
-
-                            display.classList.remove('calculator-result-transition');
-                            void display.offsetWidth;
-                            display.classList.add('calculator-result-transition');
-
-                            updateDisplay(); // Mostra a expressão final
-                            currentInput = result.toString();
-                            display.textContent = currentInput;
-                            expression = '';
-                            calculationPerformed = true;
+                        if (currentInput !== '') {
+                            expressionParts.push(currentInput);
+                        }
+                        if (expressionParts.length > 0) {
+                            const finalResult = calculate(expressionParts);
+                            currentInput = finalResult.toString();
+                            expressionParts = [];
                         }
                     } else if (value === 'C') {
                         currentInput = '0';
-                        expression = '';
-                        calculationPerformed = false;
+                        expressionParts = [];
                     } else if (value === '<') {
-                        currentInput = currentInput.length > 1 ? currentInput.slice(0, -1) : '0';
-                    } else if (value === '%') {
-                        currentInput = (parseFloat(currentInput) / 100).toString();
+                        if (currentInput.length > 1) {
+                            currentInput = currentInput.slice(0, -1);
+                        } else {
+                            currentInput = '0';
+                        }
                     }
 
-                    if (!calculationPerformed) {
-                        updateDisplay();
-                    }
+                    updateDisplay();
                 });
             });
             updateDisplay();
@@ -3398,30 +3165,26 @@
             <div class="fade-in max-w-4xl mx-auto space-y-6">
                 <div class="flex flex-wrap justify-center gap-2 p-2 bg-gray-200 dark:bg-gray-800 rounded-lg">
                     <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="world">${t('clockTabWorld')}</button>
-                    <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="weather">${t('weatherForecast')}</button>
                     <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="stopwatch">${t('clockTabStopwatch')}</button>
                     <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="timer">${t('clockTabTimer')}</button>
                 </div>
-                <div id="clock-content" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md min-h-[300px]"></div>
+                <div id="clock-content" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"></div>
             </div>`;
             setupClockTabs();
         }
 
         function setupClockTabs() {
             const tabs = document.querySelectorAll('.clock-tab');
+            const contentContainer = document.getElementById('clock-content');
 
             const loadTabContent = (tabId) => {
-                // Limpa apenas o intervalo dos relógios mundiais se existir
-                if (window.worldClockInterval) {
-                    clearInterval(window.worldClockInterval);
-                    window.worldClockInterval = null;
-                }
+                clockIntervals.forEach(interval => clearInterval(interval));
+                clockIntervals = [];
 
                 tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
 
                 switch (tabId) {
                     case 'world': renderWorldClocks(); break;
-                    case 'weather': renderWeather(); break;
                     case 'stopwatch': renderStopwatch(); break;
                     case 'timer': renderTimer(); break;
                 }
@@ -3432,78 +3195,76 @@
                 tab.addEventListener('click', () => loadTabContent(tab.dataset.tab));
             });
 
-            loadTabContent('world');
+            loadTabContent('world'); // Load default tab
         }
 
         function renderWorldClocks() {
-            const contentEl = document.getElementById('clock-content');
-            if (!contentEl) return;
+            const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' ');
+            document.getElementById('clock-content').innerHTML = `
+                <div id="local-clock" class="text-center mb-8">
+                    <h3 class="text-lg font-semibold text-brand-500">${t('localTime')} (${userTimeZone})</h3>
+                    <h2 id="local-time" class="text-5xl md:text-7xl font-bold tracking-tighter"></h2>
+                    <p id="local-date" class="text-lg text-gray-500 dark:text-gray-400"></p>
+                </div>
+                <div id="world-clocks-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            `;
             checkAndUnlockAchievement('world_traveler');
 
-            // Estrutura principal com widget de clima no topo e grid de relógios
-            contentEl.innerHTML = `
-                <div class="space-y-6">
-                                        <div id="current-weather-widget"></div> 
-                                        <div id="world-clocks-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                </div>
-            `;
-
-            // Chama a função já existente no seu código para buscar e renderizar o clima atual
-            getCurrentWeather('current-weather-widget');
-
-            const clocksContainer = document.getElementById('world-clocks-container');
-            const timezones = [
-                { label: t('localTime'), tz: Intl.DateTimeFormat().resolvedOptions().timeZone },
-                { label: 'São Paulo', tz: 'America/Sao_Paulo' },
-                { label: 'Nova York', tz: 'America/New_York' },
-                { label: 'Londres', tz: 'Europe/London' },
-                { label: 'Paris', tz: 'Europe/Paris' },
-                { label: 'Tóquio', tz: 'Asia/Tokyo' },
-                { label: 'Sydney', tz: 'Australia/Sydney' }
+            const cities = [
+                { name: 'São Paulo', timeZone: 'America/Sao_Paulo' },
+                { name: 'New York', timeZone: 'America/New_York' },
+                { name: 'Los Angeles', timeZone: 'America/Los_Angeles' },
+                { name: 'London', timeZone: 'Europe/London' },
+                { name: 'Paris', timeZone: 'Europe/Paris' },
+                { name: 'Moscow', timeZone: 'Europe/Moscow' },
+                { name: 'Tokyo', timeZone: 'Asia/Tokyo' },
+                { name: 'Dubai', timeZone: 'Asia/Dubai' },
+                { name: 'Sydney', timeZone: 'Australia/Sydney' },
             ];
 
-            let clocksHtml = '';
-            timezones.forEach((zone, index) => {
-                clocksHtml += `
-                <div class="text-left p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex justify-between items-baseline">
-                        <h3 class="font-semibold text-gray-800 dark:text-gray-200">${zone.label}</h3>
-                        <p id="clock-date-${index}" class="text-xs text-gray-500 dark:text-gray-400"></p>
-                    </div>
-                    <p id="clock-time-${index}" class="text-3xl font-mono text-brand-600 dark:text-brand-400 mt-1"></p>
-                </div>
-            `;
-            });
-            clocksContainer.innerHTML = clocksHtml;
+            const localTimeEl = document.getElementById('local-time');
+            const localDateEl = document.getElementById('local-date');
+            const worldClocksListEl = document.getElementById('world-clocks-list');
 
             const updateClocks = () => {
+                const now = new Date();
                 const lang = currentLanguage === 'pt' ? 'pt-BR' : 'en-US';
-                timezones.forEach((zone, index) => {
-                    const timeEl = document.getElementById(`clock-time-${index}`);
-                    const dateEl = document.getElementById(`clock-date-${index}`);
-                    if (timeEl && dateEl) {
-                        const now = new Date();
-                        timeEl.textContent = now.toLocaleTimeString(lang, { timeZone: zone.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                        dateEl.textContent = now.toLocaleDateString(lang, { timeZone: zone.tz, weekday: 'short', day: 'numeric', month: 'short' });
-                    }
-                });
+
+                localTimeEl.textContent = now.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                localDateEl.textContent = now.toLocaleDateString(lang, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+                worldClocksListEl.innerHTML = cities.map(city => {
+                    const time = now.toLocaleTimeString(lang, { timeZone: city.timeZone, hour: '2-digit', minute: '2-digit' });
+                    const date = now.toLocaleDateString(lang, { timeZone: city.timeZone, month: 'short', day: 'numeric' });
+                    return `
+                    <div class="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg flex justify-between items-center">
+                        <div>
+                            <h3 class="font-semibold text-lg">${city.name}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${date}</p>
+                        </div>
+                        <p class="text-3xl font-semibold">${time}</p>
+                    </div>`;
+                }).join('');
             };
 
-            if (window.worldClockInterval) clearInterval(window.worldClockInterval);
-
             updateClocks();
-            window.worldClockInterval = setInterval(updateClocks, 1000);
+            const interval = setInterval(updateClocks, 1000);
+            clockIntervals.push(interval);
         }
 
         function renderStopwatch() {
+            let startTime, savedTime = 0, tInterval;
+            let running = false;
+
             document.getElementById('clock-content').innerHTML = `
                 <div class="text-center">
                     <div id="stopwatch-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
                     <div class="flex justify-center gap-4">
-                        <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95"></button>
+                        <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('stopwatchStart')}</button>
                         <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('stopwatchReset')}</button>
                     </div>
-                </div>`;
+                </div>
+            `;
 
             const display = document.getElementById('stopwatch-display');
             const startStopBtn = document.getElementById('stopwatch-start-stop');
@@ -3518,58 +3279,48 @@
                 return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
             };
 
+
             const update = () => {
-                const difference = (Date.now() - stopwatchState.startTime) + stopwatchState.savedTime;
+                const difference = (new Date().getTime() - startTime) + savedTime;
                 display.textContent = formatTime(difference);
             };
 
-            const start = () => {
-                if (stopwatchState.running) return;
-                stopwatchState.running = true;
-                stopwatchState.startTime = Date.now();
-                stopwatchState.interval = setInterval(update, 10);
-                startStopBtn.textContent = t('stopwatchPause');
-                startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
-                startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
-            };
+            startStopBtn.addEventListener('click', () => {
+                if (!running) { // Start or Continue
+                    startTime = new Date().getTime();
+                    tInterval = setInterval(update, 10);
+                    clockIntervals.push(tInterval);
+                    startStopBtn.textContent = t('stopwatchPause');
+                    startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
+                    startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
+                    running = true;
+                } else { // Pause
+                    clearInterval(tInterval);
+                    savedTime += new Date().getTime() - startTime;
+                    startStopBtn.textContent = t('stopwatchContinue');
+                    startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
+                    startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
+                    running = false;
+                }
+            });
 
-            const stop = () => {
-                if (!stopwatchState.running) return;
-                stopwatchState.running = false;
-                clearInterval(stopwatchState.interval);
-                stopwatchState.savedTime += Date.now() - stopwatchState.startTime;
-                startStopBtn.textContent = t('stopwatchContinue');
-                startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
-                startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
-            };
-
-            const reset = () => {
-                stopwatchState.running = false;
-                clearInterval(stopwatchState.interval);
-                stopwatchState.savedTime = 0;
+            resetBtn.addEventListener('click', () => {
+                clearInterval(tInterval);
                 display.textContent = "00:00:00.00";
+                running = false;
+                savedTime = 0;
                 startStopBtn.textContent = t('stopwatchStart');
                 startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
                 startStopBtn.classList.add('bg-brand-600', 'hover:bg-brand-700');
-            };
-
-            // UI Initialization
-            if (stopwatchState.running) {
-                start();
-                stop(); // Immediately pause to show correct state and time
-                start(); // And restart the interval
-            } else if (stopwatchState.savedTime > 0) {
-                display.textContent = formatTime(stopwatchState.savedTime);
-                startStopBtn.textContent = t('stopwatchContinue');
-            } else {
-                startStopBtn.textContent = t('stopwatchStart');
-            }
-
-            startStopBtn.addEventListener('click', () => stopwatchState.running ? stop() : start());
-            resetBtn.addEventListener('click', reset);
+            });
         }
 
         function renderTimer() {
+            let timerInterval;
+            let totalSeconds = 0;
+            let running = false;
+            let paused = false;
+
             document.getElementById('clock-content').innerHTML = `
                 <div class="text-center">
                     <div id="timer-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00</div>
@@ -3578,8 +3329,8 @@
                         <input type="number" id="timer-minutes" placeholder="${t('timerMinutes')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
                         <input type="number" id="timer-seconds" placeholder="${t('timerSeconds')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
                     </div>
-                    <div class="flex justify-center gap-4">
-                        <button id="timer-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95"></button>
+                     <div class="flex justify-center gap-4">
+                        <button id="timer-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('timerStart')}</button>
                         <button id="timer-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('timerReset')}</button>
                     </div>
                 </div>`;
@@ -3592,61 +3343,66 @@
             const formatTime = (seconds) => {
                 const h = Math.floor(seconds / 3600);
                 const m = Math.floor((seconds % 3600) / 60);
-                const s = Math.round(seconds % 60);
+                const s = seconds % 60;
                 return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
             };
 
-            const update = () => {
-                const remaining = Math.max(0, (timerState.endTime - Date.now()) / 1000);
-                display.textContent = formatTime(remaining);
-
-                if (remaining <= 0) {
+            const updateTimer = () => {
+                if (totalSeconds <= 0) {
+                    clearInterval(timerInterval);
                     display.textContent = t('timerFinished');
-                    reset();
+                    startStopBtn.textContent = t('timerStart');
+                    startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    startStopBtn.classList.add('bg-brand-600', 'hover:bg-brand-700');
+                    inputsContainer.style.display = 'flex';
+                    running = false;
+                    paused = false;
+                    return;
                 }
+                totalSeconds--;
+                display.textContent = formatTime(totalSeconds);
             };
 
-            const start = () => {
-                if (timerState.running) return;
 
-                if (!timerState.paused) {
-                    const hours = parseInt(document.getElementById('timer-hours').value) || 0;
-                    const minutes = parseInt(document.getElementById('timer-minutes').value) || 0;
-                    const seconds = parseInt(document.getElementById('timer-seconds').value) || 0;
-                    timerState.totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
-                    if (timerState.totalSeconds <= 0) return;
-                    if (hours >= 1) checkAndUnlockAchievement('timer_master');
+            startStopBtn.addEventListener('click', () => {
+                if (!running) { // Is initial state or paused
+                    if (!paused) { // Initial Start
+                        const hours = parseInt(document.getElementById('timer-hours').value) || 0;
+                        const minutes = parseInt(document.getElementById('timer-minutes').value) || 0;
+                        const seconds = parseInt(document.getElementById('timer-seconds').value) || 0;
+                        totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+
+                        if (totalSeconds <= 0) return;
+
+                        if (hours >= 1) {
+                            checkAndUnlockAchievement('timer_master');
+                        }
+                    }
+
+                    paused = false;
+                    running = true;
+                    inputsContainer.style.display = 'none';
+                    display.textContent = formatTime(totalSeconds);
+                    timerInterval = setInterval(updateTimer, 1000);
+                    clockIntervals.push(timerInterval);
+                    startStopBtn.textContent = t('timerPause');
+                    startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
+                    startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
+
+                } else { // Is running, so pause it
+                    clearInterval(timerInterval);
+                    running = false;
+                    paused = true;
+                    startStopBtn.textContent = t('timerContinue');
+                    startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
+                    startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
                 }
+            });
 
-                timerState.running = true;
-                timerState.paused = false;
-                timerState.endTime = Date.now() + timerState.totalSeconds * 1000;
-                timerState.interval = setInterval(update, 1000);
-
-                inputsContainer.style.display = 'none';
-                startStopBtn.textContent = t('timerPause');
-                startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
-                startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
-                update();
-            };
-
-            const stop = () => {
-                if (!timerState.running) return;
-                timerState.running = false;
-                timerState.paused = true;
-                clearInterval(timerState.interval);
-                timerState.totalSeconds = Math.max(0, (timerState.endTime - Date.now()) / 1000);
-                startStopBtn.textContent = t('timerContinue');
-                startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
-                startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
-            };
-
-            const reset = () => {
-                clearInterval(timerState.interval);
-                timerState.running = false;
-                timerState.paused = false;
-                timerState.totalSeconds = 0;
-                timerState.endTime = 0;
+            resetBtn.addEventListener('click', () => {
+                clearInterval(timerInterval);
+                running = false;
+                paused = false;
                 display.textContent = "00:00:00";
                 startStopBtn.textContent = t('timerStart');
                 startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
@@ -3655,234 +3411,8 @@
                 document.getElementById('timer-hours').value = '';
                 document.getElementById('timer-minutes').value = '';
                 document.getElementById('timer-seconds').value = '';
-            };
-
-            // UI Initialization
-            if (timerState.running || timerState.paused) {
-                inputsContainer.style.display = 'none';
-                update();
-                if (timerState.running) {
-                    start(); stop(); start(); // Restart interval
-                } else {
-                    startStopBtn.textContent = t('timerContinue');
-                }
-            } else {
-                startStopBtn.textContent = t('timerStart');
-            }
-
-            startStopBtn.addEventListener('click', () => timerState.running ? stop() : start());
-            resetBtn.addEventListener('click', reset);
-        }
-
-        // --- WEATHER FUNCTIONS ---
-        async function getCurrentWeather(widgetContainerId = 'current-weather-widget') {
-            const container = document.getElementById(widgetContainerId);
-            if (!container) return;
-
-            if (WEATHER_API_KEY === '2f3410f5517837200509d829af334e4d' || !WEATHER_API_KEY) {
-                container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
-                return;
-            }
-
-            container.innerHTML = `<div class="w-6 h-6 border-2 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
-
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
-                });
-
-                const { latitude, longitude } = position.coords;
-                const lang = currentLanguage === 'pt' ? 'pt' : 'en';
-                const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
-
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to fetch weather data');
-                const data = await response.json();
-
-                container.innerHTML = `
-                    <div class="bg-gradient-to-br from-brand-400 to-brand-600 text-white p-4 rounded-lg shadow-lg flex items-center justify-between">
-                        <div>
-                             <p class="font-bold text-lg">${data.name}</p>
-                             <p class="text-sm capitalize">${data.weather[0].description}</p>
-                        </div>
-                        <div class="text-right">
-                             <div class="flex items-center">
-                                 <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="Weather icon" class="w-12 h-12 -my-2">
-                                 <p class="text-4xl font-bold">${Math.round(data.main.temp)}°C</p>
-                             </div>
-                             <p class="text-xs">${t('feelsLike')} ${Math.round(data.main.feels_like)}°C</p>
-                        </div>
-                    </div>
-                `;
-
-            } catch (error) {
-                console.error("Weather error:", error);
-                container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
-            }
-        }
-
-        async function renderWeather() {
-            const container = document.getElementById('clock-content');
-            container.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
-
-            if (WEATHER_API_KEY === '2f3410f5517837200509d829af334e4d' || !WEATHER_API_KEY) {
-                container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
-                return;
-            }
-
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
-                });
-
-                const { latitude, longitude } = position.coords;
-                const lang = currentLanguage === 'pt' ? 'pt' : 'en';
-                const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
-
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to fetch forecast data');
-                const data = await response.json();
-
-                const dailyForecasts = {};
-                data.list.forEach(item => {
-                    const date = new Date(item.dt_txt).toDateString(); // Usar toDateString() para agrupar por dia
-                    if (!dailyForecasts[date]) {
-                        dailyForecasts[date] = {
-                            temps: [],
-                            icons: {},
-                            descriptions: {},
-                            dt: item.dt
-                        };
-                    }
-                    dailyForecasts[date].temps.push(item.main.temp);
-                    dailyForecasts[date].icons[item.weather[0].icon] = (dailyForecasts[date].icons[item.weather[0].icon] || 0) + 1;
-                    dailyForecasts[date].descriptions[item.weather[0].description] = (dailyForecasts[date].descriptions[item.weather[0].description] || 0) + 1;
-                });
-
-                let forecastHtml = `<h2 class="text-2xl font-bold mb-4 text-center">${t('weatherForecast')} em ${data.city.name}</h2><div class="space-y-4">`;
-                const todayStr = new Date().toDateString();
-
-                Object.keys(dailyForecasts).slice(0, 5).forEach(dateStr => {
-                    const dayData = dailyForecasts[dateStr];
-                    const minTemp = Math.round(Math.min(...dayData.temps));
-                    const maxTemp = Math.round(Math.max(...dayData.temps));
-                    const mostCommonIcon = Object.keys(dayData.icons).reduce((a, b) => dayData.icons[a] > dayData.icons[b] ? a : b);
-                    const mostCommonDesc = Object.keys(dayData.descriptions).reduce((a, b) => dayData.descriptions[a] > dayData.descriptions[b] ? a : b);
-
-                    const dayName = (dateStr === todayStr) ? t('today') : new Date(dayData.dt * 1000).toLocaleDateString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { weekday: 'long' });
-
-                    forecastHtml += `
-                        <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex items-center justify-between">
-                            <span class="font-semibold w-24 capitalize">${dayName}</span>
-                            <div class="flex items-center gap-2">
-                                <img src="https://openweathermap.org/img/wn/${mostCommonIcon}.png" alt="${mostCommonDesc}" class="w-8 h-8">
-                                <span class="text-sm capitalize">${mostCommonDesc}</span>
-                            </div>
-                            <span class="font-semibold">${minTemp}° / ${maxTemp}°</span>
-                        </div>
-                    `;
-                });
-
-                forecastHtml += '</div>';
-                container.innerHTML = forecastHtml;
-
-
-            } catch (error) {
-                console.error("Forecast error:", error);
-                container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
-            }
-        }
-
-        // --- NOTIFICATION FUNCTIONS ---
-
-        async function requestNotificationPermission() {
-            if (!('Notification' in window)) return;
-            if (Notification.permission === 'granted') return;
-            if (Notification.permission === 'denied') return;
-
-            const modal = document.getElementById('confirm-modal');
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3 class="text-xl font-bold mb-2">${t('notificationPermissionTitle')}</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4">${t('notificationPermissionBody')}</p>
-                    <div class="flex gap-3">
-                        <button id="allow-notifications" class="flex-1 bg-brand-600 text-white py-2 px-4 rounded-lg hover:bg-brand-700">${t('allow')}</button>
-                        <button id="deny-notifications" class="flex-1 bg-gray-300 dark:bg-gray-600 py-2 px-4 rounded-lg hover:bg-gray-400">${t('deny')}</button>
-                    </div>
-                </div>`;
-            modal.classList.add('show');
-
-            document.getElementById('allow-notifications').addEventListener('click', async () => {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    showToast(t('notificationsEnabled'), 'success');
-                } else {
-                    showToast(t('notificationsDenied'), 'error');
-                }
-                modal.classList.remove('show');
-            });
-
-            document.getElementById('deny-notifications').addEventListener('click', () => {
-                modal.classList.remove('show');
             });
         }
-
-        function setupNotificationListener() {
-            if (notificationInterval) clearInterval(notificationInterval);
-            notificationInterval = setInterval(checkAndSendNotifications, 60000); // Check every minute
-            checkAndSendNotifications(); // Check immediately on login
-        }
-
-        async function checkAndSendNotifications() {
-            if (!currentUser || Notification.permission !== 'granted') return;
-
-            const { collection, query, where, getDocs, updateDoc, doc } = window.firebaseFirestore;
-            const now = new Date();
-
-            // 1. Checar Lembretes
-            const remindersQuery = query(collection(db, `users/${currentUser.uid}/reminders`),
-                where('completed', '==', false),
-                where('notified', '==', false)
-            );
-
-            const remindersSnapshot = await getDocs(remindersQuery);
-            remindersSnapshot.forEach(docSnap => {
-                const reminder = docSnap.data();
-                if (reminder.remindAt) {
-                    const reminderTime = reminder.remindAt.toDate();
-                    if (reminderTime <= now) {
-                        new Notification(t('reminderNotificationTitle'), {
-                            body: reminder.title,
-                            icon: '/zenith.png'
-                        });
-                        // Mark as notified to prevent re-sending
-                        updateDoc(doc(db, `users/${currentUser.uid}/reminders`, docSnap.id), { notified: true });
-                    }
-                }
-            });
-
-            // 2. Checar Hábitos
-            const habitsQuery = query(collection(db, `users/${currentUser.uid}/habits`));
-            const habitsSnapshot = await getDocs(habitsQuery);
-            habitsSnapshot.forEach(docSnap => {
-                const habit = docSnap.data();
-                const timestamps = habit.completedTimestamps?.map(ts => ts.toDate()) || [];
-                if (timestamps.length === 0) return;
-
-                const lastCompletion = new Date(Math.max(...timestamps));
-                const nextAvailable = new Date(lastCompletion.getTime() + 24 * 60 * 60 * 1000);
-
-                // Se está disponível e ainda não foi notificado para esta instância
-                if (now >= nextAvailable && (!habit.lastNotified || habit.lastNotified.toDate() < lastCompletion)) {
-                    new Notification(t('reminderNotificationTitle'), {
-                        body: t('habitNotificationBody', { habitTitle: habit.title }),
-                        icon: '/zenith.png'
-                    });
-                    updateDoc(doc(db, `users/${currentUser.uid}/habits`, docSnap.id), { lastNotified: new Date() });
-                }
-            });
-        }
-
 
         // --- AUTH FUNCTIONS ---
         function getAuthErrorMessage(errorCode) {
@@ -3907,15 +3437,6 @@
 
         async function handleLogin(email, password) {
             showLoading();
-            // Limpa erros anteriores
-            const emailErrorEl = document.getElementById('login-email-error');
-            const passwordErrorEl = document.getElementById('login-password-error');
-            emailErrorEl.textContent = '';
-            passwordErrorEl.textContent = '';
-            document.getElementById('login-email').classList.remove('border-red-500');
-            document.getElementById('login-password').classList.remove('border-red-500');
-
-
             if (!firebaseInitialized) {
                 showToast("Firebase não configurado. Login não disponível.", 'error');
                 hideLoading();
@@ -3926,19 +3447,8 @@
                 await signInWithEmailAndPassword(window.auth, email, password);
                 showToast('Login realizado com sucesso!', 'success');
             } catch (error) {
-                console.error('Login error:', error.code);
-                const errorMessage = getAuthErrorMessage(error.code);
-
-                // Exibe o erro no campo correspondente
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email' || error.code === 'auth/invalid-credential') {
-                    emailErrorEl.textContent = errorMessage;
-                    document.getElementById('login-email').classList.add('border-red-500');
-                } else if (error.code === 'auth/wrong-password') {
-                    passwordErrorEl.textContent = errorMessage;
-                    document.getElementById('login-password').classList.add('border-red-500');
-                } else {
-                    showToast(errorMessage, 'error');
-                }
+                console.error('Login error:', error);
+                showToast(getAuthErrorMessage(error.code), 'error');
             } finally {
                 hideLoading();
             }
@@ -4064,10 +3574,8 @@
                 pageTitle.textContent = t(`pageTitle${currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}`);
             }
             if (appContainer.classList.contains('active')) {
-                if (currentPage === 'dashboard' && document.getElementById('dashboard-username')) {
-                    document.getElementById('dashboard-username').textContent = currentUserProfile.name || '';
-                }
-                navigateTo(currentPage);
+                // appContent.innerHTML = ''; //This causes a flicker, let's re-render specific parts
+                navigateTo(currentPage); // Re-render current page with new language
             }
         }
 
@@ -4123,6 +3631,7 @@
                 if (user) {
                     currentUser = user;
 
+                    // Load user profile
                     const { getDoc, doc } = window.firebaseFirestore;
                     const userDocRef = doc(window.db, 'users', user.uid);
                     const userDoc = await getDoc(userDocRef);
@@ -4130,34 +3639,22 @@
                     if (userDoc.exists()) {
                         currentUserProfile = userDoc.data();
                     } else {
-                        // This case handles users who signed up before the profile doc was created
-                        currentUserProfile = {
-                            name: user.displayName || 'Usuário',
-                            email: user.email,
-                            uid: user.uid,
-                            photoURL: user.photoURL
-                        };
+                        currentUserProfile = { name: user.displayName || 'Usuário', email: user.email, uid: user.uid, photoURL: user.photoURL };
                     }
-                    // Ensure name from auth is used if not in DB
-                    if (!currentUserProfile.name) {
-                        currentUserProfile.name = user.displayName || 'Usuário';
-                    }
-
 
                     updateHeaderProfileIcon();
+
                     await checkAndUnlockAchievement('first_login');
 
                     showAppContainer();
-
-                    // Request notification permission on first login after page load
-                    requestNotificationPermission();
-                    setupNotificationListener();
-
-                    navigateTo('dashboard');
+                    if (!currentPage || currentPage === 'profile') {
+                        navigateTo('dashboard');
+                    } else {
+                        navigateTo(currentPage);
+                    }
                 } else {
                     currentUser = null;
                     currentUserProfile = {};
-                    if (notificationInterval) clearInterval(notificationInterval);
                     showAuthContainer();
                 }
                 updateTranslations();
