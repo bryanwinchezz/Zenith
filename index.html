@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="zenith.png">
+    <link rel="icon" type="image/png" href="/zenith.png">
     <title>Zenith - Seu Assistente Pessoal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -2987,17 +2987,14 @@
 
         async function checkAndUnlockAchievement(achievementId) {
             if (!currentUser || !ALL_ACHIEVEMENTS[achievementId]) return;
-
-            // NOVO: Bloco try...catch para isolar erros de verificação de conquistas
             try {
                 const { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where, Timestamp } = window.firebaseFirestore;
                 const achievementRef = doc(window.db, `users/${currentUser.uid}/achievements`, achievementId);
                 const docSnap = await getDoc(achievementRef);
-
                 if (docSnap.exists()) return; // Já desbloqueada
 
                 let conditionMet = false;
-                // ... (todo o seu 'switch case' permanece exatamente o mesmo aqui dentro)
+
                 switch (achievementId) {
                     case 'first_login':
                     case 'calculator_user':
@@ -3099,8 +3096,8 @@
                     }
                 }
             } catch (error) {
-                // NOVO: Captura o erro aqui para não afetar o fluxo principal
                 console.error(`Falha ao verificar a conquista '${achievementId}':`, error);
+                // NÃO mostra toast de erro aqui
             }
         }
 
@@ -3444,18 +3441,21 @@
         }
 
         function renderStopwatch() {
-            let startTime, savedTime = 0, tInterval;
-            let running = false;
+            // Tenta restaurar o estado do localStorage
+            const savedState = JSON.parse(localStorage.getItem('zenithStopwatch') || '{}');
+            let startTime = savedState.startTime || 0;
+            let savedTime = savedState.savedTime || 0;
+            let running = savedState.running || false;
 
             document.getElementById('clock-content').innerHTML = `
-                <div class="text-center">
-                    <div id="stopwatch-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
-                    <div class="flex justify-center gap-4">
-                        <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('stopwatchStart')}</button>
-                        <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('stopwatchReset')}</button>
-                    </div>
-                </div>
-            `;
+        <div class="text-center">
+            <div id="stopwatch-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
+            <div class="flex justify-center gap-4">
+                <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${running ? t('stopwatchPause') : t('stopwatchStart')}</button>
+                <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('stopwatchReset')}</button>
+            </div>
+        </div>
+    `;
 
             const display = document.getElementById('stopwatch-display');
             const startStopBtn = document.getElementById('stopwatch-start-stop');
@@ -3470,11 +3470,32 @@
                 return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
             };
 
+            let tInterval;
 
             const update = () => {
                 const difference = (new Date().getTime() - startTime) + savedTime;
                 display.textContent = formatTime(difference);
             };
+
+            const saveStateToStorage = () => {
+                localStorage.setItem('zenithStopwatch', JSON.stringify({
+                    startTime,
+                    savedTime,
+                    running
+                }));
+            };
+
+            // Se estava rodando, retoma a contagem
+            if (running) {
+                startTime = new Date().getTime() - (savedTime % 1000); // Ajuste fino para sincronizar
+                tInterval = setInterval(update, 10);
+                clockIntervals.push(tInterval);
+                startStopBtn.textContent = t('stopwatchPause');
+                startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
+                startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
+            } else {
+                display.textContent = formatTime(savedTime);
+            }
 
             startStopBtn.addEventListener('click', () => {
                 if (!running) { // Start or Continue
@@ -3493,6 +3514,7 @@
                     startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
                     running = false;
                 }
+                saveStateToStorage();
             });
 
             resetBtn.addEventListener('click', () => {
@@ -3503,28 +3525,32 @@
                 startStopBtn.textContent = t('stopwatchStart');
                 startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
                 startStopBtn.classList.add('bg-brand-600', 'hover:bg-brand-700');
+                // Limpa o estado do localStorage
+                localStorage.removeItem('zenithStopwatch');
             });
         }
 
         function renderTimer() {
-            let timerInterval;
-            let totalSeconds = 0;
-            let running = false;
-            let paused = false;
+            // Tenta restaurar o estado do localStorage
+            const savedState = JSON.parse(localStorage.getItem('zenithTimer') || '{}');
+            let totalSeconds = savedState.totalSeconds || 0;
+            let running = savedState.running || false;
+            let paused = savedState.paused || false;
 
             document.getElementById('clock-content').innerHTML = `
-                <div class="text-center">
-                    <div id="timer-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00</div>
-                    <div id="timer-inputs" class="flex justify-center items-center gap-4 mb-8">
-                        <input type="number" id="timer-hours" placeholder="${t('timerHours')}" min="0" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
-                        <input type="number" id="timer-minutes" placeholder="${t('timerMinutes')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
-                        <input type="number" id="timer-seconds" placeholder="${t('timerSeconds')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
-                    </div>
-                     <div class="flex justify-center gap-4">
-                        <button id="timer-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('timerStart')}</button>
-                        <button id="timer-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('timerReset')}</button>
-                    </div>
-                </div>`;
+        <div class="text-center">
+            <div id="timer-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">${formatTime(totalSeconds)}</div>
+            <div id="timer-inputs" class="flex justify-center items-center gap-4 mb-8" ${running ? 'style="display: none;"' : ''}>
+                <input type="number" id="timer-hours" placeholder="${t('timerHours')}" min="0" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${Math.floor(totalSeconds / 3600)}">
+                <input type="number" id="timer-minutes" placeholder="${t('timerMinutes')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${Math.floor((totalSeconds % 3600) / 60)}">
+                <input type="number" id="timer-seconds" placeholder="${t('timerSeconds')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${totalSeconds % 60}">
+            </div>
+            <div class="flex justify-center gap-4">
+                <button id="timer-start-stop" class="w-32 px-6 py-3 ${running ? 'bg-red-500 hover:bg-red-600' : 'bg-brand-600 hover:bg-brand-700'} text-white rounded-lg text-lg font-semibold active:scale-95 active:brightness-95">${running ? t('timerPause') : paused ? t('timerContinue') : t('timerStart')}</button>
+                <button id="timer-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('timerReset')}</button>
+            </div>
+        </div>
+    `;
 
             const display = document.getElementById('timer-display');
             const startStopBtn = document.getElementById('timer-start-stop');
@@ -3532,11 +3558,14 @@
             const inputsContainer = document.getElementById('timer-inputs');
 
             const formatTime = (seconds) => {
+                if (seconds < 0) return "00:00:00";
                 const h = Math.floor(seconds / 3600);
                 const m = Math.floor((seconds % 3600) / 60);
                 const s = seconds % 60;
                 return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
             };
+
+            let timerInterval;
 
             const updateTimer = () => {
                 if (totalSeconds <= 0) {
@@ -3548,12 +3577,28 @@
                     inputsContainer.style.display = 'flex';
                     running = false;
                     paused = false;
+                    // Limpa o estado do localStorage quando o timer termina
+                    localStorage.removeItem('zenithTimer');
                     return;
                 }
                 totalSeconds--;
                 display.textContent = formatTime(totalSeconds);
+                saveStateToStorage();
             };
 
+            const saveStateToStorage = () => {
+                localStorage.setItem('zenithTimer', JSON.stringify({
+                    totalSeconds,
+                    running,
+                    paused
+                }));
+            };
+
+            // Se estava rodando, retoma a contagem
+            if (running && !paused) {
+                timerInterval = setInterval(updateTimer, 1000);
+                clockIntervals.push(timerInterval);
+            }
 
             startStopBtn.addEventListener('click', () => {
                 if (!running) { // Is initial state or paused
@@ -3562,14 +3607,11 @@
                         const minutes = parseInt(document.getElementById('timer-minutes').value) || 0;
                         const seconds = parseInt(document.getElementById('timer-seconds').value) || 0;
                         totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
-
                         if (totalSeconds <= 0) return;
-
                         if (hours >= 1) {
                             checkAndUnlockAchievement('timer_master');
                         }
                     }
-
                     paused = false;
                     running = true;
                     inputsContainer.style.display = 'none';
@@ -3579,7 +3621,6 @@
                     startStopBtn.textContent = t('timerPause');
                     startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
                     startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
-
                 } else { // Is running, so pause it
                     clearInterval(timerInterval);
                     running = false;
@@ -3588,12 +3629,14 @@
                     startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
                     startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
                 }
+                saveStateToStorage();
             });
 
             resetBtn.addEventListener('click', () => {
                 clearInterval(timerInterval);
                 running = false;
                 paused = false;
+                totalSeconds = 0;
                 display.textContent = "00:00:00";
                 startStopBtn.textContent = t('timerStart');
                 startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
@@ -3602,6 +3645,8 @@
                 document.getElementById('timer-hours').value = '';
                 document.getElementById('timer-minutes').value = '';
                 document.getElementById('timer-seconds').value = '';
+                // Limpa o estado do localStorage
+                localStorage.removeItem('zenithTimer');
             });
         }
 
@@ -3610,6 +3655,7 @@
             const container = document.getElementById(widgetContainerId);
             if (!container) return;
 
+            // Verifica se a chave foi alterada do valor padrão
             if (WEATHER_API_KEY === '2f3410f5517837200509d829af334e4d') {
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
                 return;
@@ -3618,37 +3664,52 @@
             container.innerHTML = `<div class="w-6 h-6 border-2 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
 
             try {
+                // Tenta obter a localização
                 const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        timeout: 10000, // 10 segundos de timeout
+                        maximumAge: 300000 // Usa cache de até 5 minutos
+                    });
                 });
 
                 const { latitude, longitude } = position.coords;
-                const lang = currentLanguage === 'pt' ? 'pt' : 'en';
+                const lang = currentLanguage === 'pt' ? 'pt_br' : 'en'; // Correção: 'pt_br' em vez de 'pt'
+
+                // Monta a URL da API
                 const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
 
                 const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to fetch weather data');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
 
+                // Renderiza o widget
                 container.innerHTML = `
-                    <div class="bg-gradient-to-br from-brand-400 to-brand-600 text-white p-4 rounded-lg shadow-lg flex items-center justify-between">
-                        <div>
-                             <p class="font-bold text-lg">${data.name}</p>
-                             <p class="text-sm capitalize">${data.weather[0].description}</p>
-                        </div>
-                        <div class="text-right">
-                             <div class="flex items-center">
-                                 <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="Weather icon" class="w-12 h-12 -my-2">
-                                 <p class="text-4xl font-bold">${Math.round(data.main.temp)}°C</p>
-                             </div>
-                             <p class="text-xs">${t('feelsLike')} ${Math.round(data.main.feels_like)}°C</p>
-                        </div>
+            <div class="bg-gradient-to-br from-brand-400 to-brand-600 text-white p-4 rounded-lg shadow-lg flex items-center justify-between">
+                <div>
+                    <p class="font-bold text-lg">${data.name || 'Localização'}</p>
+                    <p class="text-sm capitalize">${data.weather[0].description || 'Sem descrição'}</p>
+                </div>
+                <div class="text-right">
+                    <div class="flex items-center">
+                        <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="Weather icon" class="w-12 h-12 -my-2">
+                        <p class="text-4xl font-bold">${Math.round(data.main.temp)}°C</p>
                     </div>
-                `;
+                    <p class="text-xs">${t('feelsLike')} ${Math.round(data.main.feels_like)}°C</p>
+                </div>
+            </div>
+        `;
 
             } catch (error) {
                 console.error("Weather error:", error);
-                container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
+                let errorMessage = t('weatherError');
+                if (error.code === 1) {
+                    errorMessage = "Permissão de localização negada. Por favor, permita o acesso à sua localização nas configurações do navegador.";
+                }
+                container.innerHTML = `<p class="text-center text-red-500">${errorMessage}</p>`;
             }
         }
 
@@ -3656,24 +3717,35 @@
             const container = document.getElementById('clock-content');
             container.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
 
+            // Verifica se a chave foi alterada do valor padrão
             if (WEATHER_API_KEY === '2f3410f5517837200509d829af334e4d') {
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
                 return;
             }
 
             try {
+                // Tenta obter a localização
                 const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        timeout: 10000,
+                        maximumAge: 300000
+                    });
                 });
 
                 const { latitude, longitude } = position.coords;
-                const lang = currentLanguage === 'pt' ? 'pt' : 'en';
+                const lang = currentLanguage === 'pt' ? 'pt_br' : 'en'; // Correção: 'pt_br'
+
                 const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
 
                 const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to fetch forecast data');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
 
+                // Agrupa as previsões por dia
                 const dailyForecasts = {};
                 data.list.forEach(item => {
                     const date = new Date(item.dt_txt).toLocaleDateString();
@@ -3685,39 +3757,50 @@
                         };
                     }
                     dailyForecasts[date].temps.push(item.main.temp);
-                    dailyForecasts[date].icons[item.weather[0].icon] = (dailyForecasts[date].icons[item.weather[0].icon] || 0) + 1;
-                    dailyForecasts[date].descriptions[item.weather[0].description] = (dailyForecasts[date].descriptions[item.weather[0].description] || 0) + 1;
+                    const iconKey = item.weather[0].icon;
+                    const descKey = item.weather[0].description;
+                    dailyForecasts[date].icons[iconKey] = (dailyForecasts[date].icons[iconKey] || 0) + 1;
+                    dailyForecasts[date].descriptions[descKey] = (dailyForecasts[date].descriptions[descKey] || 0) + 1;
                 });
 
-                let forecastHtml = `<h2 class="text-2xl font-bold mb-4 text-center">${t('weatherForecast')} em ${data.city.name}</h2><div class="space-y-4">`;
+                let forecastHtml = `<h2 class="text-2xl font-bold mb-4 text-center">${t('weatherForecast')} em ${data.city.name || 'sua região'}</h2><div class="space-y-4">`;
 
+                // Pega os próximos 5 dias
                 Object.keys(dailyForecasts).slice(0, 5).forEach((dateStr, index) => {
                     const dayData = dailyForecasts[dateStr];
                     const minTemp = Math.round(Math.min(...dayData.temps));
                     const maxTemp = Math.round(Math.max(...dayData.temps));
+
+                    // Encontra o ícone e descrição mais comuns para o dia
                     const mostCommonIcon = Object.keys(dayData.icons).reduce((a, b) => dayData.icons[a] > dayData.icons[b] ? a : b);
                     const mostCommonDesc = Object.keys(dayData.descriptions).reduce((a, b) => dayData.descriptions[a] > dayData.descriptions[b] ? a : b);
-                    const dayName = index === 0 ? t('today') : new Date(data.list.find(item => new Date(item.dt_txt).toLocaleDateString() === dateStr).dt * 1000).toLocaleDateString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', { weekday: 'long' });
+
+                    const dateObj = new Date(dateStr);
+                    const options = { weekday: 'long' };
+                    const dayName = index === 0 ? t('today') : dateObj.toLocaleDateString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', options);
 
                     forecastHtml += `
-                        <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex items-center justify-between">
-                            <span class="font-semibold w-24 capitalize">${dayName}</span>
-                            <div class="flex items-center gap-2">
-                                <img src="https://openweathermap.org/img/wn/${mostCommonIcon}.png" alt="${mostCommonDesc}" class="w-8 h-8">
-                                <span class="text-sm capitalize">${mostCommonDesc}</span>
-                            </div>
-                            <span class="font-semibold">${minTemp}° / ${maxTemp}°</span>
-                        </div>
-                    `;
+                <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex items-center justify-between">
+                    <span class="font-semibold w-24 capitalize">${dayName}</span>
+                    <div class="flex items-center gap-2">
+                        <img src="https://openweathermap.org/img/wn/${mostCommonIcon}.png" alt="${mostCommonDesc}" class="w-8 h-8">
+                        <span class="text-sm capitalize">${mostCommonDesc}</span>
+                    </div>
+                    <span class="font-semibold">${minTemp}° / ${maxTemp}°</span>
+                </div>
+            `;
                 });
 
                 forecastHtml += '</div>';
                 container.innerHTML = forecastHtml;
 
-
             } catch (error) {
                 console.error("Forecast error:", error);
-                container.innerHTML = `<p class="text-center text-red-500">${t('weatherError')}</p>`;
+                let errorMessage = t('weatherError');
+                if (error.code === 1) {
+                    errorMessage = "Permissão de localização negada.";
+                }
+                container.innerHTML = `<p class="text-center text-red-500">${errorMessage}</p>`;
             }
         }
 
@@ -4057,6 +4140,5 @@
         initApp();
     </script>
 </body>
-
 
 </html>
