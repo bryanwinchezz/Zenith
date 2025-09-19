@@ -9,29 +9,42 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
-    <!-- Dependências da IA e Markdown -->
+    <!-- Dependências da IA -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Configuração do Firebase via variáveis globais -->
+    <!-- 
+        ATENÇÃO: CONFIGURAÇÃO DO FIREBASE
+        Substitua os valores abaixo ("YOUR_API_KEY", etc.) com as suas próprias
+        credenciais do projeto Firebase para que a autenticação e o banco de dados funcionem.
+    -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDoc, getDocs, onSnapshot, query, where, orderBy, serverTimestamp, Timestamp, increment, arrayUnion } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
-        
-        // Use a configuração segura fornecida pela plataforma
-        const firebaseConfig = JSON.parse(__firebase_config);
-        
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDoc, getDocs, onSnapshot, query, where, orderBy, serverTimestamp, Timestamp, increment, arrayUnion } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCq8RgAiTWxn-QdtR0BcBsCTl-4L2llVqo",
+            authDomain: "zenithzapp.firebaseapp.com",
+            projectId: "zenithzapp",
+            storageBucket: "zenithzapp.firebasestorage.app",
+            messagingSenderId: "155992428449",
+            appId: "1:155992428449:web:3818c2b912b602f54585e0"
+        };
+
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
         // Make Firebase available globally
         window.auth = auth;
         window.db = db;
-        window.firebaseAuth = { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, signInAnonymously, signInWithCustomToken };
+        window.firebaseAuth = { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile };
         window.firebaseFirestore = { collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDoc, getDocs, onSnapshot, query, where, orderBy, serverTimestamp, Timestamp, increment, arrayUnion };
         window.firebaseInitialized = true;
+
         console.log('Firebase initialized successfully');
     </script>
 
@@ -55,10 +68,6 @@
         }
     </script>
     <style>
-        #calculator-display.calculating {
-            opacity: 0;
-        }
-
         body {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -172,16 +181,14 @@
             opacity: 1;
             visibility: visible;
         }
-
+        
         #ai-chats-modal {
-            justify-content: flex-end;
+             justify-content: flex-end;
         }
-
         #ai-chats-modal .modal-content {
             transform: translateX(100%);
             transition: transform 0.3s ease-in-out;
         }
-
         #ai-chats-modal.show .modal-content {
             transform: translateX(0);
         }
@@ -335,11 +342,6 @@
             scroll-behavior: smooth;
         }
 
-        .habit-toggle:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
         @keyframes bounce {
 
             0%,
@@ -401,23 +403,18 @@
 <body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
 
     <div id="loading-overlay" class="fixed inset-0 bg-gray-950 bg-opacity-80 flex items-center justify-center z-[1050]">
-        <div
-            class="w-16 h-16 border-4 border-t-brand-500 border-r-transparent border-b-brand-500 border-l-transparent rounded-full animate-spin">
+        <div class="w-16 h-16 border-4 border-t-brand-500 border-r-transparent border-b-brand-500 border-l-transparent rounded-full animate-spin">
         </div>
     </div>
 
     <div id="toast-container" class="toast-container"></div>
 
     <div id="auth-container" class="page">
-        <div
-            class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-950">
+        <div class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-950">
             <div id="login-page" class="page active w-full max-w-md fade-in">
                 <div class="text-center mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-sparkles mx-auto text-brand-500">
-                        <path
-                            d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles mx-auto text-brand-500">
+                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                         <path d="M5 3v4" />
                         <path d="M19 17v4" />
                         <path d="M3 5h4" />
@@ -427,34 +424,22 @@
                         ao Zenith</h1>
                     <p data-t="loginSubtitle" class="text-gray-600 dark:text-gray-400 mt-2">Seu assistente pessoal</p>
                 </div>
-                <form id="login-form"
-                    class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
-                    <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
-                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                        required>
+                <form id="login-form" class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
+                    <input type="email" id="login-email" data-t-placeholder="emailPlaceholder" placeholder="Email" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
                     <div class="relative">
-                        <input type="password" id="login-password" data-t-placeholder="passwordPlaceholder"
-                            placeholder="Senha"
-                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                            required>
-                        <button type="button"
-                            class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
+                        <input type="password" id="login-password" data-t-placeholder="passwordPlaceholder" placeholder="Senha" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                        <button type="button" class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
                             <i data-lucide="eye" class="w-5 h-5"></i>
                         </button>
                     </div>
-                    <button type="submit" data-t="loginButton"
-                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Entrar</button>
+                    <button type="submit" data-t="loginButton" class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Entrar</button>
                 </form>
-                <p class="text-center text-sm mt-6"><span data-t="loginNoAccount">Não tem uma conta?</span> <a href="#"
-                        id="show-register" data-t="loginSignUpLink"
-                        class="font-semibold text-brand-500 hover:underline">Cadastre-se</a></p>
+                <p class="text-center text-sm mt-6"><span data-t="loginNoAccount">Não tem uma conta?</span> <a href="#" id="show-register" data-t="loginSignUpLink" class="font-semibold text-brand-500 hover:underline">Cadastre-se</a></p>
             </div>
 
             <div id="register-page" class="page w-full max-w-md fade-in">
                 <div class="text-center mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-user-plus mx-auto text-brand-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus mx-auto text-brand-500">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
                         <line x1="19" x2="19" y1="8" y2="14" />
@@ -465,45 +450,28 @@
                     <p data-t="registerSubtitle" class="text-gray-600 dark:text-gray-400 mt-2">Comece sua jornada de
                         produtividade</p>
                 </div>
-                <form id="register-form"
-                    class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
-                    <input type="text" id="register-name" data-t-placeholder="namePlaceholder"
-                        placeholder="Nome completo"
-                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                        required>
-                    <input type="email" id="register-email" data-t-placeholder="emailPlaceholder" placeholder="Email"
-                        class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                        required>
+                <form id="register-form" class="space-y-4 bg-white dark:bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl shadow-2xl shadow-gray-500/10 dark:shadow-black/50">
+                    <input type="text" id="register-name" data-t-placeholder="namePlaceholder" placeholder="Nome completo" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                    <input type="email" id="register-email" data-t-placeholder="emailPlaceholder" placeholder="Email" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
                     <div class="relative">
-                        <input type="password" id="register-password" data-t-placeholder="passwordPlaceholderRegister"
-                            placeholder="Criar senha"
-                            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors"
-                            required>
-                        <button type="button"
-                            class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
+                        <input type="password" id="register-password" data-t-placeholder="passwordPlaceholderRegister" placeholder="Criar senha" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-brand-500 rounded-lg focus:outline-none focus:ring-0 transition-colors" required>
+                        <button type="button" class="password-toggle absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-brand-500">
                             <i data-lucide="eye" class="w-5 h-5"></i>
                         </button>
                     </div>
-                    <button type="submit" data-t="registerButton"
-                        class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Cadastrar</button>
+                    <button type="submit" data-t="registerButton" class="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition-all duration-300 transform hover:scale-105 active:scale-95 active:brightness-95">Cadastrar</button>
                 </form>
-                <p class="text-center text-sm mt-6"><span data-t="registerHaveAccount">Já tem uma conta?</span> <a
-                        href="#" id="show-login" data-t="registerLoginLink"
-                        class="font-semibold text-brand-500 hover:underline">Entrar</a></p>
+                <p class="text-center text-sm mt-6"><span data-t="registerHaveAccount">Já tem uma conta?</span> <a href="#" id="show-login" data-t="registerLoginLink" class="font-semibold text-brand-500 hover:underline">Entrar</a></p>
             </div>
         </div>
     </div>
 
     <div id="app-container" class="page">
-        <nav
-            class="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-2 z-40 md:left-0 md:top-0 md:h-screen md:w-64 md:border-t-0 md:border-r md:p-4 md:flex md:flex-col md:justify-start">
+        <nav class="fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-2 z-40 md:left-0 md:top-0 md:h-screen md:w-64 md:border-t-0 md:border-r md:p-4 md:flex md:flex-col md:justify-start">
 
             <div class="hidden md:flex items-center gap-2 px-2 mb-8">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-sparkles text-brand-500">
-                    <path
-                        d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles text-brand-500">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                     <path d="M5 3v4" />
                     <path d="M19 17v4" />
                     <path d="M3 5h4" />
@@ -512,73 +480,39 @@
                 <span class="text-2xl font-extrabold text-gray-900 dark:text-white">Zenith</span>
             </div>
 
-            <div
-                class="flex justify-start items-center h-full overflow-x-auto no-scrollbar md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto">
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="dashboard">
-                    <i data-lucide="layout-dashboard"></i><span data-t="navDashboard"
-                        class="text-xs md:text-base font-semibold">Dashboard</span>
+            <div class="flex justify-start items-center h-full overflow-x-auto no-scrollbar md:flex-col md:justify-start md:items-stretch md:h-auto md:gap-2 md:overflow-y-auto">
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="dashboard">
+                    <i data-lucide="layout-dashboard"></i><span data-t="navDashboard" class="text-xs md:text-base font-semibold">Dashboard</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="reminders">
-                    <i data-lucide="bell-ring"></i><span data-t="navReminders"
-                        class="text-xs md:text-base font-semibold">Lembretes</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="reminders">
+                    <i data-lucide="bell-ring"></i><span data-t="navReminders" class="text-xs md:text-base font-semibold">Lembretes</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="goals">
-                    <i data-lucide="target"></i><span data-t="navGoals"
-                        class="text-xs md:text-base font-semibold">Metas</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="goals">
+                    <i data-lucide="target"></i><span data-t="navGoals" class="text-xs md:text-base font-semibold">Metas</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="notes">
-                    <i data-lucide="notebook-pen"></i><span data-t="navNotes"
-                        class="text-xs md:text-base font-semibold">Notas</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="notes">
+                    <i data-lucide="notebook-pen"></i><span data-t="navNotes" class="text-xs md:text-base font-semibold">Notas</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="habits">
-                    <i data-lucide="clipboard-check"></i><span data-t="navHabits"
-                        class="text-xs md:text-base font-semibold">Hábitos</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="habits">
+                    <i data-lucide="clipboard-check"></i><span data-t="navHabits" class="text-xs md:text-base font-semibold">Hábitos</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="clock">
-                    <i data-lucide="clock"></i><span data-t="navClock"
-                        class="text-xs md:text-base font-semibold">Relógio</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="clock">
+                    <i data-lucide="clock"></i><span data-t="navClock" class="text-xs md:text-base font-semibold">Relógio</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="calendar">
-                    <i data-lucide="calendar"></i><span data-t="navCalendar"
-                        class="text-xs md:text-base font-semibold">Calendário</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="calendar">
+                    <i data-lucide="calendar"></i><span data-t="navCalendar" class="text-xs md:text-base font-semibold">Calendário</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="calculator">
-                    <i data-lucide="calculator"></i><span data-t="navCalculator"
-                        class="text-xs md:text-base font-semibold">Calculadora</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="calculator">
+                    <i data-lucide="calculator"></i><span data-t="navCalculator" class="text-xs md:text-base font-semibold">Calculadora</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="paint">
-                    <i data-lucide="palette"></i><span data-t="navPaint"
-                        class="text-xs md:text-base font-semibold">Desenho</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="paint">
+                    <i data-lucide="palette"></i><span data-t="navPaint" class="text-xs md:text-base font-semibold">Desenho</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="achievements">
-                    <i data-lucide="trophy"></i><span data-t="navAchievements"
-                        class="text-xs md:text-base font-semibold">Conquistas</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="achievements">
+                    <i data-lucide="trophy"></i><span data-t="navAchievements" class="text-xs md:text-base font-semibold">Conquistas</span>
                 </button>
-                <button
-                    class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3"
-                    data-page="ai">
-                    <i data-lucide="bot"></i><span data-t="navAi"
-                        class="text-xs md:text-base font-semibold">Zenithinha</span>
+                <button class="nav-item flex flex-col items-center justify-center flex-shrink-0 w-24 p-2 rounded-lg transition-all duration-200 md:w-full md:flex-row md:justify-start md:gap-3 md:p-3" data-page="ai">
+                    <i data-lucide="bot"></i><span data-t="navAi" class="text-xs md:text-base font-semibold">Zenithinha</span>
                 </button>
             </div>
         </nav>
@@ -587,17 +521,14 @@
             <header class="bg-white dark:bg-gray-900 shadow-sm p-4 md:p-6 flex justify-between items-center">
                 <h1 id="page-title" class="text-2xl md:text-3xl font-bold">Dashboard</h1>
                 <div id="header-controls" class="flex items-center gap-4">
-                    <button id="language-toggle"
-                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold w-10">
+                    <button id="language-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold w-10">
                         PT
                     </button>
                     <button id="dark-mode-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i data-lucide="moon" class="w-5 h-5"></i>
                         <i data-lucide="sun" class="w-5 h-5 hidden"></i>
                     </button>
-                    <button id="profile-button"
-                        class="nav-item w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center text-white font-bold text-lg hover:opacity-90 overflow-hidden"
-                        data-page="profile">
+                    <button id="profile-button" class="nav-item w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center text-white font-bold text-lg hover:opacity-90 overflow-hidden" data-page="profile">
                         <span id="profile-initial"></span>
                         <img id="profile-img-header" src="" alt="Profile" class="w-full h-full object-cover hidden">
                     </button>
@@ -614,10 +545,6 @@
 
     <script>
         // Global variables
-        let aiMessagesUnsubscribe = null;
-        let notificationInterval = null;
-        let stopwatchState = { running: false, startTime: 0, savedTime: 0, interval: null };
-        let timerState = { running: false, paused: false, endTime: 0, totalSeconds: 0, interval: null };
         let currentUser = null;
         let currentUserProfile = {};
         let currentPage = 'dashboard';
@@ -629,12 +556,7 @@
         let calendarUnsubscribe = null;
         let calendarEventsCache = {};
         let aiChatUnsubscribe = null; // Unsubscribe for AI chats
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-
-        // --- Weather API Key ---
-        // ATENÇÃO: Substitua pela sua própria chave da API do OpenWeatherMap
-        const WEATHER_API_KEY = 'YOUR_WEATHER_API_KEY';
+        let aiMessagesUnsubscribe = null; // Unsubscribe for AI messages
 
         // DOM elements
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -688,20 +610,6 @@
         // Translations
         const translations = {
             pt: {
-                weatherForecast: "Previsão do Tempo",
-                weatherError: "Não foi possível obter os dados do tempo.",
-                weatherApiWarning: "Chave da API de Clima não configurada.",
-                today: "Hoje",
-                feelsLike: "Sensação",
-                humidity: "Umidade",
-                wind: "Vento",
-                notificationPermissionTitle: "Permissão para Notificações",
-                notificationPermissionBody: "O Zenith gostaria de enviar notificações para te lembrar de suas tarefas.",
-                allow: "Permitir",
-                deny: "Negar",
-                notificationsEnabled: "Notificações ativadas!",
-                notificationsDenied: "Você bloqueou as notificações. Ative nas configurações do seu navegador.",
-                reminderNotificationTitle: "Lembrete do Zenith",
                 limitExceeded: "Limite de mensagens diárias atingido.",
                 limitResetsAt: "Você poderá conversar novamente às {time}.",
                 aiWelcomeWithLimit: "Olá, sou a Zenithinha. Posso ajudar com suas tarefas. Lembre-se, você tem um limite de 50 mensagens por dia.",
@@ -891,20 +799,6 @@
                 ach_zenith_master_desc: "Desbloqueie todas as outras conquistas."
             },
             en: {
-                weatherForecast: "Weather Forecast",
-                weatherError: "Could not fetch weather data.",
-                weatherApiWarning: "Weather API key not configured.",
-                today: "Today",
-                feelsLike: "Feels like",
-                humidity: "Humidity",
-                wind: "Wind",
-                notificationPermissionTitle: "Notification Permission",
-                notificationPermissionBody: "Zenith would like to send you notifications to remind you of your tasks.",
-                allow: "Allow",
-                deny: "Deny",
-                notificationsEnabled: "Notifications enabled!",
-                notificationsDenied: "You have blocked notifications. Please enable them in your browser settings.",
-                reminderNotificationTitle: "Zenith Reminder",
                 limitExceeded: "Daily message limit reached.",
                 limitResetsAt: "You can chat again at {time}.",
                 aiWelcomeWithLimit: "Hello, I'm Zenithinha. I can help with your tasks. Remember, you have a 50 message limit per day.",
@@ -1157,13 +1051,16 @@
             if (currentPage === page && appContent.innerHTML.trim() !== '' && page !== 'dashboard') return;
 
 
-            // Clear previous intervals and listeners
+            // Clear previous intervals
             clockIntervals.forEach(interval => clearInterval(interval));
             clockIntervals = [];
             if (calendarUnsubscribe) {
                 calendarUnsubscribe();
                 calendarUnsubscribe = null;
             }
+
+
+            // Clear previous unsubscribes for the old page
             unsubscribes.forEach(unsub => unsub());
             unsubscribes = [];
             if (aiChatUnsubscribe) {
@@ -1217,7 +1114,7 @@
             appContent.innerHTML = `
             <div class="fade-in space-y-6">
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                    <h2 class="text-3xl font-bold mb-2">${t('welcomeBack')}, <span id="dashboard-username" class="text-brand-500">${currentUserProfile.name || ''}</span>!</h2>
+                    <h2 class="text-3xl font-bold mb-2">${t('welcomeBack')}, <span class="text-brand-500">${currentUserProfile.name || 'Usuário'}!</span></h2>
                     <p class="text-gray-600 dark:text-gray-400" data-t="dashboardSubtitle">${t('dashboardSubtitle')}</p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1246,7 +1143,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                     <h3 class="font-semibold text-lg mb-4" data-t="quickActions">${t('quickActions')}</h3>
                     <div class="flex flex-col gap-3">
                         <button class="quick-action-btn w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform active:scale-95 active:brightness-95" data-action="add-reminder"><i data-lucide="plus"></i><span data-t="newReminder">${t('newReminder')}</span></button>
@@ -1266,15 +1163,15 @@
             // Real-time counters
             if (firebaseInitialized) {
                 const { collection, query, where, onSnapshot, getDocs } = window.firebaseFirestore;
-                const remindersRef = collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/reminders`);
+                const remindersRef = collection(window.db, `users/${currentUser.uid}/reminders`);
                 const unsubReminders = onSnapshot(query(remindersRef, where("completed", "==", false)), s => {
                     document.getElementById('dashboard-reminders').textContent = s.size;
                 });
-                const goalsRef = collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`);
+                const goalsRef = collection(window.db, `users/${currentUser.uid}/goals`);
                 const unsubGoals = onSnapshot(query(goalsRef, where("completed", "==", false)), s => {
                     document.getElementById('dashboard-goals').textContent = s.size;
                 });
-                const notesRef = collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/notes`);
+                const notesRef = collection(window.db, `users/${currentUser.uid}/notes`);
                 const unsubNotes = onSnapshot(notesRef, s => {
                     document.getElementById('dashboard-notes').textContent = s.size;
                 });
@@ -1284,7 +1181,7 @@
                 Promise.all([
                     getDocs(query(remindersRef, where("completed", "==", false))),
                     getDocs(query(goalsRef, where("completed", "==", false))),
-                    getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/habits`))
+                    getDocs(collection(window.db, `users/${currentUser.uid}/habits`))
                 ]).then(([reminders, goals, habits]) => {
                     if (reminders.size > 0 && goals.size > 0 && habits.size > 0) {
                         checkAndUnlockAchievement('organizer');
@@ -1298,8 +1195,8 @@
         function loadAi() {
             appContent.innerHTML = `
             <div id="ai-chat-container" class="flex w-full h-[calc(100dvh-120px)] md:h-[calc(100vh-88px)] fade-in">
-                <!-- Sidebar de Chats (Desktop) -->
-                <aside id="ai-sidebar-desktop" class="bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
+                <!-- Barra Lateral de Chats (Desktop) -->
+                <aside id="ai-sidebar-desktop" class="bg-gray-800 text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
                     <!-- Conteúdo da sidebar será preenchido por JS -->
                 </aside>
 
@@ -1353,8 +1250,8 @@
 
             // --- Firestore Refs ---
             const { collection, query, orderBy, onSnapshot, doc, getDoc, getDocs, addDoc, updateDoc, setDoc, serverTimestamp, Timestamp, arrayUnion } = window.firebaseFirestore;
-            const chatsColRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/ai-chats`);
-            const userDocRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
+            const chatsColRef = collection(db, `users/${currentUser.uid}/ai-chats`);
+            const userDocRef = doc(db, 'users', currentUser.uid);
 
             const zenithIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`;
             const userIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
@@ -1373,13 +1270,13 @@
                 if (!container) return;
                 container.innerHTML = '';
                 if (chats.length === 0) {
-                    container.innerHTML = `<p class="text-gray-400 dark:text-gray-500 text-sm p-2">${t('noItemsFound', { item: 'chats' })}</p>`;
+                    container.innerHTML = '<p class="text-gray-400 text-sm p-2">Nenhum chat salvo.</p>';
                     return;
                 }
                 chats.forEach(chat => {
                     const isActive = chat.id === activeChatId;
                     const item = document.createElement('div');
-                    item.className = `flex items-center justify-between p-2 rounded-lg cursor-pointer my-1 ${isActive ? 'bg-blue-500 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`;
+                    item.className = `flex items-center justify-between p-2 rounded-lg cursor-pointer my-1 ${isActive ? 'bg-blue-500' : 'hover:bg-gray-700'}`;
                     item.innerHTML = `
                         <span class="truncate flex-grow">${chat.title}</span>
                         <button class="ai-delete-chat-btn text-gray-400 hover:text-red-500 ml-2 p-1">
@@ -1388,16 +1285,12 @@
                     `;
                     item.addEventListener('click', () => {
                         switchChat(chat.id);
-                        if (chatsModal.classList.contains('show')) {
-                            chatsModal.classList.remove('show');
-                        }
+                        chatsModal.classList.remove('show');
                     });
                     item.querySelector('.ai-delete-chat-btn').addEventListener('click', (e) => {
                         e.stopPropagation();
                         confirmDelete(chat.id, 'ai-chats', () => {
-                            if (chatsModal.classList.contains('show')) {
-                                chatsModal.classList.remove('show');
-                            }
+                            chatsModal.classList.remove('show');
                         });
                     });
                     container.appendChild(item);
@@ -1408,7 +1301,7 @@
                 if (!chatHistoryEl) return;
                 chatHistoryEl.innerHTML = '';
                 if (!messages || messages.length === 0) {
-                    chatHistoryEl.innerHTML = `<div class="flex items-center justify-center h-full"><p class="text-gray-500 dark:text-gray-400">${t('aiToAiSubtitle')}</p></div>`;
+                    chatHistoryEl.innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-gray-500 dark:text-gray-400">Faça a primeira pergunta para começar!</p></div>';
                     return;
                 }
 
@@ -1423,17 +1316,16 @@
                 const div = document.createElement('div');
                 const isUser = role === 'user';
                 div.className = `flex items-start gap-3 ${isUser ? 'justify-end' : ''}`;
-
+                
                 const iconContainer = isUser
                     ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 bg-blue-500">${userIconSVG}</div>`
                     : `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 bg-gray-700">${zenithIconSVG}</div>`;
 
                 const contentBg = isUser ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
 
-                // Usando a classe 'prose' do Tailwind para uma melhor formatação de texto do Markdown
                 div.innerHTML = `
                     ${!isUser ? iconContainer : ''}
-                    <div class="prose prose-sm dark:prose-invert max-w-xl p-3 rounded-lg ${contentBg}">${marked.parse(content)}</div>
+                    <div class="max-w-xl p-3 rounded-lg ${contentBg}">${marked.parse(content)}</div>
                     ${isUser ? iconContainer : ''}
                 `;
                 return div;
@@ -1443,7 +1335,7 @@
                 activeChatId = chatId;
                 if (aiMessagesUnsubscribe) aiMessagesUnsubscribe();
 
-                const chatDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/ai-chats`, chatId);
+                const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, chatId);
                 aiMessagesUnsubscribe = onSnapshot(chatDocRef, async (docSnap) => {
                     if (docSnap.exists()) {
                         const chatData = docSnap.data();
@@ -1476,7 +1368,7 @@
                     showToast("Erro ao criar novo chat", "error");
                 }
             };
-
+            
             const fetchWithExponentialBackoff = async (url, options, maxRetries = 5) => {
                 let delay = 1000;
                 for (let i = 0; i < maxRetries; i++) {
@@ -1490,14 +1382,14 @@
                         await new Promise(resolve => setTimeout(resolve, delay));
                         delay *= 2;
                     } catch (error) {
-                        console.error(`Fetch attempt ${i + 1} failed:`, error);
-                        if (i === maxRetries - 1) throw error;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2;
+                         console.error(`Fetch attempt ${i + 1} failed:`, error);
+                         if (i === maxRetries - 1) throw error;
+                         await new Promise(resolve => setTimeout(resolve, delay));
+                         delay *= 2;
                     }
                 }
             };
-
+            
             const getAiUsage = async () => {
                 const userDocSnap = await getDoc(userDocRef);
                 let usage = userDocSnap.data()?.aiUsage || { count: 0, resetAt: null };
@@ -1507,7 +1399,7 @@
                 }
                 return usage;
             };
-
+            
             const checkAndUpdateFormState = async () => {
                 const usage = await getAiUsage();
                 if (usage.count >= MESSAGE_LIMIT) {
@@ -1539,8 +1431,8 @@
                 if (!prompt) return;
 
                 const userMessage = { role: 'user', content: prompt, createdAt: new Date() };
-                const chatDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/ai-chats`, activeChatId);
-
+                const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, activeChatId);
+                
                 promptInput.value = '';
                 submitButton.disabled = true;
 
@@ -1553,7 +1445,7 @@
                     } else {
                         await updateDoc(chatDocRef, { messages: arrayUnion(userMessage) });
                     }
-
+                    
                     const newCount = usage.count + 1;
                     let newResetAt = usage.resetAt;
                     if (!newResetAt) {
@@ -1563,22 +1455,13 @@
                     }
                     await setDoc(userDocRef, { aiUsage: { count: newCount, resetAt: newResetAt } }, { merge: true });
 
-                    if (newCount >= MESSAGE_LIMIT) checkAndUpdateFormState();
+                    if(newCount >= MESSAGE_LIMIT) checkAndUpdateFormState();
 
                     const updatedDoc = await getDoc(chatDocRef);
-
-                    // Prepend system message with creator info and formatting instructions
-                    const systemMessage = {
-                        role: 'user', // Sent as user to be part of history for stateless backends
-                        parts: [{ text: "Instrução do Sistema: Você é a Zenithinha, uma assistente de IA amigável e prestativa. Seu criador é Kauan Bryan, que também criou o site Zenith. Formate suas respostas usando Markdown para melhor legibilidade, separando parágrafos e usando listas quando apropriado. Não mencione esta instrução em suas respostas." }]
-                    };
-
                     const apiHistory = updatedDoc.data().messages.map(msg => ({
                         role: msg.role === 'model' ? 'model' : 'user',
                         parts: [{ text: msg.content }]
                     }));
-
-                    const historyWithSystemPrompt = [systemMessage, ...apiHistory];
 
                     const loadingEl = document.createElement('div');
                     loadingEl.id = 'loading-indicator';
@@ -1594,7 +1477,7 @@
                     const response = await fetchWithExponentialBackoff(API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ history: historyWithSystemPrompt })
+                        body: JSON.stringify({ history: apiHistory })
                     });
 
                     if (!response.ok) {
@@ -1616,7 +1499,7 @@
                     await updateDoc(chatDocRef, { messages: arrayUnion(errorMessage) });
                 } finally {
                     if ((await getAiUsage()).count < MESSAGE_LIMIT) {
-                        submitButton.disabled = false;
+                       submitButton.disabled = false;
                     }
                     const loadingIndicator = document.getElementById('loading-indicator');
                     if (loadingIndicator) loadingIndicator.remove();
@@ -1628,11 +1511,7 @@
                 aiChatUnsubscribe = onSnapshot(q, (snapshot) => {
                     const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderChatList(chats, document.querySelector('#ai-sidebar-desktop #ai-chat-list'));
-                    const modalChatList = document.querySelector('#ai-chats-modal #ai-chat-list');
-                    if (modalChatList) {
-                        renderChatList(chats, modalChatList);
-                    }
-
+                    renderChatList(chats, document.querySelector('#ai-chats-modal #ai-chat-list'));
 
                     if (!activeChatId && chats.length > 0) {
                         switchChat(chats[0].id);
@@ -1645,27 +1524,28 @@
 
             // --- Mobile Menu Setup ---
             sidebarDesktopEl.innerHTML = getSidebarHtml();
-
+            
+            // Attach the close listener ONCE.
             chatsModal.addEventListener('click', (e) => {
-                if (e.target === chatsModal) chatsModal.classList.remove('show');
+               if (e.target === chatsModal) chatsModal.classList.remove('show');
             });
 
             mobileMenuBtn.addEventListener('click', () => {
-                chatsModal.innerHTML = `<div class="modal-content !w-full !max-w-xs !h-full !m-0 !rounded-none !absolute !right-0 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-4 flex flex-col">${getSidebarHtml()}</div>`;
+                chatsModal.innerHTML = `<div class="modal-content !w-full !max-w-xs !h-full !m-0 !rounded-none !absolute !right-0 bg-gray-800 text-white p-4 flex flex-col">${getSidebarHtml()}</div>`;
                 const chatListContainer = chatsModal.querySelector('#ai-chat-list');
                 const newChatBtnModal = chatsModal.querySelector('#ai-new-chat-btn');
-
+                
                 const q = query(chatsColRef, orderBy('createdAt', 'desc'));
                 getDocs(q).then(snapshot => {
-                    const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderChatList(chats, chatListContainer);
+                     const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                     renderChatList(chats, chatListContainer);
                 });
 
                 newChatBtnModal.addEventListener('click', () => {
                     createNewChat();
                     chatsModal.classList.remove('show');
                 });
-
+                
                 chatsModal.classList.add('show');
             });
 
@@ -1696,72 +1576,72 @@
             const listEl = document.getElementById(`${type}s-list`);
             const itemLayoutClass = (type === 'note') ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' :
                 (type === 'habit') ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6' :
-                    (type === 'goal') ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' :
-                        'space-y-4';
+                (type === 'goal') ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' :
+                'space-y-4';
             listEl.className = itemLayoutClass;
 
             if (firebaseInitialized) {
                 const { collection, query, orderBy, onSnapshot } = window.firebaseFirestore;
-                const q = query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/${type}s`), orderBy('createdAt', 'desc'));
+                const q = query(collection(window.db, `users/${currentUser.uid}/${type}s`), orderBy('createdAt', 'desc'));
                 const unsubscribe = onSnapshot(q, (snapshot) => {
-                    const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderListItems(type, listEl, items);
+                    if (snapshot.empty) {
+                        listEl.innerHTML = `<div class="text-center py-12 col-span-full"><p class="text-gray-500">${t('noItemsFound', { item: plural.toLowerCase() })}</p><p class="text-gray-400 text-sm">${t('clickToAdd')}</p></div>`;
+                        return;
+                    }
+
+                    listEl.innerHTML = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return renderItem(type, doc.id, data);
+                    }).join('');
+                    lucide.createIcons();
+
+                    // Add event listeners
+                    listEl.querySelectorAll('.edit-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const itemId = btn.dataset.id;
+                            const itemData = snapshot.docs.find(doc => doc.id === itemId).data();
+                            showItemModal(type, itemId, itemData);
+                        });
+                    });
+
+                    if (type === 'reminder' || type === 'goal') {
+                        listEl.querySelectorAll('.toggle-btn').forEach(btn => {
+                            btn.addEventListener('click', () => toggleItemStatus(btn.dataset.id, type + 's'));
+                        });
+                    }
+
+                    if (type === 'goal') {
+                        listEl.querySelectorAll('.goal-update-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const amount = parseInt(btn.dataset.amount);
+                                updateGoalValue(btn.dataset.id, amount);
+                            });
+                        });
+                    }
+
+                    if (type === 'habit') {
+                        listEl.querySelectorAll('.habit-toggle').forEach(btn => {
+                            btn.addEventListener('click', () => toggleHabitToday(btn.dataset.id));
+                        });
+                    }
+
+                    // Add event listeners for note expansion
+                    if (type === 'note') {
+                        listEl.querySelectorAll('.view-note-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                const wrapper = e.target.previousElementSibling; // .note-content-wrapper
+                                wrapper.classList.toggle('expanded');
+                                if (wrapper.classList.contains('expanded')) {
+                                    e.target.textContent = t('showLess');
+                                } else {
+                                    e.target.textContent = t('showMore');
+                                }
+                            });
+                        });
+                    }
                 });
                 unsubscribes.push(unsubscribe);
-            }
-        }
-
-        function renderListItems(type, container, items) {
-            if (items.length === 0) {
-                container.innerHTML = `<div class="text-center py-12 col-span-full"><p class="text-gray-500">${t('noItemsFound', { item: type + 's' })}</p><p class="text-gray-400 text-sm">${t('clickToAdd')}</p></div>`;
-                return;
-            }
-
-            container.innerHTML = items.map(item => renderItem(type, item.id, item)).join('');
-            lucide.createIcons();
-
-            // Adiciona os ouvintes de evento após a renderização
-            container.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const itemData = items.find(i => i.id === btn.dataset.id);
-                    if (itemData) showItemModal(type, itemData.id, itemData);
-                });
-            });
-
-            if (type === 'reminder' || type === 'goal') {
-                container.querySelectorAll('.toggle-btn').forEach(btn => {
-                    btn.addEventListener('click', () => toggleItemStatus(btn.dataset.id, type + 's'));
-                });
-            }
-
-            if (type === 'goal') {
-                container.querySelectorAll('.goal-update-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const amount = parseInt(btn.dataset.amount);
-                        updateGoalValue(btn.dataset.id, amount);
-                    });
-                });
-            }
-
-            if (type === 'habit') {
-                container.querySelectorAll('.habit-toggle').forEach(btn => {
-                    btn.addEventListener('click', () => toggleHabitToday(btn.dataset.id));
-                });
-            }
-
-            if (type === 'note') {
-                container.querySelectorAll('.view-note-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const wrapper = e.target.previousElementSibling; // .note-content-wrapper
-                        wrapper.classList.toggle('expanded');
-                        if (wrapper.classList.contains('expanded')) {
-                            e.target.textContent = t('showLess');
-                        } else {
-                            e.target.textContent = t('showMore');
-                        }
-                    });
-                });
             }
         }
 
@@ -1810,13 +1690,13 @@
                             <div class="bg-brand-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
                         </div>
                         <div class="flex items-center justify-between">
-                            <div>
+                             <div>
                                 <p class="font-semibold text-lg">${data.currentValue} / ${data.targetValue}</p>
-                            </div>
-                            <div class="flex gap-2">
+                             </div>
+                             <div class="flex gap-2">
                                 <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="-1"><i data-lucide="minus"></i></button>
                                 <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="1"><i data-lucide="plus"></i></button>
-                            </div>
+                             </div>
                         </div>
                     </div>`;
                 case 'note':
@@ -1854,11 +1734,8 @@
                             </button>
                         </div>
                         <div class="flex items-center justify-between">
-                            <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl text-orange-500">${streak} 🔥</span></p>
-                            <button 
-                                class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 ${completedToday ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white'}" 
-                                data-id="${id}"
-                                ${completedToday ? 'disabled' : ''}>
+                            <p class="text-sm text-gray-500 whitespace-nowrap">${t('habitStreak')}: <span class="font-semibold text-xl">${streak}</span> ${t('habitDays')}</p>
+                            <button class="habit-toggle px-4 py-2 ml-4 rounded-lg font-semibold transition-all active:scale-95 ${completedToday ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white'}" data-id="${id}">
                                 ${completedToday ? t('habitDoneToday') : t('habitMarkDone')}
                             </button>
                         </div>
@@ -1869,7 +1746,7 @@
         async function updateGoalValue(id, amount) {
             if (!firebaseInitialized || !currentUser) return;
             const { doc, getDoc, updateDoc, increment } = window.firebaseFirestore;
-            const docRef = doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`, id);
+            const docRef = doc(window.db, `users/${currentUser.uid}/goals`, id);
 
             const docSnap = await getDoc(docRef);
             if (!docSnap.exists()) return;
@@ -1902,25 +1779,23 @@
             let lastDate = uniqueDates[0];
             lastDate.setHours(0, 0, 0, 0);
 
-            // If the last completion was not today or yesterday, the streak is broken.
             if (lastDate.getTime() !== today.getTime() && lastDate.getTime() !== yesterday.getTime()) {
                 return 0;
             }
 
             let streak = 0;
-            // Start checking from today (or yesterday if not completed today)
             let expectedDate = new Date(today);
             if (lastDate.getTime() !== today.getTime()) {
                 expectedDate = new Date(yesterday);
             }
 
+
             for (const date of uniqueDates) {
                 date.setHours(0, 0, 0, 0);
                 if (date.getTime() === expectedDate.getTime()) {
                     streak++;
-                    expectedDate.setDate(expectedDate.getDate() - 1); // Expect the previous day next
+                    expectedDate.setDate(expectedDate.getDate() - 1);
                 } else {
-                    // A gap in dates was found, so the streak ends
                     break;
                 }
             }
@@ -1937,7 +1812,7 @@
             showLoading();
             try {
                 const { doc, updateDoc, getDoc, serverTimestamp } = window.firebaseFirestore;
-                const docRef = doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/${collectionName}`, id);
+                const docRef = doc(window.db, `users/${currentUser.uid}/${collectionName}`, id);
                 const docSnap = await getDoc(docRef);
                 const currentStatus = docSnap.data().completed;
 
@@ -1947,13 +1822,9 @@
                 });
 
                 if (!currentStatus && collectionName === 'goals') {
-                    // Use a separate function to avoid re-checking logic inside checkAndUnlockAchievement
-                    const q = query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`), where('completed', '==', true));
-                    const snapshot = await getDocs(q);
-                    if (snapshot.size >= 1) await checkAndUnlockAchievement('goal_achiever_1');
-                    if (snapshot.size >= 10) await checkAndUnlockAchievement('goal_achiever_10');
-
                     await checkAndUnlockAchievement('productive_week');
+                    await checkAndUnlockAchievement('goal_achiever_1');
+                    await checkAndUnlockAchievement('goal_achiever_10');
                 }
 
                 showToast(t('statusUpdated'), 'success');
@@ -1966,27 +1837,30 @@
         }
 
         async function toggleHabitToday(id) {
-            if (!firebaseInitialized || !currentUser) return;
-            const today = new Date().toDateString();
-            const { doc, getDoc, updateDoc, arrayUnion } = window.firebaseFirestore;
-            const docRef = doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/habits`, id);
-
-            const docSnap = await getDoc(docRef);
-            if (!docSnap.exists()) return;
-
-            const completedDates = docSnap.data().completedDates || [];
-            if (completedDates.includes(today)) return; // Already completed today, do nothing
+            if (!firebaseInitialized || !currentUser) {
+                showToast("Firebase não configurado ou usuário não logado.", 'error');
+                return;
+            }
 
             showLoading();
             try {
-                await updateDoc(docRef, { completedDates: arrayUnion(today) });
+                const { doc, updateDoc, getDoc } = window.firebaseFirestore;
+                const docRef = doc(window.db, `users/${currentUser.uid}/habits`, id);
+                const docSnap = await getDoc(docRef);
+                const data = docSnap.data();
+                const today = new Date().toDateString();
+                const completedDates = data.completedDates || [];
 
-                // Recalculate streak after update to check for achievements
-                const updatedDoc = await getDoc(docRef);
-                const newStreak = calculateStreak(updatedDoc.data().completedDates || []);
-
-                if (newStreak >= 7) await checkAndUnlockAchievement('habit_streak_7');
-                if (newStreak >= 30) await checkAndUnlockAchievement('habit_streak_30');
+                if (completedDates.includes(today)) {
+                    const updatedDates = completedDates.filter(date => date !== today);
+                    await updateDoc(docRef, { completedDates: updatedDates });
+                } else {
+                    const updatedDates = [...completedDates, today];
+                    await updateDoc(docRef, { completedDates: updatedDates });
+                    const newStreak = calculateStreak(updatedDates);
+                    if (newStreak >= 7) await checkAndUnlockAchievement('habit_streak_7');
+                    if (newStreak >= 30) await checkAndUnlockAchievement('habit_streak_30');
+                }
 
                 showToast(t('statusUpdated'), 'success');
             } catch (error) {
@@ -2037,8 +1911,8 @@
                             <label class="block text-sm font-medium mb-2">${t('colorLabel')}</label>
                             <div class="flex gap-2">
                                 ${['yellow', 'blue', 'green', 'red', 'purple'].map(color =>
-                            `<button type="button" class="color-btn w-8 h-8 rounded-full bg-${color}-200 border-2 ${data.color === color || (!data.color && color === 'yellow') ? 'ring-2 ring-brand-500' : 'border-transparent'}" data-color="${color}"></button>`
-                        ).join('')}
+                        `<button type="button" class="color-btn w-8 h-8 rounded-full bg-${color}-200 border-2 ${data.color === color || (!data.color && color === 'yellow') ? 'ring-2 ring-brand-500' : 'border-transparent'}" data-color="${color}"></button>`
+                    ).join('')}
                             </div>
                         </div>`;
                     break;
@@ -2062,7 +1936,6 @@
                 </div>`;
 
             modal.classList.add('show');
-            lucide.createIcons();
 
             // Color selection for notes
             let selectedColor = data.color || 'yellow';
@@ -2088,7 +1961,6 @@
                         const remindAtInput = document.getElementById('item-remindAt').value;
                         payload.remindAt = remindAtInput ? new Date(remindAtInput) : null;
                         payload.completed = data.completed || false;
-                        payload.notified = data.notified || false;
                     } else if (type === 'goal') {
                         payload.currentValue = parseInt(document.getElementById('item-currentValue').value) || 0;
                         payload.targetValue = parseInt(document.getElementById('item-targetValue').value) || 100;
@@ -2097,24 +1969,21 @@
                         payload.content = document.getElementById('item-content').value;
                         payload.color = selectedColor;
                     } else if (type === 'habit') {
-                        if (!isEdit) payload.completedDates = [];
+                        payload.completedDates = data.completedDates || [];
                     }
 
                     const { doc, updateDoc, addDoc, collection, serverTimestamp } = window.firebaseFirestore;
 
                     if (id) {
-                        await updateDoc(doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/${type}s`, id), payload);
+                        await updateDoc(doc(window.db, `users/${currentUser.uid}/${type}s`, id), payload);
                     } else {
                         payload.createdAt = serverTimestamp();
-                        await addDoc(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/${type}s`), payload);
+                        await addDoc(collection(window.db, `users/${currentUser.uid}/${type}s`), payload);
                         await checkAndUnlockAchievement(`first_${type}`);
 
-                        const collectionRef = collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/${type}s`);
-                        const snapshot = await getDocs(collectionRef);
-
-                        if (type === 'note' && snapshot.size >= 10) await checkAndUnlockAchievement('note_taker_pro');
-                        if (type === 'goal' && snapshot.size >= 10) await checkAndUnlockAchievement('goal_setter_pro');
-                        if (type === 'habit' && snapshot.size >= 5) await checkAndUnlockAchievement('habit_master');
+                        if (type === 'note') await checkAndUnlockAchievement('note_taker_pro');
+                        if (type === 'goal') await checkAndUnlockAchievement('goal_setter_pro');
+                        if (type === 'habit') await checkAndUnlockAchievement('habit_master');
                     }
 
                     modal.classList.remove('show');
@@ -2168,7 +2037,7 @@
                 }
                 try {
                     const { doc, deleteDoc } = window.firebaseFirestore;
-                    await deleteDoc(doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/${collection}`, id));
+                    await deleteDoc(doc(window.db, `users/${currentUser.uid}/${collection}`, id));
                     modal.classList.remove('show');
                     showToast(t('itemDeleted'), 'success');
                     if (callback) callback();
@@ -2313,7 +2182,7 @@
             const gridEndDate = new Date(year, month, daysInMonth + (6 - lastDayOfMonth));
 
             const { collection, query, where, onSnapshot, Timestamp } = window.firebaseFirestore;
-            const eventsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/calendarEvents`);
+            const eventsRef = collection(db, `users/${currentUser.uid}/calendarEvents`);
             const q = query(eventsRef,
                 where('date', '>=', Timestamp.fromDate(gridStartDate)),
                 where('date', '<=', Timestamp.fromDate(gridEndDate))
@@ -2433,7 +2302,7 @@
             }
 
             const { collection, query, where, orderBy, onSnapshot, Timestamp } = window.firebaseFirestore;
-            const eventsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/calendarEvents`);
+            const eventsRef = collection(db, `users/${currentUser.uid}/calendarEvents`);
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -2528,7 +2397,7 @@
             showLoading();
             try {
                 const { collection, addDoc, serverTimestamp, Timestamp } = window.firebaseFirestore;
-                await addDoc(collection(db, `artifacts/${appId}/users/${currentUser.uid}/calendarEvents`), {
+                await addDoc(collection(db, `users/${currentUser.uid}/calendarEvents`), {
                     title: title,
                     date: Timestamp.fromDate(new Date(dateString + 'T00:00:00')),
                     createdAt: serverTimestamp()
@@ -2546,7 +2415,7 @@
             showLoading();
             try {
                 const { doc, updateDoc } = window.firebaseFirestore;
-                const eventRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/calendarEvents`, eventId);
+                const eventRef = doc(db, `users/${currentUser.uid}/calendarEvents`, eventId);
                 await updateDoc(eventRef, { title: newTitle });
             } catch (error) {
                 console.error("Error updating event:", error);
@@ -2577,8 +2446,8 @@
                             <button id="eraser-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="eraser" title="${t('eraser')}"><i data-lucide="eraser"></i></button>
                         </div>
                         <div class="flex items-center gap-2 border-l-2 border-gray-200 dark:border-gray-700 pl-2 ml-2">
-                            <button id="undo-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="undo" title="${t('undo')}" disabled><i data-lucide="undo-2"></i></button>
-                            <button id="redo-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="redo" title="${t('redo')}" disabled><i data-lucide="redo-2"></i></button>
+                             <button id="undo-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="undo" title="${t('undo')}" disabled><i data-lucide="undo-2"></i></button>
+                             <button id="redo-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="redo" title="${t('redo')}" disabled><i data-lucide="redo-2"></i></button>
                         </div>
                         <div class="flex items-center gap-2 border-l-2 border-gray-200 dark:border-gray-700 pl-2 ml-2">
                             <button id="clear-btn" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200" data-t-title="clear" title="${t('clear')}"><i data-lucide="trash-2"></i></button>
@@ -2620,30 +2489,14 @@
 
             function resizeCanvas() {
                 const parent = canvas.parentElement;
-                const oldImageData = history.length > 0 ? history[historyIndex] : null;
-                
                 canvas.width = parent.clientWidth;
                 canvas.height = parent.clientWidth * 0.6; // Maintain aspect ratio
-                
-                if (oldImageData) {
-                    // Create a temporary canvas to hold the old image data
-                    const tempCanvas = document.createElement('canvas');
-                    const tempCtx = tempCanvas.getContext('2d');
-                    tempCanvas.width = oldImageData.width;
-                    tempCanvas.height = oldImageData.height;
-                    tempCtx.putImageData(oldImageData, 0, 0);
-
-                    // Draw the old image data onto the new canvas, scaling it
-                    ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
-                } else {
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                }
-                
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 saveState();
             }
             window.addEventListener('resize', resizeCanvas);
-            
+
             let isDrawing = false;
 
             function updateUndoRedoButtons() {
@@ -2676,8 +2529,7 @@
                 }
             }
 
-            // Initial setup
-            resizeCanvas();
+            resizeCanvas(); // initial setup and first saveState
 
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -2829,16 +2681,14 @@
                 const dataUrl = canvas.toDataURL('image/png');
                 showLoading();
                 try {
-                    const { addDoc, collection, serverTimestamp, getDocs } = window.firebaseFirestore;
-                    await addDoc(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/drawings`), {
+                    const { addDoc, collection, serverTimestamp } = window.firebaseFirestore;
+                    await addDoc(collection(window.db, `users/${currentUser.uid}/drawings`), {
                         imageData: dataUrl,
                         createdAt: serverTimestamp()
                     });
                     showToast(t('drawingSaved'), 'success');
-
                     await checkAndUnlockAchievement('artist');
                     await checkAndUnlockAchievement('art_collector');
-
                 } catch (error) {
                     console.error('Error saving drawing:', error);
                     showToast(t('errorSavingDrawing'), 'error');
@@ -2851,29 +2701,28 @@
         function loadSavedDrawings() {
             const gallery = document.getElementById('saved-drawings-gallery');
             const { collection, query, orderBy, onSnapshot } = window.firebaseFirestore;
-            const q = query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/drawings`), orderBy('createdAt', 'desc'));
+            const q = query(collection(window.db, `users/${currentUser.uid}/drawings`), orderBy('createdAt', 'desc'));
 
             const unsubscribe = onSnapshot(q, (snapshot) => {
                 if (snapshot.empty) {
                     gallery.innerHTML = `<p id="no-drawings-msg" class="text-gray-500 col-span-full" data-t="noDrawings">${t('noDrawings')}</p>`;
                     return;
                 }
-                const drawings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                gallery.innerHTML = drawings.map(drawing => {
-                    const encodedData = encodeURIComponent(drawing.imageData);
-                    const safeId = drawing.id.replace(/'/g, "\\'");
+                gallery.innerHTML = snapshot.docs.map(doc => {
+                    const drawing = doc.data();
+                    const drawingData = JSON.stringify(drawing.imageData).replace(/'/g, "\\'");
                     return `
                     <div class="relative group">
                         <img src="${drawing.imageData}" alt="Saved Drawing" class="w-full h-32 object-cover rounded-lg shadow-md bg-white">
                         <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                            <button class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600" onclick='window.editDrawing("${drawing.imageData}")' title="${t('editDrawing')}">
+                             <button class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600" onclick='window.editDrawing(${drawingData})' title="${t('editDrawing')}">
                                 <i data-lucide="edit" class="w-4 h-4"></i>
                             </button>
-                            <button class="bg-green-500 text-white p-2 rounded-full hover:bg-green-600" onclick="window.downloadDrawing('${encodedData}', '${safeId}')" title="${t('downloadDrawing')}">
+                             <button class="bg-green-500 text-white p-2 rounded-full hover:bg-green-600" onclick="window.downloadDrawing('${drawing.imageData}', '${doc.id}')" title="${t('downloadDrawing')}">
                                 <i data-lucide="download" class="w-4 h-4"></i>
                             </button>
-                            <button class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600" onclick="deleteDrawing('${safeId}')" title="${t('delete')}">
+                            <button class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600" onclick="deleteDrawing('${doc.id}')" title="${t('delete')}">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -2900,7 +2749,7 @@
                 link.download = `zenith-drawing-${docId}.png`;
                 link.click();
             };
-            img.src = decodeURIComponent(imageDataUrl);
+            img.src = imageDataUrl;
         };
 
         window.editDrawing = (imageDataUrl) => {
@@ -2930,7 +2779,7 @@
             appContent.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto mt-10"></div>`;
 
             const { collection, getDocs } = window.firebaseFirestore;
-            const achievementsSnapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/achievements`));
+            const achievementsSnapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/achievements`));
             const unlockedAchievements = {};
             achievementsSnapshot.forEach(doc => {
                 unlockedAchievements[doc.id] = doc.data();
@@ -2953,20 +2802,20 @@
                 const isUnlocked = !!unlockedData;
                 const unlockedAt = isUnlocked ? new Date(unlockedData.unlockedAt.toDate()).toLocaleDateString() : '';
                 return `
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 ${isUnlocked ? 'border-yellow-400' : 'border-gray-200 dark:border-gray-700'}">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="p-3 rounded-full ${isUnlocked ? 'bg-yellow-100 dark:bg-yellow-900/50' : 'bg-gray-100 dark:bg-gray-700'}">
-                                <i data-lucide="${data.icon}" class="w-6 h-6 ${isUnlocked ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-400'}"></i>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 ${isUnlocked ? 'border-yellow-400' : 'border-gray-200 dark:border-gray-700'}">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="p-3 rounded-full ${isUnlocked ? 'bg-yellow-100 dark:bg-yellow-900/50' : 'bg-gray-100 dark:bg-gray-700'}">
+                                    <i data-lucide="${data.icon}" class="w-6 h-6 ${isUnlocked ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-400'}"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-lg ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-600 dark:text-gray-400'}">${t(`ach_${id}_title`)}</h3>
+                                    ${isUnlocked ? `<p class="text-sm text-yellow-600 dark:text-yellow-400">${t('unlockedOn')} ${unlockedAt}</p>` : ''}
+                                </div>
+                                ${isUnlocked ? '<div class="text-2xl text-yellow-500">🏆</div>' : '<div class="text-2xl text-gray-400">🔒</div>'}
                             </div>
-                            <div class="flex-1">
-                                <h3 class="font-bold text-lg ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-600 dark:text-gray-400'}">${t(`ach_${id}_title`)}</h3>
-                                ${isUnlocked ? `<p class="text-sm text-yellow-600 dark:text-yellow-400">${t('unlockedOn')} ${unlockedAt}</p>` : ''}
-                            </div>
-                            ${isUnlocked ? '<div class="text-2xl text-yellow-500">🏆</div>' : '<div class="text-2xl text-gray-400">🔒</div>'}
+                            <p class="text-sm text-gray-600 dark:text-gray-400">${t(`ach_${id}_desc`)}</p>
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">${t(`ach_${id}_desc`)}</p>
-                    </div>
-                    `}).join('')}
+                        `}).join('')}
                 </div>
                 
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
@@ -2991,117 +2840,90 @@
 
         async function checkAndUnlockAchievement(achievementId) {
             if (!currentUser || !ALL_ACHIEVEMENTS[achievementId]) return;
-            try {
-                const { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where, Timestamp } = window.firebaseFirestore;
-                const achievementRef = doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/achievements`, achievementId);
-                const docSnap = await getDoc(achievementRef);
-                if (docSnap.exists()) return; // Já desbloqueada
 
-                let conditionMet = false;
+            const { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where, Timestamp } = window.firebaseFirestore;
+            const achievementRef = doc(window.db, `users/${currentUser.uid}/achievements`, achievementId);
+            const docSnap = await getDoc(achievementRef);
 
-                switch (achievementId) {
-                    case 'first_login':
-                    case 'calculator_user':
-                    case 'clock_watcher':
-                    case 'timer_master':
-                    case 'world_traveler':
-                    case 'polyglot':
-                        conditionMet = true;
-                        break;
-                    case 'first_note':
-                    case 'first_goal':
-                    case 'first_habit': {
-                        const type = achievementId.split('_')[1] + 's';
-                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/${type}`));
-                        if (snapshot.size >= 1) conditionMet = true;
-                        break;
-                    }
-                    case 'artist': {
-                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/drawings`));
-                        if (snapshot.size >= 1) conditionMet = true;
-                        break;
-                    }
-                    case 'note_taker_pro': {
-                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/notes`));
-                        if (snapshot.size >= 10) conditionMet = true;
-                        break;
-                    }
-                    case 'goal_setter_pro': {
-                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`));
-                        if (snapshot.size >= 10) conditionMet = true;
-                        break;
-                    }
-                    case 'habit_master': {
-                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/habits`));
-                        if (snapshot.size >= 5) conditionMet = true;
-                        break;
-                    }
-                    case 'goal_achiever_1':
-                    case 'goal_achiever_10': {
-                        const requiredCount = achievementId === 'goal_achiever_1' ? 1 : 10;
-                        const q = query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`), where('completed', '==', true));
-                        const snapshot = await getDocs(q);
-                        if (snapshot.size >= requiredCount) conditionMet = true;
-                        break;
-                    }
-                    case 'art_collector': {
-                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/drawings`));
-                        if (snapshot.size >= 5) conditionMet = true;
-                        break;
-                    }
-                    case 'productive_week': {
-                        const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-                        const q = query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`),
-                            where('completed', '==', true),
-                            where('completedAt', '>=', Timestamp.fromDate(oneWeekAgo)));
-                        const snapshot = await getDocs(q);
-                        if (snapshot.size >= 5) conditionMet = true;
-                        break;
-                    }
-                    case 'habit_streak_7':
-                    case 'habit_streak_30': {
-                        const requiredStreak = achievementId === 'habit_streak_7' ? 7 : 30;
-                        const habitsSnapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/habits`));
-                        for (const doc of habitsSnapshot.docs) {
-                            const streak = calculateStreak(doc.data().completedDates || []);
-                            if (streak >= requiredStreak) {
-                                conditionMet = true;
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    case 'organizer': {
-                        const [reminders, goals, habits] = await Promise.all([
-                            getDocs(query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/reminders`), where("completed", "==", false))),
-                            getDocs(query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`), where("completed", "==", false))),
-                            getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/habits`))
-                        ]);
-                        if (reminders.size > 0 && goals.size > 0 && habits.size > 0) {
-                            conditionMet = true;
-                        }
-                        break;
+            if (docSnap.exists()) return; // Already unlocked
+
+            // Logic to check if achievement is truly earned
+            let conditionMet = false;
+            switch (achievementId) {
+                case 'first_login': conditionMet = true; break;
+                case 'first_note':
+                case 'first_goal':
+                case 'first_habit':
+                case 'artist': {
+                    const type = achievementId.split('_')[1] + 's';
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/${type}`));
+                    if (snapshot.size >= 1) conditionMet = true;
+                    break;
+                }
+                case 'note_taker_pro': {
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/notes`));
+                    if (snapshot.size >= 10) conditionMet = true;
+                    break;
+                }
+                case 'goal_setter_pro': {
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/goals`));
+                    if (snapshot.size >= 10) conditionMet = true;
+                    break;
+                }
+                case 'habit_master': {
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/habits`));
+                    if (snapshot.size >= 5) conditionMet = true;
+                    break;
+                }
+                case 'goal_achiever_1':
+                case 'goal_achiever_10': {
+                    const requiredCount = achievementId === 'goal_achiever_1' ? 1 : 10;
+                    const q = query(collection(window.db, `users/${currentUser.uid}/goals`), where('completed', '==', true));
+                    const snapshot = await getDocs(q);
+                    if (snapshot.size >= requiredCount) conditionMet = true;
+                    break;
+                }
+                case 'art_collector': {
+                    const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/drawings`));
+                    if (snapshot.size >= 5) conditionMet = true;
+                    break;
+                }
+                case 'productive_week': {
+                    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                    const q = query(collection(window.db, `users/${currentUser.uid}/goals`),
+                        where('completed', '==', true),
+                        where('completedAt', '>=', Timestamp.fromDate(oneWeekAgo)));
+                    const snapshot = await getDocs(q);
+                    if (snapshot.size >= 5) conditionMet = true;
+                    break;
+                }
+                case 'habit_streak_7':
+                case 'habit_streak_30':
+                case 'calculator_user':
+                case 'clock_watcher':
+                case 'timer_master':
+                case 'world_traveler':
+                case 'polyglot':
+                case 'organizer':
+                    // These are triggered manually from their respective functions
+                    conditionMet = true;
+                    break;
+            }
+
+            if (conditionMet) {
+                await setDoc(achievementRef, { unlockedAt: serverTimestamp() });
+                showToast(t(`ach_${achievementId}_title`), 'achievement');
+
+                // Check for Zenith Master
+                const allAchievementsSnapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/achievements`));
+                if (allAchievementsSnapshot.size >= Object.keys(ALL_ACHIEVEMENTS).length - 1) {
+                    const masterRef = doc(window.db, `users/${currentUser.uid}/achievements`, 'zenith_master');
+                    const masterSnap = await getDoc(masterRef);
+                    if (!masterSnap.exists()) {
+                        await setDoc(masterRef, { unlockedAt: serverTimestamp() });
+                        showToast(t(`ach_zenith_master_title`), 'achievement');
                     }
                 }
-
-                if (conditionMet) {
-                    await setDoc(achievementRef, { unlockedAt: serverTimestamp() });
-                    showToast(t(`ach_${achievementId}_title`), 'achievement');
-
-                    // Checar pelo Mestre Zenith
-                    const allAchievementsSnapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/achievements`));
-                    if (allAchievementsSnapshot.size >= Object.keys(ALL_ACHIEVEMENTS).length - 1) {
-                        const masterRef = doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/achievements`, 'zenith_master');
-                        const masterSnap = await getDoc(masterRef);
-                        if (!masterSnap.exists()) {
-                            await setDoc(masterRef, { unlockedAt: serverTimestamp() });
-                            showToast(t(`ach_zenith_master_title`), 'achievement');
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error(`Falha ao verificar a conquista '${achievementId}':`, error);
-                // NÃO mostra toast de erro aqui
             }
         }
 
@@ -3112,7 +2934,7 @@
                 <div class="fade-in max-w-2xl mx-auto">
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                         <div class="flex items-center gap-6 mb-6">
-                            <img id="profile-pic" src="${currentUser.photoURL || `https://placehold.co/100x100/7dd3fc/0c4a6e?text=${currentUserProfile.name?.charAt(0).toUpperCase() || 'U'}`}" alt="Foto de Perfil" class="w-24 h-24 rounded-full object-cover">
+                            <img id="profile-pic" src="${currentUser.photoURL || `https://placehold.co/100x100/0ea5e9/ffffff?text=${currentUserProfile.name?.charAt(0).toUpperCase() || 'U'}`}" alt="Foto de Perfil" class="w-24 h-24 rounded-full object-cover">
                             <div>
                                 <h2 class="text-2xl font-bold">${currentUserProfile.name || 'Usuário'}</h2>
                                 <p class="text-gray-600 dark:text-gray-400">${currentUser?.email || ''}</p>
@@ -3124,7 +2946,7 @@
                                 <label for="profile-name" class="block text-sm font-medium mb-2">${t('profileName')}</label>
                                 <input type="text" id="profile-name" value="${currentUserProfile.name || ''}" class="${formInputClasses}">
                             </div>
-                            <div>
+                             <div>
                                 <label for="profile-photo-url" class="block text-sm font-medium mb-2">${t('photoUrlLabel')}</label>
                                 <input type="url" id="profile-photo-url" value="${currentUser.photoURL || ''}" placeholder="${t('photoUrlPlaceholder')}" class="${formInputClasses}">
                             </div>
@@ -3170,7 +2992,7 @@
                     });
 
                     const { doc, setDoc } = window.firebaseFirestore;
-                    const userDocRef = doc(window.db, `artifacts/${appId}/users`, currentUser.uid);
+                    const userDocRef = doc(window.db, 'users', currentUser.uid);
                     await setDoc(userDocRef, {
                         name: newName,
                         photoURL: newPhotoURL
@@ -3250,80 +3072,80 @@
             const display = document.getElementById('calculator-display');
             const buttons = document.querySelectorAll('.calc-btn');
 
-            // ESTADO DA CALCULADORA
+            let expressionParts = [];
             let currentInput = '0';
-            let expression = '';
-            let calculationPerformed = false;
 
-            // ATUALIZA O VISOR
             const updateDisplay = () => {
-                display.textContent = expression.replace(/\*/g, '×').replace(/\//g, '÷') + currentInput;
-                const length = display.textContent.length;
-                if (length > 15) {
-                    display.style.fontSize = '1.5rem';
-                } else if (length > 10) {
-                    display.style.fontSize = '2rem';
-                } else {
-                    display.style.fontSize = '2.5rem';
-                }
+                const expressionString = expressionParts.join(' ');
+                display.textContent = `${expressionString} ${currentInput === '0' && expressionParts.length > 0 ? '' : currentInput}`;
             };
 
-            // LÓGICA DE CÁLCULO (Segura com `new Function`)
-            const calculate = (exp) => {
-                try {
-                    const safeExpression = exp.replace(/×/g, '*').replace(/÷/g, '/').replace(/%/g, '/100*');
-                    if (!/^[\d\s()+\-*/.%]+$/.test(safeExpression)) {
-                        return 'Erro';
+            const calculate = (parts) => {
+                if (parts.length < 3) return parseFloat(parts[0]) || 0;
+
+                let currentResult = parseFloat(parts[0]);
+                for (let i = 1; i < parts.length; i += 2) {
+                    const operator = parts[i];
+                    const nextNumber = parseFloat(parts[i + 1]);
+
+                    if (isNaN(nextNumber)) break;
+
+                    switch (operator) {
+                        case '+': currentResult += nextNumber; break;
+                        case '-': currentResult -= nextNumber; break;
+                        case '*': currentResult *= nextNumber; break;
+                        case '/': currentResult /= nextNumber; break;
                     }
-                    return new Function('return ' + safeExpression)();
-                } catch (e) {
-                    return 'Erro';
                 }
+                return parseFloat(currentResult.toPrecision(12));
             };
 
             buttons.forEach(button => {
                 button.addEventListener('click', () => {
-                    checkAndUnlockAchievement('calculator_user');
                     const value = button.dataset.value;
-                    const text = button.textContent;
-                    const isOperator = ['+', '-', '×', '÷'].includes(text);
+                    const isOperator = ['+', '-', '*', '/'].includes(value);
 
-                    if (!isNaN(value) || value === '.') { // É um número ou ponto decimal
-                        if (calculationPerformed) {
-                            expression = '';
-                            currentInput = '0';
-                            calculationPerformed = false;
+                    // Prevent overflow
+                    if (display.scrollWidth > display.clientWidth && !isNaN(value)) {
+                        return;
+                    }
+
+                    if (!isNaN(value) || value === '.') { // Number or decimal
+                        if (currentInput === '0' && value !== '.') {
+                            currentInput = value;
+                        } else if (value === '.' && currentInput.includes('.')) {
+                            return;
                         }
-                        if (value === '.' && currentInput.includes('.')) return;
-                        currentInput = currentInput === '0' && value !== '.' ? value : currentInput + value;
+                        else {
+                            currentInput += value;
+                        }
                     } else if (isOperator) {
-                        if (currentInput === '0' && expression === '') return;
-                        expression += currentInput + ' ' + value + ' ';
+                        if (currentInput !== '') {
+                            expressionParts.push(currentInput);
+                        }
+                        // Handle chained operations
+                        if (expressionParts.length >= 3) {
+                            const result = calculate(expressionParts);
+                            expressionParts = [result];
+                        }
+                        expressionParts.push(value);
                         currentInput = '0';
-                        calculationPerformed = false;
+
                     } else if (value === '%') {
-                        expression += currentInput + text;
-                        currentInput = '0';
+                        currentInput = (parseFloat(currentInput) / 100).toString();
                     } else if (value === '=') {
-                        if (expression === '') return;
-                        const finalExpression = (expression + currentInput).trim();
-                        const result = calculate(finalExpression);
-
-                        display.classList.add('calculating');
-                        setTimeout(() => {
-                            expression = '';
-                            currentInput = String(result);
-                            display.textContent = currentInput;
-                            display.classList.remove('calculating');
-                            updateDisplay();
-                        }, 150);
-
-                        calculationPerformed = true;
+                        if (currentInput !== '') {
+                            expressionParts.push(currentInput);
+                        }
+                        if (expressionParts.length > 0) {
+                            const finalResult = calculate(expressionParts);
+                            currentInput = finalResult.toString();
+                            expressionParts = [];
+                        }
                     } else if (value === 'C') {
                         currentInput = '0';
-                        expression = '';
-                        calculationPerformed = false;
-                    } else if (value === '<') { // Backspace
+                        expressionParts = [];
+                    } else if (value === '<') {
                         if (currentInput.length > 1) {
                             currentInput = currentInput.slice(0, -1);
                         } else {
@@ -3331,12 +3153,9 @@
                         }
                     }
 
-                    if (!calculationPerformed) {
-                        updateDisplay();
-                    }
+                    updateDisplay();
                 });
             });
-
             updateDisplay();
         }
 
@@ -3346,11 +3165,10 @@
             <div class="fade-in max-w-4xl mx-auto space-y-6">
                 <div class="flex flex-wrap justify-center gap-2 p-2 bg-gray-200 dark:bg-gray-800 rounded-lg">
                     <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="world">${t('clockTabWorld')}</button>
-                    <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="weather">${t('weatherForecast')}</button>
                     <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="stopwatch">${t('clockTabStopwatch')}</button>
                     <button class="clock-tab flex-1 px-4 py-2 font-semibold rounded-md border-2 border-transparent" data-tab="timer">${t('clockTabTimer')}</button>
                 </div>
-                <div id="clock-content" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md min-h-[300px]"></div>
+                <div id="clock-content" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"></div>
             </div>`;
             setupClockTabs();
         }
@@ -3367,7 +3185,6 @@
 
                 switch (tabId) {
                     case 'world': renderWorldClocks(); break;
-                    case 'weather': renderWeather(); break;
                     case 'stopwatch': renderStopwatch(); break;
                     case 'timer': renderTimer(); break;
                 }
@@ -3384,7 +3201,6 @@
         function renderWorldClocks() {
             const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' ');
             document.getElementById('clock-content').innerHTML = `
-                <div id="current-weather-widget" class="mb-8"></div>
                 <div id="local-clock" class="text-center mb-8">
                     <h3 class="text-lg font-semibold text-brand-500">${t('localTime')} (${userTimeZone})</h3>
                     <h2 id="local-time" class="text-5xl md:text-7xl font-bold tracking-tighter"></h2>
@@ -3434,25 +3250,20 @@
             updateClocks();
             const interval = setInterval(updateClocks, 1000);
             clockIntervals.push(interval);
-
-            // Fetch and render current weather
-            getCurrentWeather();
         }
 
         function renderStopwatch() {
-            const savedState = JSON.parse(localStorage.getItem('zenithStopwatch')) || { running: false, savedTime: 0 };
-            let startTime = savedState.running ? new Date().getTime() - savedState.savedTime : 0;
-            let savedTime = savedState.savedTime || 0;
-            let running = savedState.running || false;
+            let startTime, savedTime = 0, tInterval;
+            let running = false;
 
             document.getElementById('clock-content').innerHTML = `
-            <div class="text-center">
-                <div id="stopwatch-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
-                <div class="flex justify-center gap-4">
-                    <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${running ? t('stopwatchPause') : t('stopwatchStart')}</button>
-                    <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('stopwatchReset')}</button>
+                <div class="text-center">
+                    <div id="stopwatch-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
+                    <div class="flex justify-center gap-4">
+                        <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('stopwatchStart')}</button>
+                        <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('stopwatchReset')}</button>
+                    </div>
                 </div>
-            </div>
             `;
 
             const display = document.getElementById('stopwatch-display');
@@ -3468,17 +3279,15 @@
                 return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
             };
 
-            let tInterval;
 
             const update = () => {
-                const elapsed = running ? (new Date().getTime() - startTime) + savedTime : savedTime;
-                display.textContent = formatTime(elapsed);
-                localStorage.setItem('zenithStopwatch', JSON.stringify({ running, savedTime: elapsed }));
+                const difference = (new Date().getTime() - startTime) + savedTime;
+                display.textContent = formatTime(difference);
             };
 
             startStopBtn.addEventListener('click', () => {
                 if (!running) { // Start or Continue
-                    startTime = new Date().getTime() - savedTime;
+                    startTime = new Date().getTime();
                     tInterval = setInterval(update, 10);
                     clockIntervals.push(tInterval);
                     startStopBtn.textContent = t('stopwatchPause');
@@ -3487,52 +3296,44 @@
                     running = true;
                 } else { // Pause
                     clearInterval(tInterval);
-                    savedTime = new Date().getTime() - startTime;
+                    savedTime += new Date().getTime() - startTime;
                     startStopBtn.textContent = t('stopwatchContinue');
                     startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
                     startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
                     running = false;
                 }
-                localStorage.setItem('zenithStopwatch', JSON.stringify({ running, savedTime }));
             });
 
             resetBtn.addEventListener('click', () => {
                 clearInterval(tInterval);
+                display.textContent = "00:00:00.00";
                 running = false;
                 savedTime = 0;
-                display.textContent = "00:00:00.00";
                 startStopBtn.textContent = t('stopwatchStart');
                 startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
                 startStopBtn.classList.add('bg-brand-600', 'hover:bg-brand-700');
-                localStorage.removeItem('zenithStopwatch');
             });
-            update(); // Initial display
-            if (running) {
-                tInterval = setInterval(update, 10);
-                clockIntervals.push(tInterval);
-            }
         }
 
         function renderTimer() {
-            const savedState = JSON.parse(localStorage.getItem('zenithTimer')) || { running: false, paused: false, totalSeconds: 0 };
-            let totalSeconds = savedState.totalSeconds || 0;
-            let running = savedState.running || false;
-            let paused = savedState.paused || false;
+            let timerInterval;
+            let totalSeconds = 0;
+            let running = false;
+            let paused = false;
 
             document.getElementById('clock-content').innerHTML = `
                 <div class="text-center">
-                    <div id="timer-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">${formatTime(totalSeconds)}</div>
-                    <div id="timer-inputs" class="flex justify-center items-center gap-4 mb-8" ${running ? 'style="display: none;"' : ''}>
-                        <input type="number" id="timer-hours" placeholder="${t('timerHours')}" min="0" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${Math.floor(totalSeconds / 3600)}">
-                        <input type="number" id="timer-minutes" placeholder="${t('timerMinutes')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${Math.floor((totalSeconds % 3600) / 60)}">
-                        <input type="number" id="timer-seconds" placeholder="${t('timerSeconds')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${totalSeconds % 60}">
+                    <div id="timer-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00</div>
+                    <div id="timer-inputs" class="flex justify-center items-center gap-4 mb-8">
+                        <input type="number" id="timer-hours" placeholder="${t('timerHours')}" min="0" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
+                        <input type="number" id="timer-minutes" placeholder="${t('timerMinutes')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
+                        <input type="number" id="timer-seconds" placeholder="${t('timerSeconds')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700">
                     </div>
-                    <div class="flex justify-center gap-4">
-                        <button id="timer-start-stop" class="w-32 px-6 py-3 ${running ? 'bg-red-500 hover:bg-red-600' : 'bg-brand-600 hover:bg-brand-700'} text-white rounded-lg text-lg font-semibold active:scale-95 active:brightness-95">${running ? t('timerPause') : paused ? t('timerContinue') : t('timerStart')}</button>
+                     <div class="flex justify-center gap-4">
+                        <button id="timer-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${t('timerStart')}</button>
                         <button id="timer-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('timerReset')}</button>
                     </div>
-                </div>
-            `;
+                </div>`;
 
             const display = document.getElementById('timer-display');
             const startStopBtn = document.getElementById('timer-start-stop');
@@ -3540,14 +3341,11 @@
             const inputsContainer = document.getElementById('timer-inputs');
 
             const formatTime = (seconds) => {
-                if (seconds < 0) return "00:00:00";
                 const h = Math.floor(seconds / 3600);
                 const m = Math.floor((seconds % 3600) / 60);
                 const s = seconds % 60;
                 return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
             };
-
-            let timerInterval;
 
             const updateTimer = () => {
                 if (totalSeconds <= 0) {
@@ -3559,18 +3357,12 @@
                     inputsContainer.style.display = 'flex';
                     running = false;
                     paused = false;
-                    localStorage.removeItem('zenithTimer');
                     return;
                 }
                 totalSeconds--;
                 display.textContent = formatTime(totalSeconds);
-                localStorage.setItem('zenithTimer', JSON.stringify({ running, paused, totalSeconds }));
             };
 
-            if (running && !paused) {
-                timerInterval = setInterval(updateTimer, 1000);
-                clockIntervals.push(timerInterval);
-            }
 
             startStopBtn.addEventListener('click', () => {
                 if (!running) { // Is initial state or paused
@@ -3579,11 +3371,14 @@
                         const minutes = parseInt(document.getElementById('timer-minutes').value) || 0;
                         const seconds = parseInt(document.getElementById('timer-seconds').value) || 0;
                         totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+
                         if (totalSeconds <= 0) return;
+
                         if (hours >= 1) {
                             checkAndUnlockAchievement('timer_master');
                         }
                     }
+
                     paused = false;
                     running = true;
                     inputsContainer.style.display = 'none';
@@ -3593,6 +3388,7 @@
                     startStopBtn.textContent = t('timerPause');
                     startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
                     startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
+
                 } else { // Is running, so pause it
                     clearInterval(timerInterval);
                     running = false;
@@ -3601,14 +3397,12 @@
                     startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
                     startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
                 }
-                localStorage.setItem('zenithTimer', JSON.stringify({ running, paused, totalSeconds }));
             });
 
             resetBtn.addEventListener('click', () => {
                 clearInterval(timerInterval);
                 running = false;
                 paused = false;
-                totalSeconds = 0;
                 display.textContent = "00:00:00";
                 startStopBtn.textContent = t('timerStart');
                 startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
@@ -3617,237 +3411,8 @@
                 document.getElementById('timer-hours').value = '';
                 document.getElementById('timer-minutes').value = '';
                 document.getElementById('timer-seconds').value = '';
-                localStorage.removeItem('zenithTimer');
-            });
-            if (running && !paused) {
-                inputsContainer.style.display = 'none';
-            } else {
-                display.textContent = formatTime(totalSeconds);
-            }
-        }
-
-        // --- WEATHER FUNCTIONS ---
-        async function getCurrentWeather(widgetContainerId = 'current-weather-widget') {
-            const container = document.getElementById(widgetContainerId);
-            if (!container) return;
-
-            // Verifica se a chave foi alterada do valor padrão
-            if (WEATHER_API_KEY === 'YOUR_WEATHER_API_KEY') {
-                container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
-                return;
-            }
-
-            container.innerHTML = `<div class="w-6 h-6 border-2 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
-
-            try {
-                // Tenta obter a localização
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        timeout: 10000, // 10 segundos de timeout
-                        maximumAge: 300000 // Usa cache de até 5 minutos
-                    });
-                });
-
-                const { latitude, longitude } = position.coords;
-                const lang = currentLanguage === 'pt' ? 'pt_br' : 'en'; // Correção: 'pt_br' em vez de 'pt'
-
-                // Monta a URL da API
-                const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
-
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                // Renderiza o widget
-                container.innerHTML = `
-            <div class="bg-gradient-to-br from-brand-400 to-brand-600 text-white p-4 rounded-lg shadow-lg flex items-center justify-between">
-                <div>
-                    <p class="font-bold text-lg">${data.name || 'Localização'}</p>
-                    <p class="text-sm capitalize">${data.weather[0].description || 'Sem descrição'}</p>
-                </div>
-                <div class="text-right">
-                    <div class="flex items-center">
-                        <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="Weather icon" class="w-12 h-12 -my-2">
-                        <p class="text-4xl font-bold">${Math.round(data.main.temp)}°C</p>
-                    </div>
-                    <p class="text-xs">${t('feelsLike')} ${Math.round(data.main.feels_like)}°C</p>
-                </div>
-            </div>
-        `;
-
-            } catch (error) {
-                console.error("Weather error:", error);
-                let errorMessage = t('weatherError');
-                if (error.code === 1) {
-                    errorMessage = "Permissão de localização negada. Por favor, permita o acesso à sua localização nas configurações do navegador.";
-                }
-                container.innerHTML = `<p class="text-center text-red-500">${errorMessage}</p>`;
-            }
-        }
-
-        async function renderWeather() {
-            const container = document.getElementById('clock-content');
-            container.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
-
-            // Verifica se a chave foi alterada do valor padrão
-            if (WEATHER_API_KEY === 'YOUR_WEATHER_API_KEY') {
-                container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
-                return;
-            }
-
-            try {
-                // Tenta obter a localização
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        timeout: 10000,
-                        maximumAge: 300000
-                    });
-                });
-
-                const { latitude, longitude } = position.coords;
-                const lang = currentLanguage === 'pt' ? 'pt_br' : 'en'; // Correção: 'pt_br'
-
-                const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=${lang}`;
-
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                // Agrupa as previsões por dia
-                const dailyForecasts = {};
-                data.list.forEach(item => {
-                    const date = new Date(item.dt_txt).toLocaleDateString();
-                    if (!dailyForecasts[date]) {
-                        dailyForecasts[date] = {
-                            temps: [],
-                            icons: {},
-                            descriptions: {}
-                        };
-                    }
-                    dailyForecasts[date].temps.push(item.main.temp);
-                    const iconKey = item.weather[0].icon;
-                    const descKey = item.weather[0].description;
-                    dailyForecasts[date].icons[iconKey] = (dailyForecasts[date].icons[iconKey] || 0) + 1;
-                    dailyForecasts[date].descriptions[descKey] = (dailyForecasts[date].descriptions[descKey] || 0) + 1;
-                });
-
-                let forecastHtml = `<h2 class="text-2xl font-bold mb-4 text-center">${t('weatherForecast')} em ${data.city.name || 'sua região'}</h2><div class="space-y-4">`;
-
-                // Pega os próximos 5 dias
-                Object.keys(dailyForecasts).slice(0, 5).forEach((dateStr, index) => {
-                    const dayData = dailyForecasts[dateStr];
-                    const minTemp = Math.round(Math.min(...dayData.temps));
-                    const maxTemp = Math.round(Math.max(...dayData.temps));
-
-                    // Encontra o ícone e descrição mais comuns para o dia
-                    const mostCommonIcon = Object.keys(dayData.icons).reduce((a, b) => dayData.icons[a] > dayData.icons[b] ? a : b);
-                    const mostCommonDesc = Object.keys(dayData.descriptions).reduce((a, b) => dayData.descriptions[a] > dayData.descriptions[b] ? a : b);
-
-                    const dateObj = new Date(dateStr);
-                    const options = { weekday: 'long' };
-                    const dayName = index === 0 ? t('today') : dateObj.toLocaleDateString(currentLanguage === 'pt' ? 'pt-BR' : 'en-US', options);
-
-                    forecastHtml += `
-                <div class="bg-gray-100 dark:bg-gray-700/50 p-3 rounded-lg flex items-center justify-between">
-                    <span class="font-semibold w-24 capitalize">${dayName}</span>
-                    <div class="flex items-center gap-2">
-                        <img src="https://openweathermap.org/img/wn/${mostCommonIcon}.png" alt="${mostCommonDesc}" class="w-8 h-8">
-                        <span class="text-sm capitalize">${mostCommonDesc}</span>
-                    </div>
-                    <span class="font-semibold">${minTemp}° / ${maxTemp}°</span>
-                </div>
-            `;
-                });
-
-                forecastHtml += '</div>';
-                container.innerHTML = forecastHtml;
-
-            } catch (error) {
-                console.error("Forecast error:", error);
-                let errorMessage = t('weatherError');
-                if (error.code === 1) {
-                    errorMessage = "Permissão de localização negada.";
-                }
-                container.innerHTML = `<p class="text-center text-red-500">${errorMessage}</p>`;
-            }
-        }
-
-        // --- NOTIFICATION FUNCTIONS ---
-
-        async function requestNotificationPermission() {
-            if (!('Notification' in window)) return;
-            if (Notification.permission === 'granted') return;
-            if (Notification.permission === 'denied') return;
-
-            const modal = document.getElementById('confirm-modal');
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3 class="text-xl font-bold mb-2">${t('notificationPermissionTitle')}</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4">${t('notificationPermissionBody')}</p>
-                    <div class="flex gap-3">
-                        <button id="allow-notifications" class="flex-1 bg-brand-600 text-white py-2 px-4 rounded-lg hover:bg-brand-700">${t('allow')}</button>
-                        <button id="deny-notifications" class="flex-1 bg-gray-300 dark:bg-gray-600 py-2 px-4 rounded-lg hover:bg-gray-400">${t('deny')}</button>
-                    </div>
-                </div>`;
-            modal.classList.add('show');
-
-            document.getElementById('allow-notifications').addEventListener('click', async () => {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    showToast(t('notificationsEnabled'), 'success');
-                } else {
-                    showToast(t('notificationsDenied'), 'error');
-                }
-                modal.classList.remove('show');
-            });
-
-            document.getElementById('deny-notifications').addEventListener('click', () => {
-                modal.classList.remove('show');
             });
         }
-
-        function setupNotificationListener() {
-            if (notificationInterval) clearInterval(notificationInterval);
-            notificationInterval = setInterval(checkAndSendNotifications, 60000); // Check every minute
-            checkAndSendNotifications(); // Check immediately on login
-        }
-
-        async function checkAndSendNotifications() {
-            if (!currentUser || Notification.permission !== 'granted') return;
-
-            const { collection, query, where, getDocs, updateDoc, doc } = window.firebaseFirestore;
-            const now = new Date();
-
-            const q = query(collection(db, `artifacts/${appId}/users/${currentUser.uid}/reminders`),
-                where('completed', '==', false),
-                where('notified', '==', false)
-            );
-
-            const snapshot = await getDocs(q);
-            snapshot.forEach(docSnap => {
-                const reminder = docSnap.data();
-                if (reminder.remindAt) {
-                    const reminderTime = reminder.remindAt.toDate();
-                    if (reminderTime <= now) {
-                        new Notification(t('reminderNotificationTitle'), {
-                            body: reminder.title,
-                            icon: '/zenith.png'
-                        });
-                        // Mark as notified to prevent re-sending
-                        updateDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}/reminders`, docSnap.id), { notified: true });
-                    }
-                }
-            });
-        }
-
 
         // --- AUTH FUNCTIONS ---
         function getAuthErrorMessage(errorCode) {
@@ -3857,10 +3422,10 @@
                 case 'auth/user-disabled':
                     return 'Este usuário foi desativado.';
                 case 'auth/user-not-found':
-                    return 'Credenciais inválidas. Verifique seu email e senha.';
-                case 'auth/wrong-password':
                 case 'auth/invalid-credential':
                     return 'Credenciais inválidas. Verifique seu email e senha.';
+                case 'auth/wrong-password':
+                    return 'Senha incorreta. Tente novamente.';
                 case 'auth/email-already-in-use':
                     return 'Este email já está em uso por outra conta.';
                 case 'auth/weak-password':
@@ -3904,7 +3469,7 @@
                 await updateProfile(user, { displayName: name });
 
                 const { doc, setDoc, serverTimestamp } = window.firebaseFirestore;
-                await setDoc(doc(window.db, `artifacts/${appId}/users`, user.uid), {
+                await setDoc(doc(window.db, 'users', user.uid), {
                     uid: user.uid,
                     name: name,
                     email: email,
@@ -4009,10 +3574,8 @@
                 pageTitle.textContent = t(`pageTitle${currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}`);
             }
             if (appContainer.classList.contains('active')) {
-                if (currentPage === 'dashboard' && document.getElementById('dashboard-username')) {
-                    document.getElementById('dashboard-username').textContent = currentUserProfile.name || '';
-                }
-                navigateTo(currentPage);
+                // appContent.innerHTML = ''; //This causes a flicker, let's re-render specific parts
+                navigateTo(currentPage); // Re-render current page with new language
             }
         }
 
@@ -4020,12 +3583,7 @@
             const profileInitial = document.getElementById('profile-initial');
             const profileImg = document.getElementById('profile-img-header');
             const photoURL = currentUser?.photoURL || currentUserProfile?.photoURL;
-            
-            const profileButton = document.getElementById('profile-button');
-            const firstLetter = (currentUserProfile.name || 'U').charAt(0).toUpperCase();
 
-            profileInitial.textContent = firstLetter;
-            
             if (photoURL) {
                 profileImg.src = photoURL;
                 profileImg.classList.remove('hidden');
@@ -4033,12 +3591,12 @@
                 profileImg.onerror = () => {
                     profileImg.classList.add('hidden');
                     profileInitial.classList.remove('hidden');
-                    profileButton.style.backgroundColor = ''; // Remove inline style
+                    profileInitial.textContent = currentUserProfile.name?.charAt(0).toUpperCase() || 'U';
                 };
             } else {
                 profileImg.classList.add('hidden');
                 profileInitial.classList.remove('hidden');
-                profileButton.style.backgroundColor = `hsl(202, 85%, 45%)`; // Set a consistent brand color
+                profileInitial.textContent = currentUserProfile.name?.charAt(0).toUpperCase() || 'U';
             }
         }
 
@@ -4052,10 +3610,8 @@
             }
 
             const darkModeToggle = document.getElementById('dark-mode-toggle');
-            if (darkModeToggle) {
-                darkModeToggle.querySelector('[data-lucide="sun"]').classList.toggle('hidden', !isDark);
-                darkModeToggle.querySelector('[data-lucide="moon"]').classList.toggle('hidden', isDark);
-            }
+            darkModeToggle.querySelector('[data-lucide="sun"]').classList.toggle('hidden', !isDark);
+            darkModeToggle.querySelector('[data-lucide="moon"]').classList.toggle('hidden', isDark);
 
 
             currentLanguage = localStorage.getItem('language') || 'pt';
@@ -4070,73 +3626,40 @@
             firebaseInitialized = true;
 
             // Auth state listener
-            const { onAuthStateChanged, signInWithCustomToken, signInAnonymously } = window.firebaseAuth;
+            const { onAuthStateChanged } = window.firebaseAuth;
             onAuthStateChanged(window.auth, async (user) => {
                 if (user) {
                     currentUser = user;
 
+                    // Load user profile
                     const { getDoc, doc } = window.firebaseFirestore;
-                    const userDocRef = doc(window.db, `artifacts/${appId}/users`, user.uid);
+                    const userDocRef = doc(window.db, 'users', user.uid);
                     const userDoc = await getDoc(userDocRef);
 
                     if (userDoc.exists()) {
                         currentUserProfile = userDoc.data();
                     } else {
-                        // This case handles users who signed up before the profile doc was created
-                        currentUserProfile = {
-                            name: user.displayName || 'Usuário',
-                            email: user.email,
-                            uid: user.uid,
-                            photoURL: user.photoURL
-                        };
+                        currentUserProfile = { name: user.displayName || 'Usuário', email: user.email, uid: user.uid, photoURL: user.photoURL };
                     }
-                    // Ensure name from auth is used if not in DB
-                    if (!currentUserProfile.name) {
-                        currentUserProfile.name = user.displayName || 'Usuário';
-                    }
-
 
                     updateHeaderProfileIcon();
+
                     await checkAndUnlockAchievement('first_login');
 
                     showAppContainer();
-
-                    // Request notification permission on first login after page load
-                    requestNotificationPermission();
-                    setupNotificationListener();
-
-                    navigateTo('dashboard');
+                    if (!currentPage || currentPage === 'profile') {
+                        navigateTo('dashboard');
+                    } else {
+                        navigateTo(currentPage);
+                    }
                 } else {
                     currentUser = null;
                     currentUserProfile = {};
-                    if (notificationInterval) clearInterval(notificationInterval);
                     showAuthContainer();
                 }
                 updateTranslations();
                 hideLoading();
             });
-
-            // Tenta fazer login com o token de auth
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-            if (initialAuthToken) {
-                try {
-                    await signInWithCustomToken(window.auth, initialAuthToken);
-                } catch (error) {
-                    console.error('Failed to sign in with custom token, falling back to anonymous auth:', error);
-                    try {
-                        await signInAnonymously(window.auth);
-                    } catch (e) {
-                        console.error('Anonymous auth failed:', e);
-                    }
-                }
-            } else if (window.auth.currentUser === null) {
-                // If no token is present and no user is logged in, use anonymous auth
-                try {
-                    await signInAnonymously(window.auth);
-                } catch (e) {
-                    console.error('Anonymous auth failed:', e);
-                }
-            }
 
             lucide.createIcons();
         }
