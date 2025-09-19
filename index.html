@@ -9,42 +9,29 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
-    <!-- Dependências da IA -->
+    <!-- Dependências da IA e Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- 
-        ATENÇÃO: CONFIGURAÇÃO DO FIREBASE
-        Substitua os valores abaixo ("YOUR_API_KEY", etc.) com as suas próprias
-        credenciais do projeto Firebase para que a autenticação e o banco de dados funcionem.
-    -->
+    <!-- Configuração do Firebase via variáveis globais -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
-        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDoc, getDocs, onSnapshot, query, where, orderBy, serverTimestamp, Timestamp, increment, arrayUnion } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
-
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCq8RgAiTWxn-QdtR0BcBsCTl-4L2llVqo",
-            authDomain: "zenithzapp.firebaseapp.com",
-            projectId: "zenithzapp",
-            storageBucket: "zenithzapp.firebasestorage.app",
-            messagingSenderId: "155992428449",
-            appId: "1:155992428449:web:3818c2b912b602f54585e0"
-        };
-
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDoc, getDocs, onSnapshot, query, where, orderBy, serverTimestamp, Timestamp, increment, arrayUnion } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        
+        // Use a configuração segura fornecida pela plataforma
+        const firebaseConfig = JSON.parse(__firebase_config);
+        
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
         // Make Firebase available globally
         window.auth = auth;
         window.db = db;
-        window.firebaseAuth = { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile };
+        window.firebaseAuth = { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, signInAnonymously, signInWithCustomToken };
         window.firebaseFirestore = { collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDoc, getDocs, onSnapshot, query, where, orderBy, serverTimestamp, Timestamp, increment, arrayUnion };
         window.firebaseInitialized = true;
-
         console.log('Firebase initialized successfully');
     </script>
 
@@ -642,10 +629,12 @@
         let calendarUnsubscribe = null;
         let calendarEventsCache = {};
         let aiChatUnsubscribe = null; // Unsubscribe for AI chats
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
 
         // --- Weather API Key ---
         // ATENÇÃO: Substitua pela sua própria chave da API do OpenWeatherMap
-        const WEATHER_API_KEY = '2f3410f5517837200509d829af334e4d';
+        const WEATHER_API_KEY = 'YOUR_WEATHER_API_KEY';
 
         // DOM elements
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -1084,7 +1073,7 @@
                 ach_habit_master_desc: "Create 5 habits.",
                 ach_goal_achiever_1_title: "First Victory",
                 ach_goal_achiever_1_desc: "Complete your first goal.",
-                ach_goal_achiever_1_title: "Conqueror",
+                ach_goal_achiever_10_title: "Conqueror",
                 ach_goal_achiever_10_desc: "Complete 10 goals.",
                 ach_habit_streak_30_title: "Unstoppable",
                 ach_habit_streak_30_desc: "Keep a habit for 30 days.",
@@ -1168,16 +1157,13 @@
             if (currentPage === page && appContent.innerHTML.trim() !== '' && page !== 'dashboard') return;
 
 
-            // Clear previous intervals
+            // Clear previous intervals and listeners
             clockIntervals.forEach(interval => clearInterval(interval));
             clockIntervals = [];
             if (calendarUnsubscribe) {
                 calendarUnsubscribe();
                 calendarUnsubscribe = null;
             }
-
-
-            // Clear previous unsubscribes for the old page
             unsubscribes.forEach(unsub => unsub());
             unsubscribes = [];
             if (aiChatUnsubscribe) {
@@ -1260,7 +1246,7 @@
                         </button>
                     </div>
                 </div>
-                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                     <h3 class="font-semibold text-lg mb-4" data-t="quickActions">${t('quickActions')}</h3>
                     <div class="flex flex-col gap-3">
                         <button class="quick-action-btn w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 font-semibold px-4 py-2 rounded-lg hover:scale-105 transition-transform active:scale-95 active:brightness-95" data-action="add-reminder"><i data-lucide="plus"></i><span data-t="newReminder">${t('newReminder')}</span></button>
@@ -1280,15 +1266,15 @@
             // Real-time counters
             if (firebaseInitialized) {
                 const { collection, query, where, onSnapshot, getDocs } = window.firebaseFirestore;
-                const remindersRef = collection(window.db, `users/${currentUser.uid}/reminders`);
+                const remindersRef = collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/reminders`);
                 const unsubReminders = onSnapshot(query(remindersRef, where("completed", "==", false)), s => {
                     document.getElementById('dashboard-reminders').textContent = s.size;
                 });
-                const goalsRef = collection(window.db, `users/${currentUser.uid}/goals`);
+                const goalsRef = collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`);
                 const unsubGoals = onSnapshot(query(goalsRef, where("completed", "==", false)), s => {
                     document.getElementById('dashboard-goals').textContent = s.size;
                 });
-                const notesRef = collection(window.db, `users/${currentUser.uid}/notes`);
+                const notesRef = collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/notes`);
                 const unsubNotes = onSnapshot(notesRef, s => {
                     document.getElementById('dashboard-notes').textContent = s.size;
                 });
@@ -1298,7 +1284,7 @@
                 Promise.all([
                     getDocs(query(remindersRef, where("completed", "==", false))),
                     getDocs(query(goalsRef, where("completed", "==", false))),
-                    getDocs(collection(window.db, `users/${currentUser.uid}/habits`))
+                    getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/habits`))
                 ]).then(([reminders, goals, habits]) => {
                     if (reminders.size > 0 && goals.size > 0 && habits.size > 0) {
                         checkAndUnlockAchievement('organizer');
@@ -1312,7 +1298,7 @@
         function loadAi() {
             appContent.innerHTML = `
             <div id="ai-chat-container" class="flex w-full h-[calc(100dvh-120px)] md:h-[calc(100vh-88px)] fade-in">
-                <!-- Barra Lateral de Chats (Desktop) -->
+                <!-- Sidebar de Chats (Desktop) -->
                 <aside id="ai-sidebar-desktop" class="bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white w-64 flex-col p-4 shrink-0 hidden md:flex">
                     <!-- Conteúdo da sidebar será preenchido por JS -->
                 </aside>
@@ -1367,8 +1353,8 @@
 
             // --- Firestore Refs ---
             const { collection, query, orderBy, onSnapshot, doc, getDoc, getDocs, addDoc, updateDoc, setDoc, serverTimestamp, Timestamp, arrayUnion } = window.firebaseFirestore;
-            const chatsColRef = collection(db, `users/${currentUser.uid}/ai-chats`);
-            const userDocRef = doc(db, 'users', currentUser.uid);
+            const chatsColRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/ai-chats`);
+            const userDocRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
 
             const zenithIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`;
             const userIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
@@ -1457,7 +1443,7 @@
                 activeChatId = chatId;
                 if (aiMessagesUnsubscribe) aiMessagesUnsubscribe();
 
-                const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, chatId);
+                const chatDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/ai-chats`, chatId);
                 aiMessagesUnsubscribe = onSnapshot(chatDocRef, async (docSnap) => {
                     if (docSnap.exists()) {
                         const chatData = docSnap.data();
@@ -1553,7 +1539,7 @@
                 if (!prompt) return;
 
                 const userMessage = { role: 'user', content: prompt, createdAt: new Date() };
-                const chatDocRef = doc(db, `users/${currentUser.uid}/ai-chats`, activeChatId);
+                const chatDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/ai-chats`, activeChatId);
 
                 promptInput.value = '';
                 submitButton.disabled = true;
@@ -1716,66 +1702,66 @@
 
             if (firebaseInitialized) {
                 const { collection, query, orderBy, onSnapshot } = window.firebaseFirestore;
-                const q = query(collection(window.db, `users/${currentUser.uid}/${type}s`), orderBy('createdAt', 'desc'));
+                const q = query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/${type}s`), orderBy('createdAt', 'desc'));
                 const unsubscribe = onSnapshot(q, (snapshot) => {
-                    if (snapshot.empty) {
-                        listEl.innerHTML = `<div class="text-center py-12 col-span-full"><p class="text-gray-500">${t('noItemsFound', { item: plural.toLowerCase() })}</p><p class="text-gray-400 text-sm">${t('clickToAdd')}</p></div>`;
-                        return;
-                    }
-
-                    listEl.innerHTML = snapshot.docs.map(doc => {
-                        const data = doc.data();
-                        return renderItem(type, doc.id, data);
-                    }).join('');
-                    lucide.createIcons();
-
-                    // Add event listeners
-                    listEl.querySelectorAll('.edit-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const itemId = btn.dataset.id;
-                            const itemData = snapshot.docs.find(doc => doc.id === itemId).data();
-                            showItemModal(type, itemId, itemData);
-                        });
-                    });
-
-                    if (type === 'reminder' || type === 'goal') {
-                        listEl.querySelectorAll('.toggle-btn').forEach(btn => {
-                            btn.addEventListener('click', () => toggleItemStatus(btn.dataset.id, type + 's'));
-                        });
-                    }
-
-                    if (type === 'goal') {
-                        listEl.querySelectorAll('.goal-update-btn').forEach(btn => {
-                            btn.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                const amount = parseInt(btn.dataset.amount);
-                                updateGoalValue(btn.dataset.id, amount);
-                            });
-                        });
-                    }
-
-                    if (type === 'habit') {
-                        listEl.querySelectorAll('.habit-toggle').forEach(btn => {
-                            btn.addEventListener('click', () => toggleHabitToday(btn.dataset.id));
-                        });
-                    }
-
-                    // Add event listeners for note expansion
-                    if (type === 'note') {
-                        listEl.querySelectorAll('.view-note-btn').forEach(btn => {
-                            btn.addEventListener('click', (e) => {
-                                const wrapper = e.target.previousElementSibling; // .note-content-wrapper
-                                wrapper.classList.toggle('expanded');
-                                if (wrapper.classList.contains('expanded')) {
-                                    e.target.textContent = t('showLess');
-                                } else {
-                                    e.target.textContent = t('showMore');
-                                }
-                            });
-                        });
-                    }
+                    const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderListItems(type, listEl, items);
                 });
                 unsubscribes.push(unsubscribe);
+            }
+        }
+
+        function renderListItems(type, container, items) {
+            if (items.length === 0) {
+                container.innerHTML = `<div class="text-center py-12 col-span-full"><p class="text-gray-500">${t('noItemsFound', { item: type + 's' })}</p><p class="text-gray-400 text-sm">${t('clickToAdd')}</p></div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => renderItem(type, item.id, item)).join('');
+            lucide.createIcons();
+
+            // Adiciona os ouvintes de evento após a renderização
+            container.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const itemData = items.find(i => i.id === btn.dataset.id);
+                    if (itemData) showItemModal(type, itemData.id, itemData);
+                });
+            });
+
+            if (type === 'reminder' || type === 'goal') {
+                container.querySelectorAll('.toggle-btn').forEach(btn => {
+                    btn.addEventListener('click', () => toggleItemStatus(btn.dataset.id, type + 's'));
+                });
+            }
+
+            if (type === 'goal') {
+                container.querySelectorAll('.goal-update-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const amount = parseInt(btn.dataset.amount);
+                        updateGoalValue(btn.dataset.id, amount);
+                    });
+                });
+            }
+
+            if (type === 'habit') {
+                container.querySelectorAll('.habit-toggle').forEach(btn => {
+                    btn.addEventListener('click', () => toggleHabitToday(btn.dataset.id));
+                });
+            }
+
+            if (type === 'note') {
+                container.querySelectorAll('.view-note-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const wrapper = e.target.previousElementSibling; // .note-content-wrapper
+                        wrapper.classList.toggle('expanded');
+                        if (wrapper.classList.contains('expanded')) {
+                            e.target.textContent = t('showLess');
+                        } else {
+                            e.target.textContent = t('showMore');
+                        }
+                    });
+                });
             }
         }
 
@@ -1824,13 +1810,13 @@
                             <div class="bg-brand-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
                         </div>
                         <div class="flex items-center justify-between">
-                             <div>
+                            <div>
                                 <p class="font-semibold text-lg">${data.currentValue} / ${data.targetValue}</p>
-                             </div>
-                             <div class="flex gap-2">
+                            </div>
+                            <div class="flex gap-2">
                                 <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="-1"><i data-lucide="minus"></i></button>
                                 <button class="goal-update-btn w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center active:scale-95" data-id="${id}" data-amount="1"><i data-lucide="plus"></i></button>
-                             </div>
+                            </div>
                         </div>
                     </div>`;
                 case 'note':
@@ -1883,7 +1869,7 @@
         async function updateGoalValue(id, amount) {
             if (!firebaseInitialized || !currentUser) return;
             const { doc, getDoc, updateDoc, increment } = window.firebaseFirestore;
-            const docRef = doc(window.db, `users/${currentUser.uid}/goals`, id);
+            const docRef = doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`, id);
 
             const docSnap = await getDoc(docRef);
             if (!docSnap.exists()) return;
@@ -1951,7 +1937,7 @@
             showLoading();
             try {
                 const { doc, updateDoc, getDoc, serverTimestamp } = window.firebaseFirestore;
-                const docRef = doc(window.db, `users/${currentUser.uid}/${collectionName}`, id);
+                const docRef = doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/${collectionName}`, id);
                 const docSnap = await getDoc(docRef);
                 const currentStatus = docSnap.data().completed;
 
@@ -1962,7 +1948,7 @@
 
                 if (!currentStatus && collectionName === 'goals') {
                     // Use a separate function to avoid re-checking logic inside checkAndUnlockAchievement
-                    const q = query(collection(window.db, `users/${currentUser.uid}/goals`), where('completed', '==', true));
+                    const q = query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`), where('completed', '==', true));
                     const snapshot = await getDocs(q);
                     if (snapshot.size >= 1) await checkAndUnlockAchievement('goal_achiever_1');
                     if (snapshot.size >= 10) await checkAndUnlockAchievement('goal_achiever_10');
@@ -1983,7 +1969,7 @@
             if (!firebaseInitialized || !currentUser) return;
             const today = new Date().toDateString();
             const { doc, getDoc, updateDoc, arrayUnion } = window.firebaseFirestore;
-            const docRef = doc(window.db, `users/${currentUser.uid}/habits`, id);
+            const docRef = doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/habits`, id);
 
             const docSnap = await getDoc(docRef);
             if (!docSnap.exists()) return;
@@ -2051,8 +2037,8 @@
                             <label class="block text-sm font-medium mb-2">${t('colorLabel')}</label>
                             <div class="flex gap-2">
                                 ${['yellow', 'blue', 'green', 'red', 'purple'].map(color =>
-                        `<button type="button" class="color-btn w-8 h-8 rounded-full bg-${color}-200 border-2 ${data.color === color || (!data.color && color === 'yellow') ? 'ring-2 ring-brand-500' : 'border-transparent'}" data-color="${color}"></button>`
-                    ).join('')}
+                            `<button type="button" class="color-btn w-8 h-8 rounded-full bg-${color}-200 border-2 ${data.color === color || (!data.color && color === 'yellow') ? 'ring-2 ring-brand-500' : 'border-transparent'}" data-color="${color}"></button>`
+                        ).join('')}
                             </div>
                         </div>`;
                     break;
@@ -2076,6 +2062,7 @@
                 </div>`;
 
             modal.classList.add('show');
+            lucide.createIcons();
 
             // Color selection for notes
             let selectedColor = data.color || 'yellow';
@@ -2116,13 +2103,13 @@
                     const { doc, updateDoc, addDoc, collection, serverTimestamp } = window.firebaseFirestore;
 
                     if (id) {
-                        await updateDoc(doc(window.db, `users/${currentUser.uid}/${type}s`, id), payload);
+                        await updateDoc(doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/${type}s`, id), payload);
                     } else {
                         payload.createdAt = serverTimestamp();
-                        await addDoc(collection(window.db, `users/${currentUser.uid}/${type}s`), payload);
+                        await addDoc(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/${type}s`), payload);
                         await checkAndUnlockAchievement(`first_${type}`);
 
-                        const collectionRef = collection(window.db, `users/${currentUser.uid}/${type}s`);
+                        const collectionRef = collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/${type}s`);
                         const snapshot = await getDocs(collectionRef);
 
                         if (type === 'note' && snapshot.size >= 10) await checkAndUnlockAchievement('note_taker_pro');
@@ -2181,7 +2168,7 @@
                 }
                 try {
                     const { doc, deleteDoc } = window.firebaseFirestore;
-                    await deleteDoc(doc(window.db, `users/${currentUser.uid}/${collection}`, id));
+                    await deleteDoc(doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/${collection}`, id));
                     modal.classList.remove('show');
                     showToast(t('itemDeleted'), 'success');
                     if (callback) callback();
@@ -2326,7 +2313,7 @@
             const gridEndDate = new Date(year, month, daysInMonth + (6 - lastDayOfMonth));
 
             const { collection, query, where, onSnapshot, Timestamp } = window.firebaseFirestore;
-            const eventsRef = collection(db, `users/${currentUser.uid}/calendarEvents`);
+            const eventsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/calendarEvents`);
             const q = query(eventsRef,
                 where('date', '>=', Timestamp.fromDate(gridStartDate)),
                 where('date', '<=', Timestamp.fromDate(gridEndDate))
@@ -2446,7 +2433,7 @@
             }
 
             const { collection, query, where, orderBy, onSnapshot, Timestamp } = window.firebaseFirestore;
-            const eventsRef = collection(db, `users/${currentUser.uid}/calendarEvents`);
+            const eventsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/calendarEvents`);
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -2541,7 +2528,7 @@
             showLoading();
             try {
                 const { collection, addDoc, serverTimestamp, Timestamp } = window.firebaseFirestore;
-                await addDoc(collection(db, `users/${currentUser.uid}/calendarEvents`), {
+                await addDoc(collection(db, `artifacts/${appId}/users/${currentUser.uid}/calendarEvents`), {
                     title: title,
                     date: Timestamp.fromDate(new Date(dateString + 'T00:00:00')),
                     createdAt: serverTimestamp()
@@ -2559,7 +2546,7 @@
             showLoading();
             try {
                 const { doc, updateDoc } = window.firebaseFirestore;
-                const eventRef = doc(db, `users/${currentUser.uid}/calendarEvents`, eventId);
+                const eventRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/calendarEvents`, eventId);
                 await updateDoc(eventRef, { title: newTitle });
             } catch (error) {
                 console.error("Error updating event:", error);
@@ -2590,8 +2577,8 @@
                             <button id="eraser-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="eraser" title="${t('eraser')}"><i data-lucide="eraser"></i></button>
                         </div>
                         <div class="flex items-center gap-2 border-l-2 border-gray-200 dark:border-gray-700 pl-2 ml-2">
-                             <button id="undo-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="undo" title="${t('undo')}" disabled><i data-lucide="undo-2"></i></button>
-                             <button id="redo-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="redo" title="${t('redo')}" disabled><i data-lucide="redo-2"></i></button>
+                            <button id="undo-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="undo" title="${t('undo')}" disabled><i data-lucide="undo-2"></i></button>
+                            <button id="redo-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300" data-t-title="redo" title="${t('redo')}" disabled><i data-lucide="redo-2"></i></button>
                         </div>
                         <div class="flex items-center gap-2 border-l-2 border-gray-200 dark:border-gray-700 pl-2 ml-2">
                             <button id="clear-btn" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200" data-t-title="clear" title="${t('clear')}"><i data-lucide="trash-2"></i></button>
@@ -2633,14 +2620,30 @@
 
             function resizeCanvas() {
                 const parent = canvas.parentElement;
+                const oldImageData = history.length > 0 ? history[historyIndex] : null;
+                
                 canvas.width = parent.clientWidth;
                 canvas.height = parent.clientWidth * 0.6; // Maintain aspect ratio
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                if (oldImageData) {
+                    // Create a temporary canvas to hold the old image data
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCanvas.width = oldImageData.width;
+                    tempCanvas.height = oldImageData.height;
+                    tempCtx.putImageData(oldImageData, 0, 0);
+
+                    // Draw the old image data onto the new canvas, scaling it
+                    ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+                } else {
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                
                 saveState();
             }
             window.addEventListener('resize', resizeCanvas);
-
+            
             let isDrawing = false;
 
             function updateUndoRedoButtons() {
@@ -2673,7 +2676,8 @@
                 }
             }
 
-            resizeCanvas(); // initial setup and first saveState
+            // Initial setup
+            resizeCanvas();
 
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -2826,13 +2830,12 @@
                 showLoading();
                 try {
                     const { addDoc, collection, serverTimestamp, getDocs } = window.firebaseFirestore;
-                    await addDoc(collection(window.db, `users/${currentUser.uid}/drawings`), {
+                    await addDoc(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/drawings`), {
                         imageData: dataUrl,
                         createdAt: serverTimestamp()
                     });
                     showToast(t('drawingSaved'), 'success');
 
-                    // CORREÇÃO: Deixa a função checkAndUnlockAchievement cuidar da lógica de verificação
                     await checkAndUnlockAchievement('artist');
                     await checkAndUnlockAchievement('art_collector');
 
@@ -2848,28 +2851,29 @@
         function loadSavedDrawings() {
             const gallery = document.getElementById('saved-drawings-gallery');
             const { collection, query, orderBy, onSnapshot } = window.firebaseFirestore;
-            const q = query(collection(window.db, `users/${currentUser.uid}/drawings`), orderBy('createdAt', 'desc'));
+            const q = query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/drawings`), orderBy('createdAt', 'desc'));
 
             const unsubscribe = onSnapshot(q, (snapshot) => {
                 if (snapshot.empty) {
                     gallery.innerHTML = `<p id="no-drawings-msg" class="text-gray-500 col-span-full" data-t="noDrawings">${t('noDrawings')}</p>`;
                     return;
                 }
+                const drawings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                gallery.innerHTML = snapshot.docs.map(doc => {
-                    const drawing = doc.data();
-                    const drawingData = JSON.stringify(drawing.imageData).replace(/'/g, "\\'");
+                gallery.innerHTML = drawings.map(drawing => {
+                    const encodedData = encodeURIComponent(drawing.imageData);
+                    const safeId = drawing.id.replace(/'/g, "\\'");
                     return `
                     <div class="relative group">
                         <img src="${drawing.imageData}" alt="Saved Drawing" class="w-full h-32 object-cover rounded-lg shadow-md bg-white">
                         <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                             <button class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600" onclick='window.editDrawing(${drawingData})' title="${t('editDrawing')}">
+                            <button class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600" onclick='window.editDrawing("${drawing.imageData}")' title="${t('editDrawing')}">
                                 <i data-lucide="edit" class="w-4 h-4"></i>
                             </button>
-                             <button class="bg-green-500 text-white p-2 rounded-full hover:bg-green-600" onclick="window.downloadDrawing('${drawing.imageData}', '${doc.id}')" title="${t('downloadDrawing')}">
+                            <button class="bg-green-500 text-white p-2 rounded-full hover:bg-green-600" onclick="window.downloadDrawing('${encodedData}', '${safeId}')" title="${t('downloadDrawing')}">
                                 <i data-lucide="download" class="w-4 h-4"></i>
                             </button>
-                            <button class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600" onclick="deleteDrawing('${doc.id}')" title="${t('delete')}">
+                            <button class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600" onclick="deleteDrawing('${safeId}')" title="${t('delete')}">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -2896,7 +2900,7 @@
                 link.download = `zenith-drawing-${docId}.png`;
                 link.click();
             };
-            img.src = imageDataUrl;
+            img.src = decodeURIComponent(imageDataUrl);
         };
 
         window.editDrawing = (imageDataUrl) => {
@@ -2926,7 +2930,7 @@
             appContent.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto mt-10"></div>`;
 
             const { collection, getDocs } = window.firebaseFirestore;
-            const achievementsSnapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/achievements`));
+            const achievementsSnapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/achievements`));
             const unlockedAchievements = {};
             achievementsSnapshot.forEach(doc => {
                 unlockedAchievements[doc.id] = doc.data();
@@ -2949,20 +2953,20 @@
                 const isUnlocked = !!unlockedData;
                 const unlockedAt = isUnlocked ? new Date(unlockedData.unlockedAt.toDate()).toLocaleDateString() : '';
                 return `
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 ${isUnlocked ? 'border-yellow-400' : 'border-gray-200 dark:border-gray-700'}">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="p-3 rounded-full ${isUnlocked ? 'bg-yellow-100 dark:bg-yellow-900/50' : 'bg-gray-100 dark:bg-gray-700'}">
-                                    <i data-lucide="${data.icon}" class="w-6 h-6 ${isUnlocked ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-400'}"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="font-bold text-lg ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-600 dark:text-gray-400'}">${t(`ach_${id}_title`)}</h3>
-                                    ${isUnlocked ? `<p class="text-sm text-yellow-600 dark:text-yellow-400">${t('unlockedOn')} ${unlockedAt}</p>` : ''}
-                                </div>
-                                ${isUnlocked ? '<div class="text-2xl text-yellow-500">🏆</div>' : '<div class="text-2xl text-gray-400">🔒</div>'}
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 ${isUnlocked ? 'border-yellow-400' : 'border-gray-200 dark:border-gray-700'}">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="p-3 rounded-full ${isUnlocked ? 'bg-yellow-100 dark:bg-yellow-900/50' : 'bg-gray-100 dark:bg-gray-700'}">
+                                <i data-lucide="${data.icon}" class="w-6 h-6 ${isUnlocked ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-400'}"></i>
                             </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">${t(`ach_${id}_desc`)}</p>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-600 dark:text-gray-400'}">${t(`ach_${id}_title`)}</h3>
+                                ${isUnlocked ? `<p class="text-sm text-yellow-600 dark:text-yellow-400">${t('unlockedOn')} ${unlockedAt}</p>` : ''}
+                            </div>
+                            ${isUnlocked ? '<div class="text-2xl text-yellow-500">🏆</div>' : '<div class="text-2xl text-gray-400">🔒</div>'}
                         </div>
-                        `}).join('')}
+                        <p class="text-sm text-gray-600 dark:text-gray-400">${t(`ach_${id}_desc`)}</p>
+                    </div>
+                    `}).join('')}
                 </div>
                 
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
@@ -2989,7 +2993,7 @@
             if (!currentUser || !ALL_ACHIEVEMENTS[achievementId]) return;
             try {
                 const { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where, Timestamp } = window.firebaseFirestore;
-                const achievementRef = doc(window.db, `users/${currentUser.uid}/achievements`, achievementId);
+                const achievementRef = doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/achievements`, achievementId);
                 const docSnap = await getDoc(achievementRef);
                 if (docSnap.exists()) return; // Já desbloqueada
 
@@ -3008,46 +3012,46 @@
                     case 'first_goal':
                     case 'first_habit': {
                         const type = achievementId.split('_')[1] + 's';
-                        const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/${type}`));
+                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/${type}`));
                         if (snapshot.size >= 1) conditionMet = true;
                         break;
                     }
                     case 'artist': {
-                        const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/drawings`));
+                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/drawings`));
                         if (snapshot.size >= 1) conditionMet = true;
                         break;
                     }
                     case 'note_taker_pro': {
-                        const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/notes`));
+                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/notes`));
                         if (snapshot.size >= 10) conditionMet = true;
                         break;
                     }
                     case 'goal_setter_pro': {
-                        const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/goals`));
+                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`));
                         if (snapshot.size >= 10) conditionMet = true;
                         break;
                     }
                     case 'habit_master': {
-                        const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/habits`));
+                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/habits`));
                         if (snapshot.size >= 5) conditionMet = true;
                         break;
                     }
                     case 'goal_achiever_1':
                     case 'goal_achiever_10': {
                         const requiredCount = achievementId === 'goal_achiever_1' ? 1 : 10;
-                        const q = query(collection(window.db, `users/${currentUser.uid}/goals`), where('completed', '==', true));
+                        const q = query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`), where('completed', '==', true));
                         const snapshot = await getDocs(q);
                         if (snapshot.size >= requiredCount) conditionMet = true;
                         break;
                     }
                     case 'art_collector': {
-                        const snapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/drawings`));
+                        const snapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/drawings`));
                         if (snapshot.size >= 5) conditionMet = true;
                         break;
                     }
                     case 'productive_week': {
                         const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-                        const q = query(collection(window.db, `users/${currentUser.uid}/goals`),
+                        const q = query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`),
                             where('completed', '==', true),
                             where('completedAt', '>=', Timestamp.fromDate(oneWeekAgo)));
                         const snapshot = await getDocs(q);
@@ -3057,7 +3061,7 @@
                     case 'habit_streak_7':
                     case 'habit_streak_30': {
                         const requiredStreak = achievementId === 'habit_streak_7' ? 7 : 30;
-                        const habitsSnapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/habits`));
+                        const habitsSnapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/habits`));
                         for (const doc of habitsSnapshot.docs) {
                             const streak = calculateStreak(doc.data().completedDates || []);
                             if (streak >= requiredStreak) {
@@ -3069,9 +3073,9 @@
                     }
                     case 'organizer': {
                         const [reminders, goals, habits] = await Promise.all([
-                            getDocs(query(collection(window.db, `users/${currentUser.uid}/reminders`), where("completed", "==", false))),
-                            getDocs(query(collection(window.db, `users/${currentUser.uid}/goals`), where("completed", "==", false))),
-                            getDocs(collection(window.db, `users/${currentUser.uid}/habits`))
+                            getDocs(query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/reminders`), where("completed", "==", false))),
+                            getDocs(query(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/goals`), where("completed", "==", false))),
+                            getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/habits`))
                         ]);
                         if (reminders.size > 0 && goals.size > 0 && habits.size > 0) {
                             conditionMet = true;
@@ -3085,9 +3089,9 @@
                     showToast(t(`ach_${achievementId}_title`), 'achievement');
 
                     // Checar pelo Mestre Zenith
-                    const allAchievementsSnapshot = await getDocs(collection(window.db, `users/${currentUser.uid}/achievements`));
+                    const allAchievementsSnapshot = await getDocs(collection(window.db, `artifacts/${appId}/users/${currentUser.uid}/achievements`));
                     if (allAchievementsSnapshot.size >= Object.keys(ALL_ACHIEVEMENTS).length - 1) {
-                        const masterRef = doc(window.db, `users/${currentUser.uid}/achievements`, 'zenith_master');
+                        const masterRef = doc(window.db, `artifacts/${appId}/users/${currentUser.uid}/achievements`, 'zenith_master');
                         const masterSnap = await getDoc(masterRef);
                         if (!masterSnap.exists()) {
                             await setDoc(masterRef, { unlockedAt: serverTimestamp() });
@@ -3108,7 +3112,7 @@
                 <div class="fade-in max-w-2xl mx-auto">
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                         <div class="flex items-center gap-6 mb-6">
-                            <img id="profile-pic" src="${currentUser.photoURL || `https://placehold.co/100x100/0ea5e9/ffffff?text=${currentUserProfile.name?.charAt(0).toUpperCase() || 'U'}`}" alt="Foto de Perfil" class="w-24 h-24 rounded-full object-cover">
+                            <img id="profile-pic" src="${currentUser.photoURL || `https://placehold.co/100x100/7dd3fc/0c4a6e?text=${currentUserProfile.name?.charAt(0).toUpperCase() || 'U'}`}" alt="Foto de Perfil" class="w-24 h-24 rounded-full object-cover">
                             <div>
                                 <h2 class="text-2xl font-bold">${currentUserProfile.name || 'Usuário'}</h2>
                                 <p class="text-gray-600 dark:text-gray-400">${currentUser?.email || ''}</p>
@@ -3120,7 +3124,7 @@
                                 <label for="profile-name" class="block text-sm font-medium mb-2">${t('profileName')}</label>
                                 <input type="text" id="profile-name" value="${currentUserProfile.name || ''}" class="${formInputClasses}">
                             </div>
-                             <div>
+                            <div>
                                 <label for="profile-photo-url" class="block text-sm font-medium mb-2">${t('photoUrlLabel')}</label>
                                 <input type="url" id="profile-photo-url" value="${currentUser.photoURL || ''}" placeholder="${t('photoUrlPlaceholder')}" class="${formInputClasses}">
                             </div>
@@ -3166,7 +3170,7 @@
                     });
 
                     const { doc, setDoc } = window.firebaseFirestore;
-                    const userDocRef = doc(window.db, 'users', currentUser.uid);
+                    const userDocRef = doc(window.db, `artifacts/${appId}/users`, currentUser.uid);
                     await setDoc(userDocRef, {
                         name: newName,
                         photoURL: newPhotoURL
@@ -3248,14 +3252,12 @@
 
             // ESTADO DA CALCULADORA
             let currentInput = '0';
-            let expression = ''; // ALTERADO: Usaremos uma string para a expressão completa
+            let expression = '';
             let calculationPerformed = false;
 
             // ATUALIZA O VISOR
             const updateDisplay = () => {
-                // ALTERADO: Mostra a expressão completa ou o input atual
-                display.textContent = expression + currentInput;
-                // Ajusta o tamanho da fonte para caber no visor
+                display.textContent = expression.replace(/\*/g, '×').replace(/\//g, '÷') + currentInput;
                 const length = display.textContent.length;
                 if (length > 15) {
                     display.style.fontSize = '1.5rem';
@@ -3269,12 +3271,10 @@
             // LÓGICA DE CÁLCULO (Segura com `new Function`)
             const calculate = (exp) => {
                 try {
-                    // Substitui operadores visuais por funcionais e valida a expressão
                     const safeExpression = exp.replace(/×/g, '*').replace(/÷/g, '/').replace(/%/g, '/100*');
                     if (!/^[\d\s()+\-*/.%]+$/.test(safeExpression)) {
                         return 'Erro';
                     }
-                    // Usa 'new Function' para uma avaliação mais segura que 'eval'
                     return new Function('return ' + safeExpression)();
                 } catch (e) {
                     return 'Erro';
@@ -3298,7 +3298,7 @@
                         currentInput = currentInput === '0' && value !== '.' ? value : currentInput + value;
                     } else if (isOperator) {
                         if (currentInput === '0' && expression === '') return;
-                        expression += currentInput + ' ' + text + ' ';
+                        expression += currentInput + ' ' + value + ' ';
                         currentInput = '0';
                         calculationPerformed = false;
                     } else if (value === '%') {
@@ -3309,7 +3309,6 @@
                         const finalExpression = (expression + currentInput).trim();
                         const result = calculate(finalExpression);
 
-                        // NOVO: Animação de resultado
                         display.classList.add('calculating');
                         setTimeout(() => {
                             expression = '';
@@ -3441,21 +3440,20 @@
         }
 
         function renderStopwatch() {
-            // Tenta restaurar o estado do localStorage
-            const savedState = JSON.parse(localStorage.getItem('zenithStopwatch') || '{}');
-            let startTime = savedState.startTime || 0;
+            const savedState = JSON.parse(localStorage.getItem('zenithStopwatch')) || { running: false, savedTime: 0 };
+            let startTime = savedState.running ? new Date().getTime() - savedState.savedTime : 0;
             let savedTime = savedState.savedTime || 0;
             let running = savedState.running || false;
 
             document.getElementById('clock-content').innerHTML = `
-        <div class="text-center">
-            <div id="stopwatch-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
-            <div class="flex justify-center gap-4">
-                <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${running ? t('stopwatchPause') : t('stopwatchStart')}</button>
-                <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('stopwatchReset')}</button>
+            <div class="text-center">
+                <div id="stopwatch-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">00:00:00.00</div>
+                <div class="flex justify-center gap-4">
+                    <button id="stopwatch-start-stop" class="w-32 px-6 py-3 bg-brand-600 text-white rounded-lg text-lg font-semibold hover:bg-brand-700 active:scale-95 active:brightness-95">${running ? t('stopwatchPause') : t('stopwatchStart')}</button>
+                    <button id="stopwatch-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('stopwatchReset')}</button>
+                </div>
             </div>
-        </div>
-    `;
+            `;
 
             const display = document.getElementById('stopwatch-display');
             const startStopBtn = document.getElementById('stopwatch-start-stop');
@@ -3473,33 +3471,14 @@
             let tInterval;
 
             const update = () => {
-                const difference = (new Date().getTime() - startTime) + savedTime;
-                display.textContent = formatTime(difference);
+                const elapsed = running ? (new Date().getTime() - startTime) + savedTime : savedTime;
+                display.textContent = formatTime(elapsed);
+                localStorage.setItem('zenithStopwatch', JSON.stringify({ running, savedTime: elapsed }));
             };
-
-            const saveStateToStorage = () => {
-                localStorage.setItem('zenithStopwatch', JSON.stringify({
-                    startTime,
-                    savedTime,
-                    running
-                }));
-            };
-
-            // Se estava rodando, retoma a contagem
-            if (running) {
-                startTime = new Date().getTime() - (savedTime % 1000); // Ajuste fino para sincronizar
-                tInterval = setInterval(update, 10);
-                clockIntervals.push(tInterval);
-                startStopBtn.textContent = t('stopwatchPause');
-                startStopBtn.classList.replace('bg-brand-600', 'bg-red-500');
-                startStopBtn.classList.replace('hover:bg-brand-700', 'hover:bg-red-600');
-            } else {
-                display.textContent = formatTime(savedTime);
-            }
 
             startStopBtn.addEventListener('click', () => {
                 if (!running) { // Start or Continue
-                    startTime = new Date().getTime();
+                    startTime = new Date().getTime() - savedTime;
                     tInterval = setInterval(update, 10);
                     clockIntervals.push(tInterval);
                     startStopBtn.textContent = t('stopwatchPause');
@@ -3508,49 +3487,52 @@
                     running = true;
                 } else { // Pause
                     clearInterval(tInterval);
-                    savedTime += new Date().getTime() - startTime;
+                    savedTime = new Date().getTime() - startTime;
                     startStopBtn.textContent = t('stopwatchContinue');
                     startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
                     startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
                     running = false;
                 }
-                saveStateToStorage();
+                localStorage.setItem('zenithStopwatch', JSON.stringify({ running, savedTime }));
             });
 
             resetBtn.addEventListener('click', () => {
                 clearInterval(tInterval);
-                display.textContent = "00:00:00.00";
                 running = false;
                 savedTime = 0;
+                display.textContent = "00:00:00.00";
                 startStopBtn.textContent = t('stopwatchStart');
                 startStopBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
                 startStopBtn.classList.add('bg-brand-600', 'hover:bg-brand-700');
-                // Limpa o estado do localStorage
                 localStorage.removeItem('zenithStopwatch');
             });
+            update(); // Initial display
+            if (running) {
+                tInterval = setInterval(update, 10);
+                clockIntervals.push(tInterval);
+            }
         }
 
         function renderTimer() {
-            // Tenta restaurar o estado do localStorage
-            const savedState = JSON.parse(localStorage.getItem('zenithTimer') || '{}');
+            const savedState = JSON.parse(localStorage.getItem('zenithTimer')) || { running: false, paused: false, totalSeconds: 0 };
             let totalSeconds = savedState.totalSeconds || 0;
             let running = savedState.running || false;
             let paused = savedState.paused || false;
 
             document.getElementById('clock-content').innerHTML = `
-        <div class="text-center">
-            <div id="timer-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">${formatTime(totalSeconds)}</div>
-            <div id="timer-inputs" class="flex justify-center items-center gap-4 mb-8" ${running ? 'style="display: none;"' : ''}>
-                <input type="number" id="timer-hours" placeholder="${t('timerHours')}" min="0" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${Math.floor(totalSeconds / 3600)}">
-                <input type="number" id="timer-minutes" placeholder="${t('timerMinutes')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${Math.floor((totalSeconds % 3600) / 60)}">
-                <input type="number" id="timer-seconds" placeholder="${t('timerSeconds')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${totalSeconds % 60}">
-            </div>
-            <div class="flex justify-center gap-4">
-                <button id="timer-start-stop" class="w-32 px-6 py-3 ${running ? 'bg-red-500 hover:bg-red-600' : 'bg-brand-600 hover:bg-brand-700'} text-white rounded-lg text-lg font-semibold active:scale-95 active:brightness-95">${running ? t('timerPause') : paused ? t('timerContinue') : t('timerStart')}</button>
-                <button id="timer-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('timerReset')}</button>
-            </div>
-        </div>
-    `;
+                <div class="text-center">
+                    <div id="timer-display" class="text-5xl sm:text-6xl md:text-8xl font-mono mb-8">${formatTime(totalSeconds)}</div>
+                    <div id="timer-inputs" class="flex justify-center items-center gap-4 mb-8" ${running ? 'style="display: none;"' : ''}>
+                        <input type="number" id="timer-hours" placeholder="${t('timerHours')}" min="0" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${Math.floor(totalSeconds / 3600)}">
+                        <input type="number" id="timer-minutes" placeholder="${t('timerMinutes')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${Math.floor((totalSeconds % 3600) / 60)}">
+                        <input type="number" id="timer-seconds" placeholder="${t('timerSeconds')}" min="0" max="59" class="w-24 text-center p-2 rounded bg-gray-100 dark:bg-gray-700" value="${totalSeconds % 60}">
+                    </div>
+                    <div class="flex justify-center gap-4">
+                        <button id="timer-start-stop" class="w-32 px-6 py-3 ${running ? 'bg-red-500 hover:bg-red-600' : 'bg-brand-600 hover:bg-brand-700'} text-white rounded-lg text-lg font-semibold active:scale-95 active:brightness-95">${running ? t('timerPause') : paused ? t('timerContinue') : t('timerStart')}</button>
+                        <button id="timer-reset" class="w-32 px-6 py-3 bg-gray-500 text-white rounded-lg text-lg font-semibold hover:bg-gray-600 active:scale-95 active:brightness-95">${t('timerReset')}</button>
+                    </div>
+                </div>
+            `;
 
             const display = document.getElementById('timer-display');
             const startStopBtn = document.getElementById('timer-start-stop');
@@ -3577,24 +3559,14 @@
                     inputsContainer.style.display = 'flex';
                     running = false;
                     paused = false;
-                    // Limpa o estado do localStorage quando o timer termina
                     localStorage.removeItem('zenithTimer');
                     return;
                 }
                 totalSeconds--;
                 display.textContent = formatTime(totalSeconds);
-                saveStateToStorage();
+                localStorage.setItem('zenithTimer', JSON.stringify({ running, paused, totalSeconds }));
             };
 
-            const saveStateToStorage = () => {
-                localStorage.setItem('zenithTimer', JSON.stringify({
-                    totalSeconds,
-                    running,
-                    paused
-                }));
-            };
-
-            // Se estava rodando, retoma a contagem
             if (running && !paused) {
                 timerInterval = setInterval(updateTimer, 1000);
                 clockIntervals.push(timerInterval);
@@ -3629,7 +3601,7 @@
                     startStopBtn.classList.replace('bg-red-500', 'bg-brand-600');
                     startStopBtn.classList.replace('hover:bg-red-600', 'hover:bg-brand-700');
                 }
-                saveStateToStorage();
+                localStorage.setItem('zenithTimer', JSON.stringify({ running, paused, totalSeconds }));
             });
 
             resetBtn.addEventListener('click', () => {
@@ -3645,9 +3617,13 @@
                 document.getElementById('timer-hours').value = '';
                 document.getElementById('timer-minutes').value = '';
                 document.getElementById('timer-seconds').value = '';
-                // Limpa o estado do localStorage
                 localStorage.removeItem('zenithTimer');
             });
+            if (running && !paused) {
+                inputsContainer.style.display = 'none';
+            } else {
+                display.textContent = formatTime(totalSeconds);
+            }
         }
 
         // --- WEATHER FUNCTIONS ---
@@ -3656,7 +3632,7 @@
             if (!container) return;
 
             // Verifica se a chave foi alterada do valor padrão
-            if (WEATHER_API_KEY === '2f3410f5517837200509d829af334e4d') {
+            if (WEATHER_API_KEY === 'YOUR_WEATHER_API_KEY') {
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
                 return;
             }
@@ -3718,7 +3694,7 @@
             container.innerHTML = `<div class="w-8 h-8 border-4 border-t-brand-500 rounded-full animate-spin mx-auto"></div>`;
 
             // Verifica se a chave foi alterada do valor padrão
-            if (WEATHER_API_KEY === '2f3410f5517837200509d829af334e4d') {
+            if (WEATHER_API_KEY === 'YOUR_WEATHER_API_KEY') {
                 container.innerHTML = `<p class="text-center text-red-500">${t('weatherApiWarning')}</p>`;
                 return;
             }
@@ -3850,7 +3826,7 @@
             const { collection, query, where, getDocs, updateDoc, doc } = window.firebaseFirestore;
             const now = new Date();
 
-            const q = query(collection(db, `users/${currentUser.uid}/reminders`),
+            const q = query(collection(db, `artifacts/${appId}/users/${currentUser.uid}/reminders`),
                 where('completed', '==', false),
                 where('notified', '==', false)
             );
@@ -3866,7 +3842,7 @@
                             icon: '/zenith.png'
                         });
                         // Mark as notified to prevent re-sending
-                        updateDoc(doc(db, `users/${currentUser.uid}/reminders`, docSnap.id), { notified: true });
+                        updateDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}/reminders`, docSnap.id), { notified: true });
                     }
                 }
             });
@@ -3881,10 +3857,10 @@
                 case 'auth/user-disabled':
                     return 'Este usuário foi desativado.';
                 case 'auth/user-not-found':
-                case 'auth/invalid-credential':
                     return 'Credenciais inválidas. Verifique seu email e senha.';
                 case 'auth/wrong-password':
-                    return 'Senha incorreta. Tente novamente.';
+                case 'auth/invalid-credential':
+                    return 'Credenciais inválidas. Verifique seu email e senha.';
                 case 'auth/email-already-in-use':
                     return 'Este email já está em uso por outra conta.';
                 case 'auth/weak-password':
@@ -3928,7 +3904,7 @@
                 await updateProfile(user, { displayName: name });
 
                 const { doc, setDoc, serverTimestamp } = window.firebaseFirestore;
-                await setDoc(doc(window.db, 'users', user.uid), {
+                await setDoc(doc(window.db, `artifacts/${appId}/users`, user.uid), {
                     uid: user.uid,
                     name: name,
                     email: email,
@@ -4044,7 +4020,12 @@
             const profileInitial = document.getElementById('profile-initial');
             const profileImg = document.getElementById('profile-img-header');
             const photoURL = currentUser?.photoURL || currentUserProfile?.photoURL;
+            
+            const profileButton = document.getElementById('profile-button');
+            const firstLetter = (currentUserProfile.name || 'U').charAt(0).toUpperCase();
 
+            profileInitial.textContent = firstLetter;
+            
             if (photoURL) {
                 profileImg.src = photoURL;
                 profileImg.classList.remove('hidden');
@@ -4052,12 +4033,12 @@
                 profileImg.onerror = () => {
                     profileImg.classList.add('hidden');
                     profileInitial.classList.remove('hidden');
-                    profileInitial.textContent = currentUserProfile.name?.charAt(0).toUpperCase() || 'U';
+                    profileButton.style.backgroundColor = ''; // Remove inline style
                 };
             } else {
                 profileImg.classList.add('hidden');
                 profileInitial.classList.remove('hidden');
-                profileInitial.textContent = currentUserProfile.name?.charAt(0).toUpperCase() || 'U';
+                profileButton.style.backgroundColor = `hsl(202, 85%, 45%)`; // Set a consistent brand color
             }
         }
 
@@ -4071,8 +4052,10 @@
             }
 
             const darkModeToggle = document.getElementById('dark-mode-toggle');
-            darkModeToggle.querySelector('[data-lucide="sun"]').classList.toggle('hidden', !isDark);
-            darkModeToggle.querySelector('[data-lucide="moon"]').classList.toggle('hidden', isDark);
+            if (darkModeToggle) {
+                darkModeToggle.querySelector('[data-lucide="sun"]').classList.toggle('hidden', !isDark);
+                darkModeToggle.querySelector('[data-lucide="moon"]').classList.toggle('hidden', isDark);
+            }
 
 
             currentLanguage = localStorage.getItem('language') || 'pt';
@@ -4087,13 +4070,13 @@
             firebaseInitialized = true;
 
             // Auth state listener
-            const { onAuthStateChanged } = window.firebaseAuth;
+            const { onAuthStateChanged, signInWithCustomToken, signInAnonymously } = window.firebaseAuth;
             onAuthStateChanged(window.auth, async (user) => {
                 if (user) {
                     currentUser = user;
 
                     const { getDoc, doc } = window.firebaseFirestore;
-                    const userDocRef = doc(window.db, 'users', user.uid);
+                    const userDocRef = doc(window.db, `artifacts/${appId}/users`, user.uid);
                     const userDoc = await getDoc(userDocRef);
 
                     if (userDoc.exists()) {
@@ -4132,6 +4115,28 @@
                 updateTranslations();
                 hideLoading();
             });
+
+            // Tenta fazer login com o token de auth
+            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+            if (initialAuthToken) {
+                try {
+                    await signInWithCustomToken(window.auth, initialAuthToken);
+                } catch (error) {
+                    console.error('Failed to sign in with custom token, falling back to anonymous auth:', error);
+                    try {
+                        await signInAnonymously(window.auth);
+                    } catch (e) {
+                        console.error('Anonymous auth failed:', e);
+                    }
+                }
+            } else if (window.auth.currentUser === null) {
+                // If no token is present and no user is logged in, use anonymous auth
+                try {
+                    await signInAnonymously(window.auth);
+                } catch (e) {
+                    console.error('Anonymous auth failed:', e);
+                }
+            }
 
             lucide.createIcons();
         }
